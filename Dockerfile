@@ -1,6 +1,10 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
+RUN --mount=type=secret,id=envfile \
+    set -a && . /run/secrets/envfile && set +a && \
+    echo "Loaded env for build"
+
 COPY package*.json ./
 RUN npm ci
 
