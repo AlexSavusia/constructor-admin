@@ -10,8 +10,14 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@fortawesome/fontawesome-free": "^7.2.0",
+    "@react-keycloak/web": "^3.4.0",
+    "admin-lte": "^4.0.0-rc6",
+    "bootstrap": "^5.3.8",
+    "keycloak-js": "^26.2.3",
     "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react-dom": "^19.2.0",
+    "react-router-dom": "^7.13.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

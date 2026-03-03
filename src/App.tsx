@@ -1,34 +1,56 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import {type JSX, useEffect} from 'react'
+import {useKeycloak} from "@react-keycloak/web";
+import {BrowserRouter, Route, Routes, useLocation} from "react-router-dom";
+import InternalErrorPage from "./pages/InternalErrorPage.tsx";
+import ForbiddenErrorPage from "./pages/ForbiddenErrorPage.tsx";
+import NotFoundErrorPage from "./pages/NotFoundErrorPage.tsx";
+import DefaultLayout from "./layouts/DefaultLayout.tsx";
+import CalculationsPage from "./pages/Calculations";
+import CalculationsEditPage from "./pages/Calculations/edit.tsx";
+import DictionariesPage from "./pages/Dictionaries";
+import ProgramsPage from "./pages/Programs";
+
+
+function PrivateRoute({ children }: { children: JSX.Element }) {
+    const { keycloak, initialized } = useKeycloak();
+    const location = useLocation();
+
+    useEffect(() => {
+        if (!initialized) return;
+        if (keycloak.authenticated) return;
+
+        keycloak.login({
+            redirectUri: window.location.origin + location.pathname + location.search,
+        });
+    }, [initialized, keycloak, location.pathname, location.search]);
+
+    if (!initialized || !keycloak.authenticated) return <div>SPINNER</div>;
+
+    return children;
+}
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+  return(
+    <BrowserRouter>
+        <Routes>
+            <Route path="/505" element={<InternalErrorPage/>}/>
+            <Route path="/403" element={<ForbiddenErrorPage/>}/>
+            <Route path="/404" element={<NotFoundErrorPage/>}/>
+            <Route path="/" element={
+                <PrivateRoute>
+                    <DefaultLayout/>
+                </PrivateRoute>
+            }>
+                <Route path="calculations" element={<CalculationsPage/>}/>
+                <Route path="calculations/:id" element={<CalculationsEditPage/>}/>
+                <Route path="dictionaries" element={<DictionariesPage/>}>
+                </Route>
+                <Route path="programs" element={<ProgramsPage/>}>
+                </Route>
+            </Route>
+            <Route path="*" element={<NotFoundErrorPage/>}/>
+        </Routes>
+    </BrowserRouter>
   )
 }
 
