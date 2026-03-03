@@ -1,6 +1,10 @@
 FROM node:20-alpine AS build
 WORKDIR /app
 
+ARG VITE_KEYCLOAK_URL
+ARG VITE_KEYCLOAK_REALM
+ARG VITE_KEYCLOAK_CLIENT_ID
+
 COPY package*.json ./
 RUN npm ci
 
