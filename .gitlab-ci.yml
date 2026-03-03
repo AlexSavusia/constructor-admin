@@ -1,3 +1,10 @@
 workflow:
   rules:
     - when: never
+
+noop:
+  stage: .pre
+  script:
+    - echo "This job should never run."
+  rules:
+    - when: never
