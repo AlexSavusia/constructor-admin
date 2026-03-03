@@ -9,6 +9,9 @@ build:
   stage: build
   tags: [dev-dg-prod-shell]
   rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == "main"'
+      allow_failure: false
+      when: on_success
     - if: '$CI_COMMIT_BRANCH'
     - if: '$CI_COMMIT_TAG'
   variables:
