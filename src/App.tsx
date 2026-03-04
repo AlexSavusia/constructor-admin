@@ -9,6 +9,7 @@ import CalculationsPage from "./pages/Calculations";
 import CalculationsEditPage from "./pages/Calculations/edit.tsx";
 import DictionariesPage from "./pages/Dictionaries";
 import ProgramsPage from "./pages/Programs";
+import CreateProgramsPage from "./pages/Programs/create.tsx";
 
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
@@ -49,8 +50,8 @@ function App() {
                 <Route path="calculations/:id" element={<CalculationsEditPage/>}/>
                 <Route path="dictionaries" element={<DictionariesPage/>}>
                 </Route>
-                <Route path="programs" element={<ProgramsPage/>}>
-                </Route>
+                <Route path="programs" element={<ProgramsPage/>}/>
+                <Route path="programs/create" element={<CreateProgramsPage/>}/>
             </Route>
             <Route path="*" element={<NotFoundErrorPage/>}/>
         </Routes>

@@ -36,6 +36,7 @@ export function SideBar({ onNavigate }: SideBarProps) {
                         <Item to="/calculations" icon="fa-calculator" label="Расчёты" />
                         <Item to="/dictionaries" icon="fa-book" label="Справочники" />
                         <Item to="/programs" icon="fa-layer-group" label="Программы" />
+                        <Item to="/programs/create" icon="fa-layer-group" label="Создать программу" />
                     </ul>
                 </nav>
             </div>

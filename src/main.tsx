@@ -6,6 +6,7 @@ import "admin-lte/dist/css/adminlte.min.css";
 import "overlayscrollbars/styles/overlayscrollbars.css";
 import "icheck-bootstrap/icheck-bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.min.css";
+import 'react-resizable/css/styles.css';
 import './index.css'
 import {ReactKeycloakProvider} from "@react-keycloak/web";
 import keycloak from "./api/auth.ts";
