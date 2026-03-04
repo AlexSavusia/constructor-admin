@@ -15,6 +15,10 @@ function PrivateRoute({ children }: { children: JSX.Element }) {
     const { keycloak, initialized } = useKeycloak();
     const location = useLocation();
 
+    if(import.meta.env.VITE_KEYCLOAK_DISABLED === "true")
+        return children;
+
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useEffect(() => {
         if (!initialized) return;
         if (keycloak.authenticated) return;
