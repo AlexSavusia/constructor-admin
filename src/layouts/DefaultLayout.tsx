@@ -41,7 +41,7 @@ export default function DefaultLayout() {
 
             <main className="app-main">
                 <div className="app-content p-3">
-                    <Outlet />
+                    <Outlet/>
                 </div>
             </main>
 
@@ -49,7 +49,7 @@ export default function DefaultLayout() {
                 <strong>Калькулятор</strong> - WebRise.
             </footer>
 
-            <SideBarOverlay visible={sidebar.overlayVisible} onClick={sidebar.close} />
+            <SideBarOverlay visible={sidebar.overlayVisible} onClick={sidebar.close}/>
         </div>
     );
 }
