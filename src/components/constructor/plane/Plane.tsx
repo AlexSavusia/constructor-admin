@@ -78,9 +78,14 @@ export default function Plane({ className, items }: PlaneProps) {
             <div className={classNames(className, "card card-outline card-secondary h-100 mb-0")}>
                 <div className="card-header">
                     <h3 className="card-title mb-0">Полотно</h3>
-                    <div className="card-tools">
-                        <span className="badge text-bg-light">cols: {cols}</span>
+                    <div className="card-tools d-flex align-items-center gap-2">
+
+                        <button className="btn btn-success btn-sm">
+                            <i className="fas fa-save me-1"></i>
+                            Сохранить
+                        </button>
                     </div>
+
                 </div>
 
                 <div className="card-body p-2">
@@ -129,7 +134,7 @@ export default function Plane({ className, items }: PlaneProps) {
                                         const {Element} = l
                                         return (
                                             <div key={it.i} className="card shadow-sm mb-0">
-                                                <div className="card-header handle text-muted py-1 d-flex align-items-center justify-content-between"
+                                                <div className="card-header handle text-muted py-1 d-flex align-items-center justify-content-end"
                                                      style={{cursor: "move"}}
                                                 >
                                                           <span
@@ -145,14 +150,14 @@ export default function Plane({ className, items }: PlaneProps) {
                                                     <Element />
                                                 </div>
 
-                                                <div className="card-footer p-2 d-flex justify-content-end">
+                                                <div className="card-footer p-1 d-flex justify-content-end">
                                                     {!!l.settings.length && (
                                                         <button
                                                             type="button"
-                                                            className="btn btn-outline-secondary btn-sm "
+                                                            className="btn btn-outline-secondary p-1 btn-sm" style={{fontSize: "12px"}}
                                                             onClick={() => setItemSettings(l.settings)}
                                                         >
-                                                            <i className="fas fa-sliders-h" />
+                                                          Настроить
                                                         </button>
                                                     )}
                                                 </div>
