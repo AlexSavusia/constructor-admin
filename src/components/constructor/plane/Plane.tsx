@@ -102,9 +102,10 @@ export default function Plane({className, items}: PlaneProps) {
                             {layout.map((it) => {
                                 const l = getLayoutDescriptor(it.i, layoutItems)
                                 if(!l) return <p>invalid component</p>;
+                                const {Element} = l
                                 return (
                                     <div className="handle" key={it.i} style={{ border: "1px solid #999", background: "#fff" }}>
-                                        Компонент {it.i}
+                                        <Element/>
                                         {l.settings.length && <button onClick={()=>setItemSettings(l.settings)}>Настроить</button>}
                                     </div>
                                 )
