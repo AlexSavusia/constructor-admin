@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 
 type SidebarItemProps = {
     to: string;
+    end?: boolean;
     icon: string;
     label: string;
 };
@@ -10,10 +11,10 @@ type SideBarProps = {
     onNavigate?: () => void;
 };
 
-function Item({ to, icon, label }: SidebarItemProps) {
+function Item({ to, end, icon, label }: SidebarItemProps) {
     return (
         <li className="nav-item">
-            <NavLink to={to} className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
+            <NavLink to={to} end={end} className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
                 <i className={`nav-icon fas ${icon}`} />
                 <p>{label}</p>
             </NavLink>
@@ -35,8 +36,8 @@ export function SideBar({ onNavigate }: SideBarProps) {
                     <ul className="nav sidebar-menu flex-column" role="menu">
                         <Item to="/calculations" icon="fa-calculator" label="Расчёты" />
                         <Item to="/dictionaries" icon="fa-book" label="Справочники" />
-                        <Item to="/programs" icon="fa-layer-group" label="Программы" />
-                        <Item to="/programs/create" icon="fa-layer-group" label="Создать программу" />
+                        <Item to="/programs" end icon="fa-layer-group" label="Программы" />
+                        <Item to="/programs/create" icon="bi bi-border-center" label="Создать программу" />
                     </ul>
                 </nav>
             </div>

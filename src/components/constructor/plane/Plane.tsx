@@ -1,36 +1,42 @@
-import {type Layout, ReactGridLayout, useContainerWidth, useGridLayout, verticalCompactor} from "react-grid-layout";
+import {
+    type Layout,
+    ReactGridLayout,
+    useContainerWidth,
+    useGridLayout,
+    verticalCompactor,
+} from "react-grid-layout";
 import classNames from "classnames";
-import {useMemo, useState} from "react";
-import type {PaletteItemDescriptor, PaletteItemSetting} from "../type.ts";
+import { useMemo, useState } from "react";
+import type { PaletteItemDescriptor, PaletteItemSetting } from "../type.ts";
 import * as React from "react";
 import RightSidebar from "../../RightSidebar.tsx";
 
 export type PlaneProps = {
-    className?: string
-    items: PaletteItemDescriptor[]
-}
+    className?: string;
+    items: PaletteItemDescriptor[];
+};
 
 function clamp(n: number, min: number, max: number) {
     return Math.max(min, Math.min(max, n));
 }
 
 function getDescriptor(key: string, descriptors: PaletteItemDescriptor[]): PaletteItemDescriptor | null {
-    return descriptors.find(x=>x.key==key) ?? null;
+    return descriptors.find((x) => x.key == key) ?? null;
 }
 
 function getLayoutDescriptor(id: string, descriptors: LayoutPaletteItemDescriptor[]): LayoutPaletteItemDescriptor | null {
-    return descriptors.find(x=>x.id==id) ?? null;
+    return descriptors.find((x) => x.id == id) ?? null;
 }
 
-type LayoutPaletteItemDescriptor = PaletteItemDescriptor & {id: string}
+type LayoutPaletteItemDescriptor = PaletteItemDescriptor & { id: string };
 
-export default function Plane({className, items}: PlaneProps) {
+export default function Plane({ className, items }: PlaneProps) {
     const marginX = 0;
     const marginY = 0;
     const paddingX = 0;
     const paddingY = 0;
     const cols = 3;
-    const rowHeight = 30;
+    const rowHeight = 40;
     const [layoutItems, setLayoutItems] = useState<LayoutPaletteItemDescriptor[]>([]);
     const [itemSettings, setItemSettings] = useState<PaletteItemSetting[] | null>(null)
     const { width, containerRef, mounted } = useContainerWidth();
@@ -69,57 +75,102 @@ export default function Plane({className, items}: PlaneProps) {
 
     return (
         <>
-            <div
-                onDrop={onDrop}
-                onDragOver={e=>e.preventDefault()}
-                className={classNames(className)} ref={containerRef}>
-                {mounted && (
-                    <div
-                        style={{
-                            position: "relative",
-                            width: "100%",
-                            height: 500,
-                            backgroundImage: `
-            repeating-linear-gradient(
-              to right,
-              rgba(0,0,0,0.15) 0px,
-              rgba(0,0,0,0.15) 1px,
-              transparent 1px,
-              transparent ${colW}px
-            )
-          `,
-                        }}
-                    >
-                        <ReactGridLayout
-                            style={{background: "red"}}
-                            width={width}
-                            layout={layout}
-                            gridConfig={{ cols, rowHeight }}
-                            dragConfig={{
-                                enabled: true,
-                                handle: '.handle',
-                                cancel: ".react-resizable-handle, input, textarea, select, button, [contenteditable=true]",
-                        }}
-                            compactor={verticalCompactor}
-                            onLayoutChange={setLayout}
-                        >
-                            {layout.map((it) => {
-                                const l = getLayoutDescriptor(it.i, layoutItems)
-                                if(!l) return <p>invalid component</p>;
-                                const {Element} = l
-                                return (
-                                    <div key={it.i} style={{ border: "1px solid #999", background: "#fff" }}>
-                                        <div className="handle" style={{color: "move"}}>
-                                           <span style={{color: "move"}}>⠿</span>
-                                        </div>
-                                        <Element/>
-                                        {l.settings.length && <button onClick={()=>setItemSettings(l.settings)}>Настроить</button>}
-                                    </div>
-                                )
-                            })}
-                        </ReactGridLayout>
+            <div className={classNames(className, "card card-outline card-secondary h-100 mb-0")}>
+                <div className="card-header">
+                    <h3 className="card-title mb-0">Полотно</h3>
+                    <div className="card-tools">
+                        <span className="badge text-bg-light">cols: {cols}</span>
                     </div>
-                )}
+                </div>
+
+                <div className="card-body p-2">
+                    <div
+                        onDrop={onDrop}
+                        onDragOver={(e) => e.preventDefault()}
+                        className={classNames("w-100")}
+                        ref={containerRef}
+                    >
+                        {mounted && (
+                            <div
+                                className="position-relative rounded"
+                                style={{
+                                    width: "100%",
+                                    height: '100%',
+                                    border: "1px dashed rgba(0,0,0,.25)",
+                                    backgroundColor: "var(--bs-body-bg)",
+                                    overflow: "hidden",
+                                    backgroundImage: `
+                                    repeating-linear-gradient(
+                                      to right,
+                                      rgba(0,0,0,0.08) 0px,
+                                      rgba(0,0,0,0.08) 1px,
+                                      transparent 1px,
+                                      transparent ${colW}px
+                                    )
+                                  `,
+                                }}
+                            >
+                                <ReactGridLayout
+                                    style={{ background: "rgba(108,117,125,0.37)" }}
+                                    width={width}
+                                    layout={layout}
+                                    gridConfig={{ cols, rowHeight }}
+                                    dragConfig={{
+                                        enabled: true,
+                                        handle: ".handle",
+                                        cancel: ".react-resizable-handle, input, textarea, select, button, [contenteditable=true]",
+                                    }}
+                                    compactor={verticalCompactor}
+                                    onLayoutChange={setLayout}
+                                >
+                                    {layout.map((it) => {
+                                        const l = getLayoutDescriptor(it.i, layoutItems)
+                                        if(!l) return <p>invalid component</p>;
+                                        const {Element} = l
+                                        return (
+                                            <div key={it.i} className="card shadow-sm mb-0">
+                                                <div className="card-header handle text-muted py-1 d-flex align-items-center justify-content-between"
+                                                     style={{cursor: "move"}}
+                                                >
+                                                          <span
+                                                              className="text-muted"
+                                                              title="Переместить"
+                                                              style={{ lineHeight: 1}}
+                                                          >
+                                                            <i className="fas fa-grip-lines" />
+                                                          </span>
+                                                </div>
+
+                                                <div className="card-body p-2">
+                                                    <Element />
+                                                </div>
+
+                                                <div className="card-footer p-2 d-flex justify-content-end">
+                                                    {!!l.settings.length && (
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-outline-secondary btn-sm "
+                                                            onClick={() => setItemSettings(l.settings)}
+                                                        >
+                                                            <i className="fas fa-sliders-h" />
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </ReactGridLayout>
+                                {!layout.length && (
+                                    <div className="h-100 d-flex align-items-center justify-content-center text-muted">
+                                        Перетащите элемент из палитры сюда
+                                    </div>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="card-footer text-muted small">Перетаскивание: за “ручку” в шапке блока</div>
             </div>
         <RightSidebar title="Настройки поля" open={!!itemSettings} onClose={()=>setItemSettings(null)}>
             <div><p>p</p></div>

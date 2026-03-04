@@ -9,9 +9,16 @@ export type ConstructorProps = {
 
 export default function Constructor({className}: ConstructorProps) {
     return (
-        <div className={classNames(className, "bg-gray-500 h-full d-grid grid-cols-12")}>
-            <Palette className="col-span-3" items={PALETTE_ITEMS}/>
-            <Plane className="col-span-9" items={PALETTE_ITEMS}/>
+        <div className={classNames(className,  "d-flex flex-column flex-lg-row max-w-[1620px]","w-100","gap-3")}
+             style={{ minHeight: "70vh" }}>
+            <div  className="flex-shrink-0"
+                  style={{width: "100%",maxWidth: 320}}>
+                <Palette  items={PALETTE_ITEMS}/>
+            </div>
+            <div className="flex-grow-1">
+                <Plane items={PALETTE_ITEMS}/>
+            </div>
+
         </div>
     )
 }

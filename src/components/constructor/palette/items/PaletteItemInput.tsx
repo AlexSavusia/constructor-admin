@@ -13,13 +13,13 @@ function PaletteItemInput({className}: PaletteItemProps){
     )
 }
 
-function PaletteItemInputPreview({className}: PaletteItemPreviewProps){
+function PaletteItemInputPreview({ className }: PaletteItemPreviewProps) {
     return (
-        <div className={classNames("form-group border", className)}>
-            <label>Label</label>
-            <input className="form-control" placeholder="Placeholder"/>
+        <div className={classNames("mb-0", className)}>
+            <label className="form-label mb-1">Label</label>
+            <input className="form-control form-control-sm" placeholder="Placeholder" />
         </div>
-    )
+    );
 }
 
 const InputDescriptor: PalletItemInputDescriptor = {
