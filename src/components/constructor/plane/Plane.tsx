@@ -95,7 +95,11 @@ export default function Plane({className, items}: PlaneProps) {
                             width={width}
                             layout={layout}
                             gridConfig={{ cols, rowHeight }}
-                            dragConfig={{ enabled: true, handle: '.handle' }}
+                            dragConfig={{
+                                enabled: true,
+                                handle: '.handle',
+                                cancel: ".react-resizable-handle, input, textarea, select, button, [contenteditable=true]",
+                        }}
                             compactor={verticalCompactor}
                             onLayoutChange={setLayout}
                         >
@@ -104,7 +108,10 @@ export default function Plane({className, items}: PlaneProps) {
                                 if(!l) return <p>invalid component</p>;
                                 const {Element} = l
                                 return (
-                                    <div className="handle" key={it.i} style={{ border: "1px solid #999", background: "#fff" }}>
+                                    <div key={it.i} style={{ border: "1px solid #999", background: "#fff" }}>
+                                        <div className="handle" style={{color: "move"}}>
+                                           <span style={{color: "move"}}>⠿</span>
+                                        </div>
                                         <Element/>
                                         {l.settings.length && <button onClick={()=>setItemSettings(l.settings)}>Настроить</button>}
                                     </div>
