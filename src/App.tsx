@@ -1,6 +1,7 @@
 import {type JSX, useEffect} from 'react'
 import {useKeycloak} from "@react-keycloak/web";
 import {BrowserRouter, Route, Routes, useLocation} from "react-router-dom";
+import { Toaster } from "react-hot-toast";
 import InternalErrorPage from "./pages/InternalErrorPage.tsx";
 import ForbiddenErrorPage from "./pages/ForbiddenErrorPage.tsx";
 import NotFoundErrorPage from "./pages/NotFoundErrorPage.tsx";
@@ -55,6 +56,7 @@ function App() {
             </Route>
             <Route path="*" element={<NotFoundErrorPage/>}/>
         </Routes>
+        <Toaster position="top-center" />
     </BrowserRouter>
   )
 }
