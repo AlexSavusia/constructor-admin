@@ -150,15 +150,12 @@ export default function Plane({ className, items }: PlaneProps) {
                                                     <Element />
                                                 </div>
 
-                                                <div className="card-footer p-1 d-flex justify-content-end">
+                                                <div className="card-footer py-0 d-flex justify-content-end">
                                                     {!!l.settings.length && (
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-outline-secondary p-1 btn-sm" style={{fontSize: "12px"}}
-                                                            onClick={() => setItemSettings(l.settings)}
+                                                        <p style={{marginBottom:0,  fontSize: "12px", cursor: "pointer", textDecoration: "underline"}}    onClick={() => setItemSettings(l.settings)}
                                                         >
                                                           Настроить
-                                                        </button>
+                                                        </p>
                                                     )}
                                                 </div>
                                             </div>
