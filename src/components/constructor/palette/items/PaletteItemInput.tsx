@@ -4,11 +4,17 @@ import type {
     PalletItemInputDescriptor
 } from "../../type.ts";
 import classNames from "classnames";
+// import { useState } from "react";
+ import Input from "../../../fieldsUI/Input/Input.tsx"
+//  import InputDate from "../../../fieldsUI/InputDate/InputDate.tsx"
+// import Checkbox from "../../../fieldsUI/Checkbox/Checkbox.tsx"
 
 function PaletteItemInput({className}: PaletteItemProps){
+    // const [date, setDate] = useState("");
+
     return (
         <div className={classNames(className)}>
-
+            <Input label="Фамилия, Имя, Отчество" />
         </div>
     )
 }

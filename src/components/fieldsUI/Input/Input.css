@@ -1,0 +1,55 @@
+.field {
+    width: 100%;
+}
+
+.inputWrapper {
+    position: relative;
+    border: 1px solid #dddfe3;
+    border-radius: 8px;
+    padding: 18px 19px 10px;
+    background: #fff;
+}
+
+.input {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    background: transparent;
+    color: #2e3038;
+}
+
+.label {
+    position: absolute;
+    left: 19px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #b9bcc6;
+    pointer-events: none;
+    transition: all 0.2s ease;
+}
+
+.input:focus + .label {
+    top: 2px;
+    font-size: 12px;
+    padding: 4px;
+    background: #fff;
+}
+
+.input:not(:placeholder-shown)+.label {
+    top: 2px;
+    font-size: 12px;
+    padding: 4px;
+    background: #fff;
+}
+
+.error {
+    border-color: #ea4b4b;
+}
+
+.errorText {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #ea4b4b;
+}
