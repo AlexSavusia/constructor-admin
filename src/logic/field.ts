@@ -61,6 +61,8 @@ export type LookupRowAvailabilityDefinition = {
     selectable?: BooleanPropertyLogicDefinition
 }
 
+export type FieldLogicType = keyof FieldLogicDefinition
+
 export type FieldLogicDefinition = {
     visibility?: BooleanPropertyLogicDefinition;
     enabled?: BooleanPropertyLogicDefinition;

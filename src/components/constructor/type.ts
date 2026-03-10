@@ -1,9 +1,9 @@
 import type {MaybeArray} from "../../type.ts";
-import type {LogicExpression} from "../logic/type.ts";
 import * as React from "react";
+import type {BooleanExpression} from "../../logic/expression.ts";
 
 export type PaletteItemType = "input";
-export type PalletItemSettingValueType = "string" | "number" | "boolean" | "Date";
+export type PalletItemSettingValueType = "string" | "number" | "boolean" | "datetime";
 export type ValueTypeAlias = string | number | boolean | Date
 
 export type PaletteItemDescriptor = {
@@ -19,11 +19,12 @@ export type PaletteItemDescriptor = {
 
 export type PaletteItemSetting = {
     title: string;
+    key: string
     defaultValue?: MaybeArray<ValueTypeAlias>
     valType: PalletItemSettingValueType
     isMultiVal?: boolean
     multiValVariants?: ValueTypeAlias[]
-    validation?: LogicExpression
+    validation?: BooleanExpression
 }
 
 export type PalletItemInputDescriptor = PaletteItemDescriptor & {
@@ -38,4 +39,5 @@ export type PaletteItemPreviewProps = {
 export type PaletteItemProps = {
     className?: string;
 }
+
 

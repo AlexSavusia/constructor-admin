@@ -27,6 +27,7 @@ export type FieldOnUpdateRule = {
 }
 type FieldPath = unknown;
 type RuntimeVarPath = unknown;
+
 export type SetFieldValueOnUpdateAction = {
     type: "setFieldValue";
     target: FieldPath;

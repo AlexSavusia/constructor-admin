@@ -1,281 +1,170 @@
-export type ValueType =
-    | "string"
-    | "number"
-    | "boolean"
-    | "datetime"
-    | "object"
-    | "unknown";
+import type {
+    ConstVariableDefinition,
+    ExpressionScope,
+    FormDefinition,
+    Key,
+    RuntimeVariableDefinition, ValueType
+} from "../../logic/type.ts";
+import * as React from "react";
+import type {StepDefinition, StepTransitionLogicDefinition} from "../../logic/step.ts";
+import type {
+    FieldCapabilities,
+    FieldDefinition,
+    FieldLogicDefinition, FieldLogicType,
+    FieldOnUpdateDefinition
+} from "../../logic/field.ts";
+import type {LookupDefinition} from "../../logic/lookup.ts";
+import type {BooleanExpression, ReadRef, ValueExpression, WriteRef} from "../../logic/expression.ts";
+import type {
+    BooleanPropertyLogicDefinition,
+    ValueLogicDefinition
+} from "../../logic/logic.ts";
 
-export type FieldKind =
-    | "text"
-    | "textarea"
-    | "number"
-    | "checkbox"
-    | "datetime"
-    | "select"
-    | "radio"
-    | "list"
-    | "custom";
+export type EditorState = {
+    stepKey: Key;
+    form: FormDefinition
+    scope: ExpressionScope
 
-export type EntityOrigin = "persisted" | "draft";
+    validation: {
+        errors: ValidationIssue[];
+        warnings: ValidationIssue[];
+    };
+}
 
-export interface BaseMeta {
-    id: string;
-    code: string;
+export type FieldLocation = {
+    stepKey: Key;
+    fieldKey: Key;
+}
+export type ValidationIssue = {
+    path: unknown
+    code: string
+    message: string
+}
+
+export type ScopeContext = unknown
+export type WritableScope = {
+    canWriteField: boolean;
+    canWriteVariable: boolean;
+}
+export type AvailableReadRef = {
     label: string;
-    description?: string;
-    origin: EntityOrigin;
+    ref: ReadRef;
+    valueType?: ValueType;
 }
-
-export interface FieldCapabilities {
-    canBeRequired: boolean;
-    canBeVisible: boolean;
-    canBeEnabled: boolean;
-    canBeSetValue: boolean;
-    canBeCompared: boolean;
-}
-
-export interface FieldLookupBindingMeta {
-    lookupId: string;
-
-    valueField: string;
-    labelField: string;
-
-    usesRuntimeFilter: boolean;
-    usesConfigFilter: boolean;
-    usesItemSelectableWhen: boolean;
-    usesItemVisibleWhen: boolean;
-}
-
-export interface FieldMeta extends BaseMeta {
-    entityType: "field";
-
-    kind: FieldKind;
-    valueType: ValueType;
-
-    multiple?: boolean;
-
-    requiredByDefault?: boolean;
-    visibleByDefault?: boolean;
-    enabledByDefault?: boolean;
-
-    capabilities: FieldCapabilities;
-
-    lookupBinding?: FieldLookupBindingMeta; //если поле селектор связанный со справичником то тут храним инфу про это
-
-    tags?: string[];
-}
-
-export interface VariableMeta extends BaseMeta {
-    entityType: "variable";
-
-    valueType: ValueType;
-
-    mutable: boolean;
-    computed?: boolean;
-
-    canBeUsedInConditions: boolean;
-    canBeAssigned: boolean;
-
-    tags?: string[];
-}
-
-//"колонка(?)"
-export interface LookupFieldMeta {
-    path: string;
+export type AvailableWriteTarget = {
     label: string;
-    valueType: ValueType;
-
-    nullable?: boolean;
-    searchable?: boolean;
-
-    isKey?: boolean;
-    isLabel?: boolean;
+    valueType?: ValueType;
+    target: WriteRef;
 }
 
-export interface LookupMeta extends BaseMeta {
-    entityType: "lookup";
+export type FormEditorContextValue = {
+    state: EditorState;
+    dispatch: React.Dispatch<FormEditorAction>;
 
-    itemType: "object";
+    validation: {
+        warnings: ValidationIssue[];
+        errors: ValidationIssue[];
+    }
 
-    fields: LookupFieldMeta[];
+    selectors: FormEditorSelectors;
+    actions: FormEditorActionCreators;
+};
 
-    keyField?: string;
-    labelField?: string;
+export type FormEditorSelectors = {
+    getStep(stepKey: Key): StepDefinition | undefined;
+    getField(fieldKey: Key): FieldDefinition | undefined;
+    getFieldLocation(fieldKey: Key): FieldLocation | undefined;
 
-    alwaysAvailable: boolean;
+    getAllFields(): FieldDefinition[];
+    getAllLookups(): LookupDefinition[];
+    getAllConstants(): ConstVariableDefinition[];
+    getAllVariables(): RuntimeVariableDefinition[];
 
-    supportsConfigFilter: boolean;
-    supportsRuntimeFilter: boolean;
-    supportsItemSelectableWhen: boolean;
-    supportsItemVisibleWhen: boolean;
+    getAvailableReadRefs(scope: ExpressionScope, ctx: ScopeContext): AvailableReadRef[];
+    getAvailableWriteTargets(scope: WritableScope, ctx: ScopeContext): AvailableWriteTarget[];
 
-    tags?: string[];
-}
+    getFieldCapabilities(fieldKey: Key): FieldCapabilities | undefined;
 
-export type EditorEntityMeta = FieldMeta | VariableMeta | LookupMeta;
+    validateExpression(expr: ValueExpression | BooleanExpression, scope: ExpressionScope, ctx: ScopeContext): ValidationIssue[];
+    validateForm(): ValidationIssue[];
+};
 
-export interface FieldRefMeta {
-    entityType: "field";
+//TODO pass fieldKey not field
+export type FormEditorAction =
+    | { type: "ADD_ON_UPDATE"; stepKey: Key; field: FieldDefinition, payload: FieldOnUpdateDefinition }
+    | { type: "UPDATE_ON_UPDATE"; stepKey: Key; field: FieldDefinition, patch: Partial<FieldOnUpdateDefinition> }
+    | { type: "DELETE_ON_UPDATE"; stepKey: Key; field: FieldDefinition }
 
-    id: string;
-    code: string;
-    label: string;
-    origin: EntityOrigin;
+    | { type: "ADD_BOOL_PROPERTY_LOGIC"; logicKey: FieldLogicType; stepKey: Key; field: FieldDefinition, payload: BooleanPropertyLogicDefinition }
+    | { type: "UPDATE_BOOL_PROPERTY_LOGIC"; logicKey: FieldLogicType; stepKey: Key; field: FieldDefinition, patch: Partial<BooleanPropertyLogicDefinition> }
+    | { type: "DELETE_BOOL_PROPERTY_LOGIC"; logicKey: FieldLogicType; stepKey: Key; field: FieldDefinition }
 
-    kind: FieldKind;
-    valueType: ValueType;
+    | { type: "ADD_VALUE_LOGIC"; stepKey: Key; field: FieldDefinition, payload: ValueLogicDefinition }
+    | { type: "UPDATE_VALUE_LOGIC"; stepKey: Key; field: FieldDefinition, patch: Partial<ValueLogicDefinition> }
+    | { type: "DELETE_VALUE_LOGIC"; stepKey: Key; field: FieldDefinition }
 
-    capabilities: FieldCapabilities;
+    // | { type: "UPDATE_FIELD"; fieldKey: Key; patch: Partial<FieldDefinition> }
+    // | { type: "REMOVE_FIELD"; fieldKey: Key }
+    //
+    // | { type: "ADD_FIELD_LOGIC_RULE"; fieldKey: Key; logicKey: "visibility" | "enabled" | "required"; rule: BooleanDecisionRule }
+    // | { type: "UPDATE_FIELD_LOGIC_RULE"; fieldKey: Key; logicKey: "visibility" | "enabled" | "required"; ruleIndex: number; patch: Partial<BooleanDecisionRule> }
+    // | { type: "REMOVE_FIELD_LOGIC_RULE"; fieldKey: Key; logicKey: "visibility" | "enabled" | "required"; ruleIndex: number }
+    //
+    // | { type: "ADD_ON_UPDATE_RULE"; fieldKey: Key; rule: FieldOnUpdateRule }
+    // | { type: "UPDATE_ON_UPDATE_RULE"; fieldKey: Key; ruleIndex: number; rule: FieldOnUpdateRule }
+    // | { type: "REMOVE_ON_UPDATE_RULE"; fieldKey: Key; ruleIndex: number }
+    //
+    // | { type: "ADD_ON_UPDATE_ACTION"; fieldKey: Key; ruleIndex: number; action: FieldOnUpdateAction }
+    // | { type: "UPDATE_ON_UPDATE_ACTION"; fieldKey: Key; ruleIndex: number; actionIndex: number; action: FieldOnUpdateAction }
+    // | { type: "REMOVE_ON_UPDATE_ACTION"; fieldKey: Key; ruleIndex: number; actionIndex: number }
+    //
+    // | { type: "SET_BOOLEAN_EXPRESSION"; path: EditorPath; expression: BooleanExpression }
+    // | { type: "SET_VALUE_EXPRESSION"; path: EditorPath; expression: ValueExpression };
 
-    lookupBinding?: FieldLookupBindingMeta;
-}
 
-export interface VariableRefMeta {
-    entityType: "variable";
 
-    id: string;
-    code: string;
-    label: string;
-    origin: EntityOrigin;
+export type EditorPath =
+    | { type: "fieldLogicVisibility"; fieldKey: Key }
+    | { type: "fieldLogicEnabled"; fieldKey: Key }
+    | { type: "fieldLogicRequired"; fieldKey: Key }
+    | { type: "fieldLogicValue"; fieldKey: Key }
+    | { type: "fieldOnUpdateRule"; fieldKey: Key; ruleIndex: number }
+    | { type: "fieldOnUpdateAction"; fieldKey: Key; ruleIndex: number; actionIndex: number }
+    | { type: "stepTransitionRule"; stepKey: Key; ruleIndex: number }
+    | { type: "lookupBaseFilter"; lookupKey: Key }
+    | { type: "lookupRowAvailability"; fieldKey: Key; rowId: string; prop: "enabled" | "selectable" };
 
-    valueType: ValueType;
+export type FormEditorActionCreators = {
+    addStep(input?: Partial<StepDefinition>): void;
+    updateStep(stepKey: Key, patch: Partial<StepDefinition>): void;
+    removeStep(stepKey: Key): void;
 
-    mutable: boolean;
-    canBeUsedInConditions: boolean;
-    canBeAssigned: boolean;
-}
+    addField(stepKey: Key, field: FieldDefinition): void;
+    updateField(fieldKey: Key, patch: Partial<FieldDefinition>): void;
+    removeField(fieldKey: Key): void;
+    moveField(fieldKey: Key, targetStepKey: Key, index?: number): void;
 
-export interface LookupFieldRefMeta {
-    lookupId: string;
-    lookupCode: string;
+    addLookup(input: LookupDefinition): void;
+    updateLookup(lookupKey: Key, patch: Partial<LookupDefinition>): void;
+    removeLookup(lookupKey: Key): void;
 
-    name: string;
-    label: string;
-    valueType: ValueType;
+    addConstant(input: ConstVariableDefinition): void;
+    updateConstant(key: Key, patch: Partial<ConstVariableDefinition>): void;
+    removeConstant(key: Key): void;
 
-    isKey: boolean;
-    isLabel: boolean;
-}
+    addVariable(input: RuntimeVariableDefinition): void;
+    updateVariable(key: Key, patch: Partial<RuntimeVariableDefinition>): void;
+    removeVariable(key: Key): void;
 
-export interface LookupRefMeta {
-    entityType: "lookup";
+    setFieldLogic(fieldKey: Key, logic: FieldLogicDefinition | undefined): void;
+    setFieldOnUpdate(fieldKey: Key, onUpdate: FieldOnUpdateDefinition | undefined): void;
+    setStepTransition(stepKey: Key, transition: StepTransitionLogicDefinition | undefined): void;
 
-    id: string;
-    code: string;
-    label: string;
-    origin: EntityOrigin;
+    updateExpression(path: EditorPath, value: unknown): void;
+    insertRule(path: EditorPath, rule: unknown): void;
+    removeNode(path: EditorPath): void;
+    moveNode(path: EditorPath, direction: "up" | "down"): void;
 
-    fields: LookupFieldRefMeta[];
-
-    keyField?: string;
-    labelField?: string;
-
-    supportsConfigFilter: boolean;
-    supportsRuntimeFilter: boolean;
-    supportsItemSelectableWhen: boolean;
-    supportsItemVisibleWhen: boolean;
-}
-
-export type OperandKind = "field" | "variable" | "lookupField";
-
-export interface FieldOperandRef {
-    kind: "field";
-    fieldId: string;
-}
-
-export interface VariableOperandRef {
-    kind: "variable";
-    variableId: string;
-}
-
-export interface LookupFieldOperandRef {
-    kind: "lookupField";
-    lookupId: string;
-    fieldName: string;
-}
-
-export type OperandRef =
-    | FieldOperandRef
-    | VariableOperandRef
-    | LookupFieldOperandRef;
-
-export interface OperandMeta {
-    key: string; // field:driverAge / variable:hasDiscount / lookupField:cities:countryCode
-    label: string; // Field . Age
-    kind: OperandKind;
-
-    valueType: ValueType;
-
-    ref: OperandRef;
-
-    origin: EntityOrigin;
-}
-
-export function makeFieldOperandKey(fieldId: string): string {
-    return `field:${fieldId}`;
-}
-
-export function makeVariableOperandKey(variableId: string): string {
-    return `variable:${variableId}`;
-}
-
-export function makeLookupFieldOperandKey(lookupId: string, fieldName: string): string {
-    return `lookupField:${lookupId}:${fieldName}`;
-}
-
-export type ActionTargetKind = "field" | "variable";
-
-export interface FieldActionTargetRef {
-    kind: "field";
-    fieldId: string;
-}
-
-export interface VariableActionTargetRef {
-    kind: "variable";
-    variableId: string;
-}
-
-export type ActionTargetRef =
-    | FieldActionTargetRef
-    | VariableActionTargetRef;
-
-export interface ActionTargetMeta {
-    key: string;
-    label: string;
-    kind: ActionTargetKind;
-
-    valueType: ValueType;
-
-    ref: ActionTargetRef;
-
-    origin: EntityOrigin;
-}
-
-export type ValueSourceKind = "const" | "field" | "variable" | "lookupField";
-
-export interface ConstValueSourceRef {
-    kind: "const";
-}
-
-export interface FieldValueSourceRef {
-    kind: "field";
-    fieldId: string;
-}
-
-export interface VariableValueSourceRef {
-    kind: "variable";
-    variableId: string;
-}
-
-export interface LookupFieldValueSourceRef {
-    kind: "lookupField";
-    lookupId: string;
-    fieldName: string;
-}
-
-export type ValueSourceRef =
-    | ConstValueSourceRef
-    | FieldValueSourceRef
-    | VariableValueSourceRef
-    | LookupFieldValueSourceRef;
+    undo(): void;
+    redo(): void;
+};
