@@ -8,9 +8,9 @@ import "overlayscrollbars/styles/overlayscrollbars.css";
 import "icheck-bootstrap/icheck-bootstrap.min.css";
 import "bootstrap-icons/font/bootstrap-icons.min.css";
 import './index.css'
+import App from "./App.tsx";
 import {ReactKeycloakProvider} from "@react-keycloak/web";
 import keycloak from "./api/auth.ts";
-import App from "./App.tsx";
 
 const authInitOptions = {
     onLoad: "check-sso",
@@ -23,12 +23,6 @@ createRoot(document.getElementById('root')!).render(
     <ReactKeycloakProvider
         authClient={keycloak}
         initOptions={authInitOptions}
-        // onTokens={(tokens) => {
-        //     // put token into axios here
-        // }}
-        // onEvent={(event, error) => {
-        //
-        // }}
       >
       <App/>
     </ReactKeycloakProvider>
