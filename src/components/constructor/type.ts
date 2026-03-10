@@ -1,5 +1,5 @@
 import type {MaybeArray} from "../../type.ts";
-import type {LogicExpression} from "../../logic/type.ts";
+import type {LogicExpression} from "../logic/type.ts";
 import * as React from "react";
 
 export type PaletteItemType = "input";

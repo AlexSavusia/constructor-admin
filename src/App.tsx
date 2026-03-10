@@ -11,6 +11,7 @@ import CalculationsEditPage from "./pages/Calculations/edit.tsx";
 import DictionariesPage from "./pages/Dictionaries";
 import ProgramsPage from "./pages/Programs";
 import CreateProgramsPage from "./pages/Programs/create.tsx";
+import HomePage from "./pages/HomePage.tsx";
 
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
@@ -47,6 +48,7 @@ function App() {
                     <DefaultLayout/>
                 </PrivateRoute>
             }>
+                <Route path="" element={<HomePage/>}/>
                 <Route path="calculations" element={<CalculationsPage/>}/>
                 <Route path="calculations/:id" element={<CalculationsEditPage/>}/>
                 <Route path="dictionaries" element={<DictionariesPage/>}>
