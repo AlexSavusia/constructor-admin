@@ -1,9 +1,8 @@
 import { useMemo, useState } from "react";
-import { FaCopy, FaPen, FaPlus, FaTrash } from "react-icons/fa";
 import PageHeader from "../../components/ui/PageHeader";
 import TableToolbar from "../../components/ui/TableToolbar";
 import PaginationFooter from "../../components/ui/PaginationFooter";
-import { IconBtn } from "../../components/ui/IconBtn";
+import DictionaryRow from "../../components/ui/DictionaryRow";
 
 type DictionaryItem = {
     id: string;
@@ -98,14 +97,9 @@ const MOCK_ITEMS: DictionaryItem[] = [
         groupId: "3",
     },
 ];
-
-function getGroupName(groupId?: string) {
-    return GROUPS.find((x) => x.id === groupId)?.name ?? "-";
-}
-
 export default function DictionariesPage() {
     const [page, setPage] = useState(1);
-    const [size, setSize] = useState(10);
+    const [size, setSize] = useState(20);
     const [search, setSearch] = useState("");
     const [selectedGroupId, setSelectedGroupId] = useState("");
 
@@ -162,7 +156,7 @@ export default function DictionariesPage() {
     };
 
     return (
-        <>
+        <div className="d-flex flex-column w-100">
             <PageHeader
                 title="Справочники"
                 right={
@@ -238,59 +232,14 @@ export default function DictionariesPage() {
                                         const rowNumber = (page - 1) * size + i + 1;
 
                                         return (
-                                            <tr key={it.id}>
-                                                <td className="text-muted">{rowNumber}</td>
-                                                <td className="font-weight-medium">{it.name}</td>
-                                                <td>
-                                                    {it.description?.trim() ? (
-                                                        it.description
-                                                    ) : (
-                                                        <span className="text-muted">—</span>
-                                                    )}
-                                                </td>
-                                                <td>
-                                                        <span className="badge badge-light">
-                                                            {getGroupName(it.groupId)}
-                                                        </span>
-                                                </td>
-                                                <td className="text-right">
-                                                    <div className="btn-group btn-group-sm">
-                                                        <IconBtn
-                                                            title="Скопировать API"
-                                                            className="btn btn-outline-secondary"
-                                                            onClick={() => void onCopy(it.id)}
-                                                        >
-                                                            <FaCopy />
-                                                        </IconBtn>
-
-                                                        <IconBtn
-                                                            as="a"
-                                                            href={`/dictionaries/${it.id}/rows/create`}
-                                                            title="Добавить данные"
-                                                            className="btn btn-outline-success"
-                                                        >
-                                                            <FaPlus />
-                                                        </IconBtn>
-
-                                                        <IconBtn
-                                                            as="a"
-                                                            href={`/dictionaries/${it.id}/edit`}
-                                                            title="Редактировать"
-                                                            className="btn btn-outline-primary"
-                                                        >
-                                                            <FaPen />
-                                                        </IconBtn>
-
-                                                        <IconBtn
-                                                            title="Удалить"
-                                                            className="btn btn-outline-danger"
-                                                            onClick={() => onDelete(it.id)}
-                                                        >
-                                                            <FaTrash />
-                                                        </IconBtn>
-                                                    </div>
-                                                </td>
-                                            </tr>
+                                            <DictionaryRow
+                                                key={it.id}
+                                                item={it}
+                                                rowNumber={rowNumber}
+                                                groups={GROUPS}
+                                                onCopy={onCopy}
+                                                onDelete={onDelete}
+                                            />
                                         );
                                     })}
                                     </tbody>
@@ -308,6 +257,6 @@ export default function DictionariesPage() {
                     </div>
                 </div>
             </section>
-        </>
+        </div>
     );
 }
