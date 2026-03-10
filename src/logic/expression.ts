@@ -33,6 +33,10 @@ export interface ObjectValueExpression {
     entries: Record<string, ValueExpression>;
 }
 
+export type WriteRef =
+    FieldRef |
+    VariableRef
+
 export type ReadRef =
     SelfRef |
     FieldRef |
