@@ -5,7 +5,7 @@ type Props = React.InputHTMLAttributes<HTMLInputElement> & {
     error?: string;
 };
 
-export default function Input({ label, error, ...props }: Props) {
+export default function InputUI({ label, error, ...props }: Props) {
     return (
         <div className="field">
             <div className={`inputWrapper ${error ? "error" : ""}`}>

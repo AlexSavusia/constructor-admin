@@ -150,7 +150,7 @@ export default function Plane({ className, items }: PlaneProps) {
                                                     <Element />
                                                 </div>
 
-                                                <div className="card-footer py-0 d-flex justify-content-end">
+                                                <div className="p-1 d-flex justify-content-end">
                                                     {!!l.settings.length && (
                                                         <p style={{marginBottom:0,  fontSize: "12px", cursor: "pointer", textDecoration: "underline"}}    onClick={() => setItemSettings(l.settings)}
                                                         >

@@ -1,0 +1,141 @@
+.radio-buttons {
+    width: 100%;
+    display: block;
+}
+
+.radio-buttons-title {
+    margin: 0 0 8px;
+    font-size: 16px;
+    color: #2e3038;
+}
+
+.radio-buttons-list {
+    display: flex;
+    width: 100%;
+    gap: 24px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.radio-buttons-item {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.radio-buttons-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.radio-buttons-label {
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+    line-height: 24px;
+    color: #2e3038;
+    letter-spacing: 0.04em;
+    cursor: pointer;
+}
+
+.radio-buttons-window {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    margin-right: 12px;
+    background: transparent;
+    border: 1px solid #b9bcc6;
+    border-radius: 50%;
+    transition: 0.2s;
+    flex-shrink: 0;
+}
+
+.radio-buttons-circle {
+    width: 8px;
+    height: 8px;
+    background: #006cb2;
+    border-radius: 50%;
+    opacity: 0;
+    transition: 0.2s;
+}
+
+.radio-buttons-input:checked + .radio-buttons-label .radio-buttons-circle {
+    opacity: 1;
+}
+
+.radio-buttons-input:checked + .radio-buttons-label .radio-buttons-window {
+    border-color: #006cb2;
+}
+
+.radio-buttons-input:disabled + .radio-buttons-label {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.radio-buttons-info {
+    position: relative;
+    display: flex;
+    align-items: flex-start;
+    margin-left: 5px;
+    height: 24px;
+}
+
+.radio-buttons-info-text {
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    transform: translate(-50%, 10px);
+    width: 300px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #f1f2f4;
+    font-size: 12px;
+    line-height: 16px;
+    color: #2e3038;
+    letter-spacing: 0.04em;
+    opacity: 0;
+    visibility: hidden;
+    transition: 0.2s;
+    z-index: 2;
+}
+
+.radio-buttons-info:hover .radio-buttons-info-text {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, 0);
+}
+
+/* param theme */
+
+.radio-buttons--param {
+    display: inline-block;
+}
+
+.radio-buttons--param .radio-buttons-list {
+    justify-content: flex-start;
+    gap: 12px;
+}
+
+.radio-buttons--param .radio-buttons-window {
+    display: none;
+}
+
+.radio-buttons--param .radio-buttons-label {
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 137%;
+    padding: 10px 30px;
+    border-radius: 10px;
+    border: 1px solid #0047bb;
+    color: #0047bb;
+    background: #ffffff;
+    transition: 0.2s;
+}
+
+.radio-buttons--param .radio-buttons-input:checked + .radio-buttons-label {
+    color: #ffffff;
+    background: #0047bb;
+}

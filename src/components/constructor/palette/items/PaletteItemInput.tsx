@@ -5,16 +5,22 @@ import type {
 } from "../../type.ts";
 import classNames from "classnames";
 // import { useState } from "react";
- import Input from "../../../fieldsUI/Input/Input.tsx"
-//  import InputDate from "../../../fieldsUI/InputDate/InputDate.tsx"
-// import Checkbox from "../../../fieldsUI/Checkbox/Checkbox.tsx"
+  import InputUI from "../../../ui/fieldsUI/Input/Input.tsx"
+//  import InputDate from "../../../ui/fieldsUI/InputDate/InputDate.tsx"
+// import Checkbox from "../../../ui/fieldsUI/Checkbox/Checkbox.tsx"
+// import RadioButtons from "../../../ui/fieldsUI/RadioButtons/RadioButtons.tsx"
+// import Switch from "../../../ui/fieldsUI/Switch/Switch.tsx"
+//  import Textarea from "../../../ui/fieldsUI/Textarea/Textarea.tsx"
+import Input from "../../../ui/fieldsUIAdmin/Input/Input.tsx"
 
 function PaletteItemInput({className}: PaletteItemProps){
     // const [date, setDate] = useState("");
+    // const [value, setValue] = useState("1");
+    // const [enabled, setEnabled] = useState(false);
 
     return (
         <div className={classNames(className)}>
-            <Input label="Фамилия, Имя, Отчество" />
+            <InputUI label="Фамилия, Имя, Отчество" />
         </div>
     )
 }
@@ -22,8 +28,7 @@ function PaletteItemInput({className}: PaletteItemProps){
 function PaletteItemInputPreview({ className }: PaletteItemPreviewProps) {
     return (
         <div className={classNames("mb-0", className)}>
-            <label className="form-label mb-1">Label</label>
-            <input className="form-control form-control-sm" placeholder="Placeholder" />
+            <Input  placeholder="Фамилия, Имя, Отчество" />
         </div>
     );
 }
