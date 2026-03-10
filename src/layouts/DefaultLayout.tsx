@@ -40,7 +40,7 @@ export default function DefaultLayout() {
             />
 
             <main className="app-main">
-                <div className="app-content p-3">
+                <div className="app-content p-3 d-flex justify-content-center">
                     <Outlet/>
                 </div>
             </main>

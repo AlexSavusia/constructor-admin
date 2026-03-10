@@ -31,7 +31,7 @@ export default function RightSidebar({ open, onClose, children, title }: RightSi
             >
                 <div className="right-sidebar-header">
                     <span>{title}</span>
-                    <button type="button" className="btn btn-light">
+                    <button type="button" className="btn btn-light btn-sm" onClick={onClose}>
                         <i className="fa-regular fa-circle-xmark"></i>
                     </button>
                 </div>
