@@ -1,4 +1,12 @@
+import {useState} from "react";
+import RuleEditor from "../components/logic/components/RuleEditor.tsx";
+
 
 export default function HomePage() {
-    return <p>home</p>
+    const [o, so] = useState(false)
+    return (
+        <>
+            <RuleEditor/>
+        </>
+    )
 }
