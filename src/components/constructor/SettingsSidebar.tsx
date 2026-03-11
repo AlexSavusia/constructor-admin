@@ -4,10 +4,20 @@ import type {
     ValueTypeAlias,
 } from "./type.ts";
 
+type OptionItem = {
+    label: string;
+    value: string;
+};
+
 type SettingsSidebarProps = {
     settings: PaletteItemSetting[];
     values: PaletteItemSettingsValues;
     onChange: (key: string, value: ValueTypeAlias) => void;
+
+    onValidationClick?: () => void;
+    onVisibilityConditionsClick?: () => void;
+    onCalculateValueClick?: () => void;
+    onRequiredConditionClick?: () => void;
 };
 
 function isSettingVisible(
@@ -30,6 +40,10 @@ export default function SettingsSidebar({
                                             settings,
                                             values,
                                             onChange,
+                                            onValidationClick,
+                                            onVisibilityConditionsClick,
+                                            onCalculateValueClick,
+                                            onRequiredConditionClick,
                                         }: SettingsSidebarProps) {
     const visibleSettings = settings.filter((setting) =>
         isSettingVisible(setting, values),
@@ -37,8 +51,233 @@ export default function SettingsSidebar({
 
     return (
         <div className="d-flex flex-column gap-3">
+            <div>
+                <button
+                    type="button"
+                    className="btn btn-light w-100"
+                    onClick={onValidationClick}
+                >
+                    Валидация
+                </button>
+            </div>
+
+            <div>
+                <button
+                    type="button"
+                    className="btn btn-light w-100"
+                    onClick={onCalculateValueClick}
+                >
+                    Рассчитать значение
+                </button>
+            </div>
+
             {visibleSettings.map((setting) => {
                 const value = values?.[setting.key];
+
+                if (setting.key === "visible") {
+                    return (
+                        <div key={setting.key} className="d-flex flex-column gap-2">
+                            <div className="d-flex align-items-center justify-content-between gap-2">
+                                <div className="form-check mb-0">
+                                    <input
+                                        id={setting.key}
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        checked={Boolean(value)}
+                                        onChange={(e) => onChange(setting.key, e.target.checked)}
+                                    />
+                                    <label
+                                        className="form-check-label"
+                                        htmlFor={setting.key}
+                                    >
+                                        Видимость
+                                    </label>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="btn btn-light btn-sm"
+                                    onClick={onVisibilityConditionsClick}
+                                >
+                                    Условия
+                                </button>
+                            </div>
+                        </div>
+                    );
+                }
+
+                if (setting.key === "disabled") {
+                    return (
+                        <div key={setting.key} className="d-flex flex-column gap-2">
+                            <div className="d-flex align-items-center justify-content-between gap-2">
+                                <div className="form-check mb-0">
+                                    <input
+                                        id={setting.key}
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        checked={Boolean(value)}
+                                        onChange={(e) => onChange(setting.key, e.target.checked)}
+                                    />
+                                    <label
+                                        className="form-check-label"
+                                        htmlFor={setting.key}
+                                    >
+                                        Включено
+                                    </label>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="btn btn-light btn-sm"
+                                    onClick={onVisibilityConditionsClick}
+                                >
+                                    Условия
+                                </button>
+                            </div>
+                        </div>
+                    );
+                }
+
+                if (setting.key === "required") {
+                    return (
+                        <div key={setting.key} className="d-flex flex-column gap-2">
+                            <div className="d-flex align-items-center justify-content-between gap-2">
+                                <div className="form-check mb-0">
+                                    <input
+                                        id={setting.key}
+                                        className="form-check-input"
+                                        type="checkbox"
+                                        checked={Boolean(value)}
+                                        onChange={(e) => onChange(setting.key, e.target.checked)}
+                                    />
+                                    <label
+                                        className="form-check-label"
+                                        htmlFor={setting.key}
+                                    >
+                                        {setting.title}
+                                    </label>
+                                </div>
+
+                                <button
+                                    type="button"
+                                    className="btn btn-sm btn-light"
+                                    onClick={onRequiredConditionClick}
+                                >
+                                    Условие
+                                </button>
+                            </div>
+                        </div>
+                    );
+                }
+
+                if (setting.key === "mask") {
+                    return (
+                        <div key={setting.key}>
+                            <label className="form-label">{setting.title}</label>
+                            <input
+                                className="form-control"
+                                type="text"
+                                value={String(value ?? "")}
+                                onChange={(e) => onChange(setting.key, e.target.value)}
+                                placeholder="Например: +996 (999) 99-99-99"
+                            />
+                        </div>
+                    );
+                }
+
+                if (setting.key === "options") {
+                    const options = Array.isArray(value)
+                        ? (value as OptionItem[])
+                        : [];
+
+                    const updateOption = (
+                        index: number,
+                        patch: Partial<OptionItem>,
+                    ) => {
+                        const next = options.map((item, i) =>
+                            i === index ? { ...item, ...patch } : item,
+                        );
+                        onChange(setting.key, next);
+                    };
+
+                    const addOption = () => {
+                        const nextIndex = options.length + 1;
+                        const next = [
+                            ...options,
+                            {
+                                label: `Вариант ${nextIndex}`,
+                                value: `option_${nextIndex}`,
+                            },
+                        ];
+                        onChange(setting.key, next);
+                    };
+
+                    const removeOption = (index: number) => {
+                        const next = options.filter((_, i) => i !== index);
+                        onChange(setting.key, next);
+                    };
+
+                    return (
+                        <div key={setting.key} className="d-flex flex-column gap-2">
+                            <label className="form-label mb-0">{setting.title}</label>
+
+                            {options.map((option, index) => (
+                                <div
+                                    key={`${setting.key}-${index}`}
+                                    className="border rounded p-2 d-flex flex-column gap-2"
+                                >
+                                    <div>
+                                        <label className="form-label mb-1">
+                                            Label
+                                        </label>
+                                        <input
+                                            className="form-control"
+                                            type="text"
+                                            value={option.label}
+                                            onChange={(e) =>
+                                                updateOption(index, {
+                                                    label: e.target.value,
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="form-label mb-1">
+                                            Value
+                                        </label>
+                                        <input
+                                            className="form-control"
+                                            type="text"
+                                            value={option.value}
+                                            onChange={(e) =>
+                                                updateOption(index, {
+                                                    value: e.target.value,
+                                                })
+                                            }
+                                        />
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        className="btn btn-sm btn-outline-danger align-self-start"
+                                        onClick={() => removeOption(index)}
+                                    >
+                                        Удалить вариант
+                                    </button>
+                                </div>
+                            ))}
+
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-outline-primary"
+                                onClick={addOption}
+                            >
+                                Добавить вариант
+                            </button>
+                        </div>
+                    );
+                }
 
                 if (setting.valType === "boolean") {
                     return (

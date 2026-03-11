@@ -2,9 +2,9 @@ import type {MaybeArray} from "../../type.ts";
 import * as React from "react";
 import type {BooleanExpression} from "../../logic/expression.ts";
 
-export type PaletteItemType = | "input" | "textarea" | "checkbox" | "radio" | "switch" | "date"
+export type PaletteItemType = | "input" | "textarea" | "checkbox" | "radio" | "switch" | "date" | "description" | "select"
 export type PalletItemSettingValueType = | "string" | "number" | "boolean" | "datetime"
-export type ValueTypeAlias = string | number | boolean | Date
+export type ValueTypeAlias = string | number | boolean | Date | OptionItem[]
 export type PaletteItemSettingsValues = Record<string, ValueTypeAlias | ValueTypeAlias[]>
 
 export type PaletteItemDescriptor = {
@@ -46,3 +46,8 @@ export type LayoutPaletteItemDescriptor = {
     descriptorKey: string;
     settingsValues: PaletteItemSettingsValues;
 }
+
+export type OptionItem = {
+    label: string;
+    value: string | number;
+};
