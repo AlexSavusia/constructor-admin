@@ -1,0 +1,83 @@
+.input-date-container {
+    position: relative;
+}
+
+.input-date {
+    position: relative;
+}
+
+.input-date-input {
+    width: 100%;
+    font-size: 16px;
+    color: #2e3038;
+    outline: none;
+    border: 1px solid #dddfe3;
+    border-radius: 8px;
+    padding: 22px 48px 10px 19px;
+    background: #fff;
+}
+
+.input-date-input::placeholder {
+    color: transparent;
+}
+
+.input-date-label {
+    position: absolute;
+    left: 19px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    line-height: 140%;
+    color: #b9bcc6;
+    letter-spacing: 0.04em;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    background: #fff;
+    padding: 0 4px;
+}
+
+.input-date-input:focus + .input-date-label {
+    top: 0;
+    font-size: 12px;
+    padding: 4px;
+    background: #fff;
+    transform: translateY(0);
+    line-height: 1;
+}
+
+.input-date-input:not(:placeholder-shown) + .input-date-label {
+    top: 0;
+    font-size: 12px;
+    padding: 4px;
+    background: #fff;
+    transform: translateY(0);
+    line-height: 1;
+}
+
+.input-date-button {
+    position: absolute;
+    top: 18px;
+    right: 19px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    padding: 0;
+}
+
+.input-date-button:disabled {
+    cursor: default;
+}
+
+.input-date-popper {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 10;
+    background: #ffffff;
+    border: 1px solid #dddfe3;
+    border-radius: 8px;
+    padding: 8px;
+}
