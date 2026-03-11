@@ -19,12 +19,12 @@ export default function Modal({title, open, onClose, onSave, className, children
                 onClick={() => onClose()}
                 style={{
                     visibility: open ? "visible" : "hidden",
-                    position: "absolute",
+                    maxHeight: "100vh",
                 }}
             >
                 <div
                     onClick={(e) => e.stopPropagation()}
-                    className={classNames("modal-dialog modal-dialog-centered modal-xl", className)}
+                    className={classNames("modal-dialog modal-dialog-centered modal-xxl", className)}
                 >
                     <div className="modal-content">
                         <div className="modal-header">

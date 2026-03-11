@@ -50,3 +50,7 @@
   padding: 1rem;
   overflow: auto;
 }
+
+.modal-xxl {
+  max-width: 1600px;
+}

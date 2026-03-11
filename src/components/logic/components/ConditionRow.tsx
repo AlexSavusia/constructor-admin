@@ -84,8 +84,9 @@ export default function ConditionRow({rule, path}: ConditionRowProps) {
 
 
     return (
-        <div style={{ display: "flex", gap: 8, alignItems: "center", margin: "8px 0" }}>
+        <div className="my-2 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm lg:flex-row lg:items-center">
             <select
+                className="min-h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 lg:flex-1"
                 value={firstPath.join(".")}
                 onChange={e=> {
                     const np = e.target.value.split(".") as NodePath;
@@ -97,6 +98,7 @@ export default function ConditionRow({rule, path}: ConditionRowProps) {
                 ))}
             </select>
             <select
+                className="min-h-[42px] w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 lg:w-[220px] lg:flex-none"
                 value={rule.type}
                 onChange={e=> {
                     patchCondition(path, {type: e.target.value as BooleanExpression['type']})
@@ -108,6 +110,7 @@ export default function ConditionRow({rule, path}: ConditionRowProps) {
             </select>
             {secondPath &&
                 <select
+                    className="min-h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 lg:flex-1"
                     value={secondPath.join(".")}
                     onChange={e=> {
                         const np = e.target.value.split(".") as NodePath;
