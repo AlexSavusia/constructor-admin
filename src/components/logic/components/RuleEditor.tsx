@@ -8,7 +8,7 @@ import type {AndExpression, OrExpression} from "../../../logic/expression.ts";
 
 export type RuleEditorProps = {
     open: boolean;
-    setOpen: (open: boolean) => void;
+    onClose: () => void;
     stepKey: Key
     fieldKey?: Key
     form: FormDefinition
@@ -23,7 +23,7 @@ export type RuleEditorProps = {
 //     className?: string;
 //     onSave?: () => void;
 
-export default function RuleEditor({stepKey, fieldKey, form, scope, rule, open, setOpen}: RuleEditorProps) {
+export default function RuleEditor({stepKey, fieldKey, form, scope, rule, open, onClose}: RuleEditorProps) {
     const onSaveCb = useCallback(() => {}, [])
     const initState: EditorState = {
         stepKey,
@@ -48,7 +48,7 @@ export default function RuleEditor({stepKey, fieldKey, form, scope, rule, open, 
         <Modal
             title="Rule Editor"
             open={open}
-            onClose={()=>setOpen(false)}
+            onClose={onClose}
             onSave={onSaveCb}
         >
             <EditorProvider initialState={initState}>

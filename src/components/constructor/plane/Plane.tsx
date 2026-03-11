@@ -7,10 +7,12 @@ import type { PaletteItemDescriptor, PaletteItemSettingsValues, ValueTypeAlias} 
 import RightSidebar from "../../RightSidebar.tsx";
 import SettingsSidebar from "../SettingsSidebar.tsx";
 import {useFormEditorActions, useFormEditorSelectors} from "../../../pages/Programs/editor/context.ts";
-import type {FormDefinition, Key} from "../../../logic/type.ts";
+import type {ExpressionScope, FormDefinition, Key} from "../../../logic/type.ts";
 import type {
     FieldDefinition,
 } from "../../../logic/field.ts";
+import RuleEditor from "../../logic/components/RuleEditor.tsx";
+import type {EditorEditingRule} from "../../logic/types.ts";
 
 export type PlaneProps = {
     className?: string;
@@ -55,7 +57,7 @@ export default function Plane({ onSave, className, items, stepKey }: PlaneProps)
     const paddingY = 0;
     const cols = 3;
     const rowHeight = 56;
-    const {getStep, getFormState, getLayout} = useFormEditorSelectors()
+    const {getStep, getFormState, getLayout,} = useFormEditorSelectors()
     const { addField, updateFieldSettings, removeField, saveLayout } = useFormEditorActions()
 
     const layoutItems = useMemo(()=>
@@ -65,7 +67,7 @@ export default function Plane({ onSave, className, items, stepKey }: PlaneProps)
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
     const { width, containerRef, mounted } = useContainerWidth();
-
+    const [editingRule, setEditingRule] = useState<EditorEditingRule & {scope: ExpressionScope} | null>(null);
     // const { layout, setLayout } = useGridLayout({
     //     layout: Object.entries(getStep(stepKey).fields).map(v=>v[1]).map(l=>l.layout),// layoutItems.map(l=>l.layout),
     //     cols,
@@ -302,12 +304,27 @@ export default function Plane({ onSave, className, items, stepKey }: PlaneProps)
             >
                 {selectedItem && selectedDescriptor && (
                     <SettingsSidebar
+                        stepKey={stepKey}
                         settings={selectedDescriptor.settings}
                         values={selectedItem.settingsValues}
                         onChange={handleSettingChange}
+                        onEditRule={setEditingRule}
+                        editingRule={editingRule}
                     />
                 )}
             </RightSidebar>
+            <RuleEditor
+                open={!!editingRule}
+                onClose={()=>setEditingRule(null)}
+                stepKey={stepKey}
+                form={getFormState()}
+                scope={editingRule?.scope ?? "LOOKUP_ROW_SCOPE"}
+                onSave={(rule) => {
+                    debugger
+                    console.log(rule)
+                    setEditingRule(null)
+                }}
+            />
         </>
     );
 }

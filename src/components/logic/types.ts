@@ -26,6 +26,8 @@ export type EditorEditingRule = {
     actions?: ActionExpression[];
 }
 
+export type Rule = EditorEditingRule
+
 export type ActionExpression = unknown
 
 export type EditorState = {

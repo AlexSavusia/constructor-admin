@@ -24,7 +24,6 @@ export interface FieldCapabilities {
 export interface BaseFieldDefinition {
     __typ: "field"
     key: Key
-    // label: string
 
     valueType?: ValueType
     defaultValue?: unknown

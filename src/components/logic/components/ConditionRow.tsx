@@ -45,7 +45,7 @@ export default function ConditionRow({rule, path}: ConditionRowProps) {
         }
 
         if(definition.__typ == "field") {
-            return `Var ${definition.label}`
+            return `Field TAKE FROM SETTINGS`
         }
         return `unknown definition __typ ${definition}`
     }

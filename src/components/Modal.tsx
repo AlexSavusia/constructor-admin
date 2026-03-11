@@ -19,6 +19,7 @@ export default function Modal({title, open, onClose, onSave, className, children
                 onClick={() => onClose()}
                 style={{
                     visibility: open ? "visible" : "hidden",
+                    position: "absolute",
                 }}
             >
                 <div
