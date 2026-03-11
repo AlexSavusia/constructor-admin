@@ -1,94 +1,67 @@
-import type {ConditionNode, GroupNode} from "../type.ts";
 import ConditionRow from "./ConditionRow.tsx";
+import type {AndExpression, BoolConstExpression, OrExpression} from "../../../logic/expression.ts";
+import type {NodePath} from "./reducer.ts";
+import {useEditorActions} from "./EditorContext.tsx";
 
 export type GroupEditorProps = {
-    isRoot?: boolean;
-    group: GroupNode
-    onChange: (node: GroupNode) => void
+    rule: AndExpression | OrExpression
+    path: NodePath
 }
 
-export default function GroupEditor({group, onChange, isRoot}: GroupEditorProps) {
-    const updateChild = (childId: string, nextChild: GroupNode | ConditionNode) => {
-        onChange({
-            ...group,
-            children: group.children.map((c) => (c.id === childId ? nextChild : c)),
-        });
-    };
+export default function GroupEditor({rule, path}: GroupEditorProps) {
+    const { updateCondition, patchCondition } = useEditorActions()
 
-    const removeChild = (childId: string) => {
-        onChange({
-            ...group,
-            children: group.children.filter((c) => c.id !== childId),
-        });
+    const addGroup = () => {
+        const newGroup: AndExpression | OrExpression = {
+            id: crypto.randomUUID(),
+            type: "and",
+            items: [],
+        };
+        rule.items.push(newGroup);
+        updateCondition(path, rule)
     };
 
     const addCondition = () => {
-        const newCondition: ConditionNode = {
+        const newCondition: BoolConstExpression = {
             id: crypto.randomUUID(),
-            type: "condition",
-            enabled: true,
-            left: { kind: "field", id: "" },
-            operator: "eq",
-            right: { kind: "const", value: "" },
+            type: "boolConst",
+            value: true
         };
-
-        onChange({
-            ...group,
-            children: [...group.children, newCondition],
-        });
-    };
-
-    const addGroup = () => {
-        const newGroup: GroupNode = {
-            id: crypto.randomUUID(),
-            type: "group",
-            enabled: true,
-            operator: "all",
-            children: [],
-        };
-
-        onChange({
-            ...group,
-            children: [...group.children, newGroup],
-        });
+        rule.items.push(newCondition);
+        updateCondition(path, rule)
     };
 
     return (
         <div style={{ borderLeft: "2px solid #d9d9d9", paddingLeft: 12, marginBottom: 12 }}>
             <div>
-                {!isRoot && (
-                    <input
-                        type="checkbox"
-                        checked={group.enabled}
-                        onChange={(e) => onChange({ ...group, enabled: e.target.checked })}
-                        />
-                )}
                 <select
-                    value={group.operator}
-                    onChange={(e) =>
-                        onChange({ ...group, operator: e.target.value as "all" | "any" })
-                    }
+                    value={rule.type}
+                    onChange={(e) =>{
+                        debugger
+                        patchCondition(path, {
+                            type: e.target.value as "or" | "and",
+                        })
+                    }}
                 >
-                    <option value="all">ALL conditions are met</option>
-                    <option value="any">ANY of the following</option>
+                    <option value="and">ALL conditions are met</option>
+                    <option value="or">ANY of the following</option>
                 </select>
             </div>
             <div>
-                {group.children.map((child) =>
-                    child.type === "condition" ? (
+                {rule.items.map((child, index) =>
+                    (child.type !== "and" && child.type !== "or") ? (
                         <ConditionRow
                             key={child.id}
-                            node={child}
-                            onChange={(next) => updateChild(child.id, next)}
-                            onDelete={() => removeChild(child.id)}
+                            rule={child}
+                            path={[...path, "items", index]}
                         />
                     ) : (
                         <div key={child.id}>
                             <GroupEditor
-                                group={child}
-                                onChange={(next) => updateChild(child.id, next)}
+                                rule={child}
+                                path={[...path, "items", index]}
                             />
-                            <button onClick={() => removeChild(child.id)}>Delete group</button>
+                            <button onClick={() => {}}>Delete group</button>
                         </div>
                     ))}
             </div>

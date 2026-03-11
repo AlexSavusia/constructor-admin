@@ -3,7 +3,7 @@ import type {
     ExpressionScope,
     FormDefinition,
     Key,
-    RuntimeVariableDefinition, ValueType
+    RuntimeVariableDefinition
 } from "../../logic/type.ts";
 import * as React from "react";
 import type {StepDefinition, StepTransitionLogicDefinition} from "../../logic/step.ts";
@@ -14,16 +14,27 @@ import type {
     FieldOnUpdateDefinition
 } from "../../logic/field.ts";
 import type {LookupDefinition} from "../../logic/lookup.ts";
-import type {BooleanExpression, ReadRef, ValueExpression, WriteRef} from "../../logic/expression.ts";
+import type {BooleanExpression, ValueExpression} from "../../logic/expression.ts";
 import type {
     BooleanPropertyLogicDefinition,
     ValueLogicDefinition
 } from "../../logic/logic.ts";
+import type {NodePath} from "./components/reducer.ts";
+
+export type EditorEditingRule = {
+    condition?: BooleanExpression;
+    actions?: ActionExpression[];
+}
+
+export type ActionExpression = unknown
 
 export type EditorState = {
     stepKey: Key;
+    fieldKey: Key | null;
     form: FormDefinition
     scope: ExpressionScope
+
+    rule: EditorEditingRule
 
     validation: {
         errors: ValidationIssue[];
@@ -46,16 +57,8 @@ export type WritableScope = {
     canWriteField: boolean;
     canWriteVariable: boolean;
 }
-export type AvailableReadRef = {
-    label: string;
-    ref: ReadRef;
-    valueType?: ValueType;
-}
-export type AvailableWriteTarget = {
-    label: string;
-    valueType?: ValueType;
-    target: WriteRef;
-}
+
+
 
 export type FormEditorContextValue = {
     state: EditorState;
@@ -80,8 +83,8 @@ export type FormEditorSelectors = {
     getAllConstants(): ConstVariableDefinition[];
     getAllVariables(): RuntimeVariableDefinition[];
 
-    getAvailableReadRefs(scope: ExpressionScope, ctx: ScopeContext): AvailableReadRef[];
-    getAvailableWriteTargets(scope: WritableScope, ctx: ScopeContext): AvailableWriteTarget[];
+    // getAvailableReadRefs(scope: ExpressionScope, ctx: ScopeContext): AvailableReadRef[];
+    // getAvailableWriteTargets(scope: WritableScope, ctx: ScopeContext): AvailableWriteTarget[];
 
     getFieldCapabilities(fieldKey: Key): FieldCapabilities | undefined;
 
@@ -91,6 +94,13 @@ export type FormEditorSelectors = {
 
 //TODO pass fieldKey not field
 export type FormEditorAction =
+    | { type: "SET_ACTION_BY_PATH", path: NodePath, action: ValueExpression }
+    | { type: "SET_CONDITION_BY_PATH", path: NodePath, condition: BooleanExpression }
+    | { type: "PATCH_CONDITION_BY_PATH", path: NodePath, condition: Partial<BooleanExpression | ValueExpression> }
+    // unused below
+    | { type: "UPDATE_CONDITION"; stepKey: Key, fieldKey: Key, condition: BooleanExpression}
+    | { type: "UPDATE_ACTION"; stepKey: Key, fieldKey: Key, action: ValueExpression}
+
     | { type: "ADD_ON_UPDATE"; stepKey: Key; field: FieldDefinition, payload: FieldOnUpdateDefinition }
     | { type: "UPDATE_ON_UPDATE"; stepKey: Key; field: FieldDefinition, patch: Partial<FieldOnUpdateDefinition> }
     | { type: "DELETE_ON_UPDATE"; stepKey: Key; field: FieldDefinition }

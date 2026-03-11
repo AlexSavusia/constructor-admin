@@ -1,165 +1,64 @@
-import type {EditorState, FormEditorAction} from "../types.ts";
+import type {EditorEditingRule, FormEditorAction} from "../types.ts";
 
-export default function editorReducer(state: EditorState, action: FormEditorAction): EditorState {
+export type NodePath = Array<string | number>;
+
+export function setByPath<T>(obj: T, path: NodePath, value: unknown): T {
+    if (path.length === 0) {
+        return value as T;
+    }
+
+    const [head, ...tail] = path;
+
+    if (Array.isArray(obj)) {
+        const copy = [...obj];
+        copy[head as number] = setByPath(copy[head as number], tail, value);
+        return copy as T;
+    }
+
+    return {
+        ...(obj as Record<string, unknown>),
+        [head]: setByPath(
+            (obj as Record<string, unknown>)[head as string],
+            tail,
+            value
+        ),
+    } as T;
+}
+
+export function patchByPath<T extends object>(
+    obj: T,
+    path: NodePath,
+    patch: Record<string, unknown>
+): T {
+    const target = getByPath(obj, path);
+
+    return setByPath(obj, path, {
+        ...(target as Record<string, unknown>),
+        ...patch,
+    });
+}
+
+export function getByPath(obj: unknown, path: NodePath): unknown {
+    return path.reduce((acc, key) => {
+        if (acc == null) return undefined;
+        // @ts-expect-error no error bruh
+        return (acc)[key];
+    }, obj);
+}
+
+export default function editorReducer(state: EditorEditingRule, action: FormEditorAction): EditorEditingRule {
+    const t = action.type
     switch (action.type) {
-        case "ADD_ON_UPDATE": {
-            const { stepKey, field, payload } = action;
-            return {
-                ...state,
-                form: {
-                    ...state.form,
-                    steps: {
-                        ...state.form.steps,
-                        [stepKey]: {
-                            ...state.form.steps[stepKey],
-                            fields: {
-                                ...state.form.steps[stepKey].fields,
-                                [field.key]: {
-                                    ...state.form.steps[stepKey].fields[field.key],
-                                    onUpdate: payload,
-                                }
-                            }
-                        },
-                    }
-                }
-            }
+        case "SET_CONDITION_BY_PATH": {
+            return setByPath(state, action.path, action.condition);
         }
-        case "UPDATE_ON_UPDATE": {
-            const { stepKey, field, patch } = action;
-            const patchedOnUpdate = {
-                ...(state.form.steps[stepKey].fields[field.key].onUpdate ?? { rules: []}),
-                ...patch
-            }
-            return {
-                ...state,
-                form: {
-                    ...state.form,
-                    steps: {
-                        ...state.form.steps,
-                        [stepKey]: {
-                            ...state.form.steps[stepKey],
-                            fields: {
-                                ...state.form.steps[stepKey].fields,
-                                [field.key]: {
-                                    ...state.form.steps[stepKey].fields[field.key],
-                                    onUpdate: patchedOnUpdate,
-                                }
-                            }
-                        },
-                    }
-                }
-            }
+        case "SET_ACTION_BY_PATH": {
+            return setByPath(state, action.path, action.action);
         }
-        case "DELETE_ON_UPDATE": {
-            const { stepKey, field } = action;
-            return {
-                ...state,
-                form: {
-                    ...state.form,
-                    steps: {
-                        ...state.form.steps,
-                        [stepKey]: {
-                            ...state.form.steps[stepKey],
-                            fields: {
-                                ...state.form.steps[stepKey].fields,
-                                [field.key]: {
-                                    ...state.form.steps[stepKey].fields[field.key],
-                                    onUpdate: undefined
-                                }
-                            }
-                        },
-                    }
-                }
-            }
-        }
-        case "ADD_BOOL_PROPERTY_LOGIC": {
-            const { stepKey, field, logicKey, payload } = action;
-            const currField = state.form.steps[stepKey].fields[field.key]
-            const updatedLogic = currField.logic ? {
-                ...currField.logic,
-                [logicKey]: payload
-            } : {
-                [logicKey]: payload
-            }
-            return {
-                ...state,
-                form: {
-                    ...state.form,
-                    steps: {
-                        ...state.form.steps,
-                        [stepKey]: {
-                            ...state.form.steps[stepKey],
-                            fields: {
-                                ...state.form.steps[stepKey].fields,
-                                [field.key]: {
-                                    ...currField,
-                                    logic: updatedLogic
-                                }
-                            }
-                        },
-                    }
-                }
-            }
-        }
-        case "UPDATE_BOOL_PROPERTY_LOGIC": {
-            const { stepKey, field, logicKey, patch } = action;
-            const currField = state.form.steps[stepKey].fields[field.key]
-            const updatedLogic = currField.logic ? {
-                ...currField.logic,
-                [logicKey]: {
-                    ...currField.logic[logicKey],
-                    ...patch
-                }
-            } : {
-                [logicKey]: patch
-            }
-            return {
-                ...state,
-                form: {
-                    ...state.form,
-                    steps: {
-                        ...state.form.steps,
-                        [stepKey]: {
-                            ...state.form.steps[stepKey],
-                            fields: {
-                                ...state.form.steps[stepKey].fields,
-                                [field.key]: {
-                                    ...currField,
-                                    logic: updatedLogic
-                                }
-                            }
-                        },
-                    }
-                }
-            }
-        }
-        case "DELETE_BOOL_PROPERTY_LOGIC": {
-            const { stepKey, field, logicKey} = action;
-            const currField = state.form.steps[stepKey].fields[field.key]
-            return {
-                ...state,
-                form: {
-                    ...state.form,
-                    steps: {
-                        ...state.form.steps,
-                        [stepKey]: {
-                            ...state.form.steps[stepKey],
-                            fields: {
-                                ...state.form.steps[stepKey].fields,
-                                [field.key]: {
-                                    ...currField,
-                                    logic: {
-                                        ...currField.logic,
-                                        [logicKey]: undefined
-                                    }
-                                }
-                            }
-                        },
-                    }
-                }
-            }
+        case "PATCH_CONDITION_BY_PATH": {
+            return patchByPath(state, action.path, action.condition);
         }
         default:
-            throw new Error(`Unknown action type ${action.type}`);
+            throw new Error(`Unknown action type ${t}`);
     }
 }

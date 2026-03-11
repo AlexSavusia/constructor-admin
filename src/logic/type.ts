@@ -15,13 +15,17 @@ export type FormDefinition = {
 }
 
 export type ConstVariableDefinition = {
+    __typ: "constant"
     key: Key;
+    label: string
     valueType: ValueType;
     value: unknown;
 }
 
 export type RuntimeVariableDefinition = {
+    __typ: "variable"
     key: Key;
+    label: string
     valueType: ValueType;
     defaultValue?: unknown;
 }

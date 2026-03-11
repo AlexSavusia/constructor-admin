@@ -1,39 +1,84 @@
-import type {RuleEditorState} from "../type.ts";
-import {useState} from "react";
+import {useCallback} from "react";
 import WhenEditor from "./WhenEditor.tsx";
-import ThenEditor from "./ThenEditor.tsx";
+import type {ExpressionScope, FormDefinition, Key} from "../../../logic/type.ts";
+import Modal from "../../Modal.tsx";
+import {EditorProvider} from "./EditorProvider.tsx";
+import type {EditorEditingRule, EditorState} from "../types.ts";
+import type {AndExpression, OrExpression} from "../../../logic/expression.ts";
 
 export type RuleEditorProps = {
-    rule?: RuleEditorState
+    open: boolean;
+    setOpen: (open: boolean) => void;
+    stepKey: Key
+    fieldKey?: Key
+    form: FormDefinition
+    scope: ExpressionScope
+    onSave: (form: EditorEditingRule) => void
+    rule?: EditorEditingRule
 }
+//title?: string;
+//     open: boolean;
+//     setOpen: (open: boolean) => void;
+//     children: React.ReactNode;
+//     className?: string;
+//     onSave?: () => void;
 
-const createEmptyRule = (): RuleEditorState => ({
-    id: "MAKE RANDOM",
-    name: "Empty rule",
-    then: [],
-    when: {
-        id: "MAKE RANDOM",
-        type: "group",
-        enabled: true,
-        operator: 'all',
-        children: []
+export default function RuleEditor({stepKey, fieldKey, form, scope, rule, open, setOpen}: RuleEditorProps) {
+    const onSaveCb = useCallback(() => {}, [])
+    const initState: EditorState = {
+        stepKey,
+        fieldKey: fieldKey ?? null,
+        form,
+        scope,
+        rule: rule ?? {
+            condition: undefined,
+            actions: undefined,
+        },
+        validation: {
+            errors: [],
+            warnings: [],
+        }
     }
-})
 
-export default function RuleEditor({rule: initRule}: RuleEditorProps) {
-    const [rule, setRule] = useState<RuleEditorState>(initRule ?? createEmptyRule())
+    if(rule?.condition?.type != "and" && rule?.condition?.type != "or" && rule?.condition != undefined) {
+        throw new Error(`Invalid rule condition rule ${JSON.stringify(rule.condition)}`, )
+    }
 
     return (
-        <div>
-            <WhenEditor
-                node={rule.when}
-                onChange={(when) => {
-                    setRule((s) => ({ ...s, when }))
-                }} />
-            <ThenEditor
-                node={rule.then}
-                onChange={(then) => setRule((s) => ({ ...s, then }))}
-            />
-        </div>
+        <Modal
+            title="Rule Editor"
+            open={open}
+            setOpen={setOpen}
+            onSave={onSaveCb}
+        >
+            <EditorProvider initialState={initState}>
+                <WhenEditor
+                    path={["form"]}
+                    rule={initState.rule.condition as AndExpression | OrExpression}
+                    />
+                {/*<ThenEditor*/}
+                {/*    node={rule.then}*/}
+                {/*    onChange={(then) => setRule((s) => ({ ...s, then }))}*/}
+                {/*/>*/}
+            </EditorProvider>
+        </Modal>
     )
+
+    // return (
+    //     <div>
+    //         <WhenEditor
+    //             node={rule.when}
+    //             onChange={(when) => {
+    //                 setRule((s) => ({ ...s, when }))
+    //             }} />
+    //         <ThenEditor
+    //             node={rule.then}
+    //             onChange={(then) => setRule((s) => ({ ...s, then }))}
+    //         />
+    //         <div>
+    //             <button className="btn btn-secondary">close</button>
+    //             <button className="btn btn-primary">save</button>
+    //         </div>
+    //     </div>
+    // )
 }

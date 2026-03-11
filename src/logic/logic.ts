@@ -8,7 +8,7 @@ export type BooleanPropertyLogicDefinition = {
 
 export type BooleanDecisionRule = {
     when: BooleanExpression;
-    value: boolean;
+    value: boolean; // dont need probably
 }
 
 export interface ValueLogicDefinition {
