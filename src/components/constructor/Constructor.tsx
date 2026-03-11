@@ -13,7 +13,7 @@ export default function Constructor({className}: ConstructorProps) {
              style={{ minHeight: "70vh" }}>
             <div  className="flex-shrink-0"
                   style={{width: "100%",maxWidth: 320}}>
-                <Palette  items={PALETTE_ITEMS}/>
+                <Palette items={PALETTE_ITEMS}/>
             </div>
             <div className="flex-grow-1">
                 <Plane items={PALETTE_ITEMS}/>
