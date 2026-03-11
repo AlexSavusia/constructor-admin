@@ -1,17 +1,18 @@
-import type { ReactNode } from "react";
 import "./Switch.css";
 
 type Props = {
     checked?: boolean;
     onChange?: (value: boolean) => void;
     disabled?: boolean;
-    children?: ReactNode;
+    label?: string;
+    required?: boolean;
     name?: string;
 };
 
-export default function Switch({checked = false, onChange, disabled, children, name}: Props) {
+export default function Switch({checked = false, onChange, disabled, label, name, required}: Props) {
     return (
         <label className={`switch-label ${disabled ? "switch-label--disabled" : ""}`}>
+            {required && <span className="required">*</span>}
             <input
                 className="switch-input"
                 type="checkbox"
@@ -25,7 +26,7 @@ export default function Switch({checked = false, onChange, disabled, children, n
         <span className="switch-thumb" />
       </span>
 
-            {children && <span className="switch-text">{children}</span>}
+            {label && <span className="switch-text">{label}</span>}
         </label>
     );
 }

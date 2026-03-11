@@ -28,8 +28,21 @@
     color: #b9bcc6;
     pointer-events: none;
     transition: all 0.2s ease;
+
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
+.required {
+    font-size: 30px;
+    position: relative;
+    line-height: 1;
+    color: #ea4b4b;
+    display: flex;
+    align-items: center;
+    top: 3px;
+}
 .input:focus + .label {
     top: 2px;
     font-size: 12px;

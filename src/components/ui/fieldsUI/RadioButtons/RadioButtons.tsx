@@ -9,6 +9,7 @@ type Props = {
     name: string;
     data: RadioItem[];
     title?: string;
+    required?: boolean;
     currentValue?: string | number;
     onChange?: (value: string) => void;
     disabled?: boolean;
@@ -16,19 +17,13 @@ type Props = {
     theme?: "default" | "param";
 };
 
-export default function RadioButtons({
-                                         name,
-                                         data,
-                                         title,
-                                         currentValue,
-                                         onChange,
-                                         disabled,
-                                         info,
-                                         theme = "default",
-                                     }: Props) {
+export default function RadioButtons({name, data, title, required, currentValue, onChange, disabled, info, theme = "default" }: Props) {
     return (
         <div className={`radio-buttons ${theme === "param" ? "radio-buttons--param" : ""}`}>
-            {title && <p className="radio-buttons-title">{title}</p>}
+           <div className="d-flex gap-2">
+               {required && <span className="required">*</span>}
+               {title && <p className="radio-buttons-title">{title}</p>}
+           </div>
 
             <div className="radio-buttons-list">
                 {data.map((item, index) => {
