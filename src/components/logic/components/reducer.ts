@@ -1,4 +1,4 @@
-import type {EditorEditingRule, FormEditorAction} from "../types.ts";
+import type {EditorState, FormEditorAction} from "../types.ts";
 
 export type NodePath = Array<string | number>;
 
@@ -46,17 +46,26 @@ export function getByPath(obj: unknown, path: NodePath): unknown {
     }, obj);
 }
 
-export default function editorReducer(state: EditorEditingRule, action: FormEditorAction): EditorEditingRule {
+export default function editorReducer(state: EditorState, action: FormEditorAction): EditorState {
     const t = action.type
     switch (action.type) {
         case "SET_CONDITION_BY_PATH": {
-            return setByPath(state, action.path, action.condition);
+            return {
+                ...state,
+                form: setByPath(state.form, action.path, action.condition)
+            };
         }
         case "SET_ACTION_BY_PATH": {
-            return setByPath(state, action.path, action.action);
+            return {
+                ...state,
+                form: setByPath(state.form, action.path, action.action)
+            };
         }
         case "PATCH_CONDITION_BY_PATH": {
-            return patchByPath(state, action.path, action.condition);
+            return {
+                ...state,
+                form: patchByPath(state.form, action.path, action.condition)
+            };
         }
         default:
             throw new Error(`Unknown action type ${t}`);

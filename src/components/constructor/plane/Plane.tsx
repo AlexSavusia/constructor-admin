@@ -1,15 +1,22 @@
 import * as React from "react";
-import { useMemo, useState } from "react";
+import {useMemo, useState} from "react";
 import classNames from "classnames";
-import {type Layout, ReactGridLayout, useContainerWidth, useGridLayout, verticalCompactor } from "react-grid-layout";
-import type {LayoutPaletteItemDescriptor, PaletteItemDescriptor, PaletteItemSettingsValues, ValueTypeAlias} from "../type.ts";
+import {ReactGridLayout, useContainerWidth, verticalCompactor} from "react-grid-layout";
+import type { PaletteItemDescriptor, PaletteItemSettingsValues, ValueTypeAlias} from "../type.ts";
 
 import RightSidebar from "../../RightSidebar.tsx";
 import SettingsSidebar from "../SettingsSidebar.tsx";
+import {useFormEditorActions, useFormEditorSelectors} from "../../../pages/Programs/editor/context.ts";
+import type {FormDefinition, Key} from "../../../logic/type.ts";
+import type {
+    FieldDefinition,
+} from "../../../logic/field.ts";
 
 export type PlaneProps = {
     className?: string;
     items: PaletteItemDescriptor[];
+    stepKey: Key
+    onSave: (form: FormDefinition) => void,
 };
 
 function clamp(n: number, min: number, max: number) {
@@ -41,30 +48,33 @@ function buildDefaultSettingsValues(
     }, {});
 }
 
-export default function Plane({ className, items }: PlaneProps) {
+export default function Plane({ onSave, className, items, stepKey }: PlaneProps) {
     const marginX = 0;
     const marginY = 0;
     const paddingX = 0;
     const paddingY = 0;
     const cols = 3;
     const rowHeight = 56;
+    const {getStep, getFormState, getLayout} = useFormEditorSelectors()
+    const { addField, updateFieldSettings, removeField, saveLayout } = useFormEditorActions()
 
-    const [layoutItems, setLayoutItems] = useState<LayoutPaletteItemDescriptor[]>([]);
+    const layoutItems = useMemo(()=>
+        Object.entries(getStep(stepKey).fields).map(v=>v[1]),
+        [stepKey, getStep]
+    );
     const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
     const { width, containerRef, mounted } = useContainerWidth();
 
-    const initialLayout = useMemo<Layout>(() => [], []);
-
-    const { layout, setLayout } = useGridLayout({
-        layout: initialLayout,
-        cols,
-    });
+    // const { layout, setLayout } = useGridLayout({
+    //     layout: Object.entries(getStep(stepKey).fields).map(v=>v[1]).map(l=>l.layout),// layoutItems.map(l=>l.layout),
+    //     cols,
+    // });
 
     const colW = width / cols;
 
     const selectedItem = useMemo(
-        () => layoutItems.find((x) => x.id === selectedItemId) ?? null,
+        () => layoutItems.find((x) => x.key === selectedItemId) ?? null,
         [layoutItems, selectedItemId],
     );
 
@@ -95,18 +105,25 @@ export default function Plane({ className, items }: PlaneProps) {
 
         const id = crypto.randomUUID();
 
-        setLayoutItems((prev) => [
-            ...prev,
-            {
-                id,
-                descriptorKey: descriptor.key,
-                settingsValues: buildDefaultSettingsValues(descriptor),
+        const newItem: FieldDefinition = {
+            //TODO all of this have to be configured here properly
+            capabilities: {
+                canBeVisible: false,
+                canBeEnabled: false,
+                canBeRequired: false,
+                canBeSetValue: false
             },
-        ]);
+            control: "input",
+            fieldType: "input",
+            valueType: "unknown",
+            defaultValue: undefined,
+            /////////////////////////////////
 
-        setLayout([
-            ...layout,
-            {
+            __typ: "field",
+            key: id,
+            descriptorKey: descriptor.key,
+            settingsValues: buildDefaultSettingsValues(descriptor),
+            layout: {
                 i: id,
                 x,
                 y,
@@ -115,32 +132,19 @@ export default function Plane({ className, items }: PlaneProps) {
                 minW: descriptor.minWidth,
                 maxW: descriptor.maxWidth,
                 resizeHandles: ["e", "w"],
-            },
-        ]);
+            }
+        }
+        addField(stepKey, newItem);
     };
 
     const handleSettingChange = (key: string, value: ValueTypeAlias) => {
         if (!selectedItemId) return;
 
-        setLayoutItems((prev) =>
-            prev.map((item) =>
-                item.id === selectedItemId
-                    ? {
-                        ...item,
-                        settingsValues: {
-                            ...item.settingsValues,
-                            [key]: value,
-                        },
-                    }
-                    : {...item},
-            ),
-        );
+        updateFieldSettings(stepKey, selectedItemId, {[key]: value});
     };
 
     const handleDelete = (id: string) => {
-        setLayoutItems((prev) => prev.filter((item) => item.id !== id));
-        setLayout(layout.filter((item) => item.i !== id));
-
+        removeField(stepKey, id)
         if (selectedItemId === id) {
             setSelectedItemId(null);
         }
@@ -152,7 +156,7 @@ export default function Plane({ className, items }: PlaneProps) {
                 <div className="card-header">
                     <h3 className="card-title mb-0">Полотно</h3>
                     <div className="card-tools d-flex align-items-center gap-2">
-                        <button type="button" className="btn btn-success btn-sm">
+                        <button type="button" className="btn btn-success btn-sm" onClick={()=>onSave(getFormState())}>
                             <i className="fas fa-save me-1" />
                             Сохранить
                         </button>
@@ -190,7 +194,6 @@ export default function Plane({ className, items }: PlaneProps) {
                                 <ReactGridLayout
                                     style={{ background: "rgba(108,117,125,0.37)" }}
                                     width={width}
-                                    layout={layout}
                                     gridConfig={{ cols, rowHeight }}
                                     dragConfig={{
                                         enabled: true,
@@ -198,11 +201,12 @@ export default function Plane({ className, items }: PlaneProps) {
                                         cancel: ".react-resizable-handle, input, textarea, select, button, [contenteditable=true]",
                                     }}
                                     compactor={verticalCompactor}
-                                    onLayoutChange={setLayout}
+                                    layout={getLayout(stepKey)}
+                                    onLayoutChange={(l) => saveLayout(stepKey, l)}
                                 >
-                                    {layout.map((it) => {
+                                    {getLayout(stepKey).map((it) => {
                                         const layoutItem =
-                                            layoutItems.find((x) => x.id === it.i) ?? null;
+                                            layoutItems.find((x) => x.key === it.i) ?? null;
 
                                         if (!layoutItem) {
                                             return (
@@ -232,7 +236,7 @@ export default function Plane({ className, items }: PlaneProps) {
                                                 key={it.i}
                                                 className={classNames(
                                                     "card shadow-sm mb-0 ",
-                                                    selectedItemId === layoutItem.id && "border border-primary",
+                                                    selectedItemId === layoutItem.key && "border border-primary",
                                                 )}
                                             >
                                                 <div
@@ -260,7 +264,7 @@ export default function Plane({ className, items }: PlaneProps) {
                                                     <button
                                                         type="button"
                                                         className="btn btn-link btn-sm p-0 text-decoration-none"
-                                                        onClick={() => setSelectedItemId(layoutItem.id)}
+                                                        onClick={() => setSelectedItemId(layoutItem?.key)}
                                                     >
                                                         Настроить
                                                     </button>
@@ -268,7 +272,7 @@ export default function Plane({ className, items }: PlaneProps) {
                                                     <button
                                                         type="button"
                                                         className="btn btn-link btn-sm p-0 text-danger text-decoration-none"
-                                                        onClick={() => handleDelete(layoutItem.id)}
+                                                        onClick={() => handleDelete(layoutItem.key)}
                                                     >
                                                         Удалить
                                                     </button>
@@ -277,7 +281,7 @@ export default function Plane({ className, items }: PlaneProps) {
                                         );
                                     })}
                                 </ReactGridLayout>
-                                {!layout.length && (
+                                {!getLayout(stepKey).length && (
                                     <div className="h-100 d-flex align-items-center justify-content-center text-muted">
                                         Перетащите элемент из палитры сюда
                                     </div>
@@ -291,7 +295,6 @@ export default function Plane({ className, items }: PlaneProps) {
                     Перетаскивание — за ручку в шапке блока
                 </div>
             </div>
-
             <RightSidebar
                 title="Настройки поля"
                 open={!!selectedItem && !!selectedDescriptor}

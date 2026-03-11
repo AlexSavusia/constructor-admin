@@ -37,7 +37,7 @@ export default function GroupEditor({rule, path}: GroupEditorProps) {
                 <select
                     value={rule.type}
                     onChange={(e) =>{
-                        debugger
+                        // debugger
                         patchCondition(path, {
                             type: e.target.value as "or" | "and",
                         })

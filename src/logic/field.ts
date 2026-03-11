@@ -1,5 +1,7 @@
 import type {Key, ValueType} from "./type.ts";
 import type {BooleanPropertyLogicDefinition, FieldOnUpdateRule, ValueLogicDefinition} from "./logic.ts";
+import type {PaletteItemSettingsValues} from "../components/constructor/type.ts";
+import type {LayoutItem} from "react-grid-layout";
 
 export type FieldType = "input" | "output"
 
@@ -22,7 +24,7 @@ export interface FieldCapabilities {
 export interface BaseFieldDefinition {
     __typ: "field"
     key: Key
-    label: string
+    // label: string
 
     valueType?: ValueType
     defaultValue?: unknown
@@ -30,11 +32,14 @@ export interface BaseFieldDefinition {
     fieldType: FieldType
     capabilities: FieldCapabilities
 
-    layout: unknown //TODO
     config?: unknown // TODO
 
     logic?: FieldLogicDefinition
     onUpdate?: FieldOnUpdateDefinition
+
+    descriptorKey: string
+    settingsValues: PaletteItemSettingsValues;
+    layout: LayoutItem
 }
 
 export interface InputFieldDefinition extends BaseFieldDefinition {

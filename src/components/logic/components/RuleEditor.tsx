@@ -48,7 +48,7 @@ export default function RuleEditor({stepKey, fieldKey, form, scope, rule, open, 
         <Modal
             title="Rule Editor"
             open={open}
-            setOpen={setOpen}
+            onClose={()=>setOpen(false)}
             onSave={onSaveCb}
         >
             <EditorProvider initialState={initState}>

@@ -1,5 +1,5 @@
 import type {EditorState} from "../types.ts";
-import {useContext, useReducer} from "react";
+import {useReducer} from "react";
 import editorReducer from "./reducer.ts";
 import * as React from "react";
 import { EditorContext } from "./EditorContext.tsx";

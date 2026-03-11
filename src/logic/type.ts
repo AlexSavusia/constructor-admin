@@ -6,6 +6,8 @@ export type Key = string;
 export type ValueType = "string" | "number" | "boolean" | "array" | "object" | "unknown" | "datetime";
 
 export type FormDefinition = {
+    name: string;
+    enabled: boolean;
     firstStepKey: Key;
     steps: Record<Key, StepDefinition>
     lookups: Record<Key, LookupDefinition>
