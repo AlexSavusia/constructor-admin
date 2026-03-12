@@ -12,6 +12,7 @@ import type {PaletteItemSettingsValues} from "../../../components/constructor/ty
 import type {Layout} from "react-grid-layout";
 import type {ActionExpression, Rule} from "../../../components/logic/types.ts";
 import type {BooleanExpression} from "../../../logic/expression.ts";
+import type {BooleanPropertyLogicDefinition} from "../../../logic/logic.ts";
 
 export type EditorStateValue = {
     stepKey: Key | null;
@@ -29,7 +30,7 @@ export const objPathFromString = (rs: string) => rs.split(".")
 export type LogicEditorContextValue = {
     path: ObjPath
     scope: ExpressionScope,
-    rule: Rule
+    rule: BooleanPropertyLogicDefinition | Rule
 }
 
 
@@ -37,6 +38,12 @@ export type FieldEditorContextValue = {
     path: ObjPath
     key: Key
     draft: FieldDefinition;
+}
+
+export type ContextFields = {
+    fields: ObjPath[],
+    variables: ObjPath[],
+    constants: ObjPath[],
 }
 
 export type EditorActions = {
@@ -65,6 +72,8 @@ export type EditorActions = {
     persistEditingField: () => void
     updateEditingFieldSettings: (settings: PaletteItemSettingsValues) => void;
     resetEditingField: () => void // resets editing object (not field reset)
+
+    getAllContextVariables: (scope: ExpressionScope) => ContextFields
 }
 
 export type EditorState = EditorStateValue & EditorActions
@@ -117,8 +126,23 @@ function setByPath<T, V>(object: T, path: ObjPath, value: V): T {
 }
 
 export function createContextStore(initialState?: EditorStateValue) {
-    return createStore<EditorState>((set) => {
+    return createStore<EditorState>((set, get) => {
         const EDITOR_ACTIONS: EditorActions = {
+            getAllContextVariables: (scope: ExpressionScope) => {
+                const { form } = get()
+                const {steps, variables, constants} = form
+
+
+                return {
+                    constants: Object.entries(constants)
+                        .map(v=>["constants", v[0]]),
+                    variables: Object.entries(variables)
+                        .map(v=>["variables", v[0]]),
+                    fields: Object.entries(steps).map(st => Object.entries(st[1].fields)
+                        .map(f => [st[0], "fields", f[0]])).flat()
+                }
+
+            },
             setEditingField: (stepKey, fieldKey) => set((state) => {
                 const path: ObjPath = ["form", "steps", stepKey, "fields", fieldKey];
                 const field = state.form.steps[stepKey]?.fields[fieldKey];
@@ -146,14 +170,24 @@ export function createContextStore(initialState?: EditorStateValue) {
                 editingField: undefined
             })),
             persistEditingRule: () => set((state) => {
-                //dont forget to make editingField undefined
-                throw new Error("Implement me bruh")
+                const updatedState = setByPath(state, state.editingRule!.path, state.editingRule!.rule)
+                console.log(updatedState)
+                return {
+                    ...updatedState,
+                    editingRule: undefined,
+                } // TODO this is bad cuz whole context is being reset
             }),
             updateEditingRule: (path, expr) => set((state) => {
+                const editingRule = state.editingRule!
+                const r = setByPath('defaultValue' in editingRule.rule ? (editingRule.rule as BooleanPropertyLogicDefinition).rule : (editingRule.rule as Rule), path, expr)
+                const decisionRule = (["FIELD_SCOPE_PROPERTY"] as ExpressionScope[]).includes(editingRule.scope)
                 return {
                     editingRule: {
                         ...state.editingRule,
-                        rule: setByPath(state.editingRule!.rule, path, expr),
+                        rule: decisionRule ? {
+                            ...editingRule.rule,
+                            rule: r
+                        } : r,
                     }
                 } as Partial<EditorState>
             }),

@@ -128,15 +128,36 @@ export default function Plane({ onSave, className, items }: PlaneProps) {
             logic: {
                 visibility: {
                     defaultValue: true,
-                    rules: []
+                    rule: {
+                        condition: {
+                            id: crypto.randomUUID(),
+                            type: "and",
+                            items: []
+                        },
+                        actions: []
+                    }
                 },
                 enabled: {
                     defaultValue: true,
-                    rules: []
+                    rule: {
+                        condition: {
+                            id: crypto.randomUUID(),
+                            type: "and",
+                            items: []
+                        },
+                        actions: []
+                    }
                 },
                 required: {
                     defaultValue: true,
-                    rules: []
+                    rule: {
+                        condition: {
+                            id: crypto.randomUUID(),
+                            type: "and",
+                            items: []
+                        },
+                        actions: []
+                    }
                 },
                 // value: {}
             },
