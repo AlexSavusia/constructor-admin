@@ -2,14 +2,16 @@ import Palette from "./palette/Palette.tsx";
 import Plane from "./plane/Plane.tsx";
 import classNames from "classnames";
 import PALETTE_ITEMS from "./palette/PaletteItems.ts";
-import type {FormDefinition, Key} from "../../logic/type.ts";
+import type {FormDefinition} from "../../logic/type.ts";
+import {useEditorContext} from "../../pages/Programs/editor/EditorContext.tsx";
 
 export type ConstructorProps = {
     className?: string;
-    onSave: (form: FormDefinition) => void,
 }
 
-export default function Constructor({className, onSave}: ConstructorProps) {
+export default function Constructor({className}: ConstructorProps) {
+    const currentStepKey = useEditorContext(s=>s.stepKey)
+    const setEditingRule = useEditorContext(s=>s.setEditingRule)
     return (
         <div className={classNames(className,  "d-flex flex-column flex-lg-row max-w-[1620px]","w-100","gap-3")}
              style={{ minHeight: "70vh" }}>
@@ -18,9 +20,14 @@ export default function Constructor({className, onSave}: ConstructorProps) {
                 <Palette items={PALETTE_ITEMS}/>
             </div>
             <div className="flex-grow-1">
-                <Plane onSave={onSave} items={PALETTE_ITEMS}/>
+                <Plane items={PALETTE_ITEMS}/>
             </div>
-
+            <button
+                className="btn btn-primary"
+                onClick={()=>setEditingRule(["form", "steps", currentStepKey!, "transition", "rules", 0], "STEP_TRANSITION_SCOPE")}
+            >
+                edit transition
+            </button>
         </div>
     )
 }

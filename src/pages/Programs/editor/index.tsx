@@ -2,8 +2,8 @@ import Input from "../../../components/ui/fieldsUIAdmin/Input/Input.tsx";
 import Modal from "../../../components/Modal.tsx";
 import Constructor from "../../../components/constructor/Constructor.tsx";
 import type {FormDefinition} from "../../../logic/type.ts";
-import {useEditorContext} from "./EditorContext.tsx";
-import {useEffect} from "react";
+import {EditorContext, useEditorContext} from "./EditorContext.tsx";
+import {useContext, useEffect} from "react";
 
 export type FormEditorProps = {
     onSave: (form: FormDefinition) => void;
@@ -17,7 +17,7 @@ export default function FormEditor({onSave}: FormEditorProps) {
     const updateConstValue = useEditorContext(s => s.updateConstValue);
     const addStep = useEditorContext(s => s.addStep);
     const stepsValue = useEditorContext(s => s.form.steps);
-
+    const ctx = useContext(EditorContext);
     return (
         <>
             <div className="col">
@@ -47,7 +47,11 @@ export default function FormEditor({onSave}: FormEditorProps) {
                         </div>
                     </div>
                     <div className="card-footer">
-                        <button type="submit" className="btn btn-primary">Submit</button>
+                        <button type="button" className="btn btn-primary"
+                        onClick={()=>{
+                            const {form} = ctx!.getState()
+                            onSave(form);
+                        }}>Submit</button>
                     </div>
                 </div>
                 <div className="card card-primary w-full">
@@ -82,7 +86,7 @@ export default function FormEditor({onSave}: FormEditorProps) {
             </div>
             <Modal open={!!currentStepKey} onClose={()=>setStepKey(null)}>
                 {currentStepKey && (
-                    <Constructor onSave={onSave}/>
+                    <Constructor />
                 )}
             </Modal>
         </>
