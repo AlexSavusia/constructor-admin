@@ -1,6 +1,5 @@
 import {useEffect} from "react";
 import classNames from "classnames";
-import type {Key} from "../logic/type.ts";
 
 type RightSidebarProps = {
     open: boolean;

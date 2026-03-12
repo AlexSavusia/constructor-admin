@@ -6,8 +6,6 @@ export type Key = string;
 export type ValueType = "string" | "number" | "boolean" | "array" | "object" | "unknown" | "datetime";
 
 export type FormDefinition = {
-    name: string;
-    enabled: boolean;
     firstStepKey: Key;
     steps: Record<Key, StepDefinition>
     lookups: Record<Key, LookupDefinition>
@@ -34,6 +32,8 @@ export type RuntimeVariableDefinition = {
 
 export type ExpressionScope =
     | "FIELD_SCOPE"
+    | "FIELD_SCOPE_DECISION"
+    | "FIELD_SCOPE_PROPERTY"
     | "FIELD_ON_UPDATE_SCOPE"
     | "LOOKUP_BASE_FILTER_SCOPE"
     | "LOOKUP_ROW_SCOPE"

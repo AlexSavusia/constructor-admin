@@ -1,20 +1,13 @@
-import {useCallback} from "react";
+import {useCallback, useMemo} from "react";
 import WhenEditor from "./WhenEditor.tsx";
 import type {ExpressionScope, FormDefinition, Key} from "../../../logic/type.ts";
 import Modal from "../../Modal.tsx";
-import {EditorProvider} from "./EditorProvider.tsx";
-import type {EditorEditingRule, EditorState} from "../types.ts";
+import {EditorProvider} from "../../../pages/Programs/editor/EditorProvider.tsx";
 import type {AndExpression, OrExpression} from "../../../logic/expression.ts";
+import {useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
 
 export type RuleEditorProps = {
-    open: boolean;
-    onClose: () => void;
-    stepKey: Key
-    fieldKey?: Key
-    form: FormDefinition
-    scope: ExpressionScope
-    onSave: (form: EditorEditingRule) => void
-    rule?: EditorEditingRule
+
 }
 //title?: string;
 //     open: boolean;
@@ -23,44 +16,33 @@ export type RuleEditorProps = {
 //     className?: string;
 //     onSave?: () => void;
 
-export default function RuleEditor({stepKey, fieldKey, form, scope, rule, open, onClose}: RuleEditorProps) {
-    const onSaveCb = useCallback(() => {}, [])
-    const initState: EditorState = {
-        stepKey,
-        fieldKey: fieldKey ?? null,
-        form,
-        scope,
-        rule: rule ?? {
-            condition: undefined,
-            actions: undefined,
-        },
-        validation: {
-            errors: [],
-            warnings: [],
-        }
+export default function RuleEditor() {
+    const editingRule = useEditorContext(s=>s.editingRule)
+    //const persistEditingRule = useEditorContext(s=>s.persistEditingRule)
+    const resetEditingRule = useEditorContext(s=>s.resetEditingRule)
+
+    const onSaveCb = useCallback(() => {}, [editingRule])
+
+    if(editingRule?.rule?.condition?.type != "and" && editingRule?.rule?.condition?.type != "or" && editingRule != undefined) {
+        throw new Error(`Invalid rule condition rule ${JSON.stringify(editingRule)}`, )
     }
 
-    if(rule?.condition?.type != "and" && rule?.condition?.type != "or" && rule?.condition != undefined) {
-        throw new Error(`Invalid rule condition rule ${JSON.stringify(rule.condition)}`, )
+    if(!editingRule) {
+        return null;
     }
 
     return (
         <Modal
             title="Rule Editor"
-            open={open}
-            onClose={onClose}
+            open={!!editingRule}
+            onClose={resetEditingRule}
             onSave={onSaveCb}
         >
-            <EditorProvider initialState={initState}>
-                <WhenEditor
-                    path={["form"]}
-                    rule={initState.rule.condition as AndExpression | OrExpression}
-                    />
-                {/*<ThenEditor*/}
-                {/*    node={rule.then}*/}
-                {/*    onChange={(then) => setRule((s) => ({ ...s, then }))}*/}
-                {/*/>*/}
-            </EditorProvider>
+            <WhenEditor/>
+            {/*<ThenEditor*/}
+            {/*    node={rule.then}*/}
+            {/*    onChange={(then) => setRule((s) => ({ ...s, then }))}*/}
+            {/*/>*/}
         </Modal>
     )
 

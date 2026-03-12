@@ -1,5 +1,10 @@
 import type {Key, ValueType} from "./type.ts";
-import type {BooleanPropertyLogicDefinition, FieldOnUpdateRule, ValueLogicDefinition} from "./logic.ts";
+import type {
+    BooleanDecisionRule,
+    BooleanPropertyLogicDefinition,
+    FieldOnUpdateRule,
+    ValueLogicDefinition
+} from "./logic.ts";
 import type {PaletteItemSettingsValues} from "../components/constructor/type.ts";
 import type {LayoutItem} from "react-grid-layout";
 
@@ -70,6 +75,7 @@ export type FieldLogicType = keyof FieldLogicDefinition
 
 export type FieldLogicDefinition = {
     visibility?: BooleanPropertyLogicDefinition;
+    validation?: BooleanDecisionRule;
     enabled?: BooleanPropertyLogicDefinition;
     required?: BooleanPropertyLogicDefinition;
     value?: ValueLogicDefinition; //this will have higher priority then onUpdate if both are set (or just do not allow setting both?)

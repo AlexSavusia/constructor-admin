@@ -4,10 +4,10 @@ import type {StepTransitionRule} from "./logic.ts";
 
 export type StepDefinition = {
     key: Key;
-    title?: string;
+    title: string;
 
     fields: Record<Key, FieldDefinition>;
-    transition?: StepTransitionLogicDefinition;
+    transition: StepTransitionLogicDefinition;
 }
 
 export type StepTransitionLogicDefinition = {

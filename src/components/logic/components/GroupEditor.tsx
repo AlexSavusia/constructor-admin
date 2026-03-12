@@ -1,16 +1,19 @@
 import ConditionRow from "./ConditionRow.tsx";
-import type {AndExpression, BoolConstExpression, OrExpression} from "../../../logic/expression.ts";
-import type {NodePath} from "./reducer.ts";
-import {useEditorActions} from "./EditorContext.tsx";
-
+import {
+    type AndExpression,
+    type BoolConstExpression,
+    getChildrenRootPathForRule,
+    type OrExpression
+} from "../../../logic/expression.ts";
+import {findByPath, type ObjPath, useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
 export type GroupEditorProps = {
     rule: AndExpression | OrExpression
-    path: NodePath
+    path: ObjPath
 }
 
 export default function GroupEditor({rule, path}: GroupEditorProps) {
-    const { updateCondition, patchCondition } = useEditorActions()
-
+    const editingRule = useEditorContext(s=>s.editingRule)!
+    const updateEditingRule = useEditorContext(s=>s.updateEditingRule)
     const addGroup = () => {
         const newGroup: AndExpression | OrExpression = {
             id: crypto.randomUUID(),
@@ -18,7 +21,8 @@ export default function GroupEditor({rule, path}: GroupEditorProps) {
             items: [],
         };
         rule.items.push(newGroup);
-        updateCondition(path, rule)
+        const npg = getChildrenRootPathForRule(path, newGroup)[1] as ObjPath;
+        updateEditingRule(npg, newGroup);
     };
 
     const addCondition = () => {
@@ -28,7 +32,8 @@ export default function GroupEditor({rule, path}: GroupEditorProps) {
             value: true
         };
         rule.items.push(newCondition);
-        updateCondition(path, rule)
+        const npg = getChildrenRootPathForRule(path, newCondition) as ObjPath;
+        updateEditingRule(npg, newCondition);
     };
 
     return (
@@ -38,8 +43,9 @@ export default function GroupEditor({rule, path}: GroupEditorProps) {
                     value={rule.type}
                     onChange={(e) =>{
                         // debugger
-                        patchCondition(path, {
-                            type: e.target.value as "or" | "and",
+                        updateEditingRule(path, {
+                            ...findByPath(editingRule.rule.condition, path) as AndExpression | OrExpression,
+                            type: e.target.value as "or" | "and"
                         })
                     }}
                 >
@@ -53,13 +59,13 @@ export default function GroupEditor({rule, path}: GroupEditorProps) {
                         <ConditionRow
                             key={child.id}
                             rule={child}
-                            path={[...path, "items", index]}
+                            path={[...path, index]}
                         />
                     ) : (
                         <div key={child.id}>
                             <GroupEditor
                                 rule={child}
-                                path={[...path, "items", index]}
+                                path={[...path, index]}
                             />
                             <button onClick={() => {}}>Delete group</button>
                         </div>

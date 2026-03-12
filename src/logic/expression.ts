@@ -1,4 +1,5 @@
-import type {NodePath} from "../components/logic/components/reducer.ts";
+import type {ObjPath} from "../pages/Programs/editor/EditorContext.tsx";
+import type {ActionExpression} from "../components/logic/types.ts";
 
 export type ValueExpression =
     | ConstValueExpression
@@ -91,6 +92,48 @@ export type BooleanExpression =
         | IsEmptyExpression
         | NotEmptyExpression
 
+export function isTwoOperandMode(rule: BooleanExpression) {
+    switch (rule.type) {
+        case "boolConst":
+        case "or":
+        case "and":
+        case "not":
+            return false
+        case "eq":
+        case "ne":
+        case "gt":
+        case "gte":
+        case "lt":
+        case "lte":
+            return true
+        default:
+            throw new Error(`Unsupported expression type ${rule}`);
+    }
+}
+
+export function getChildrenRootPathForRule(root: ObjPath, rule: BooleanExpression | ActionExpression) {
+    switch (rule.type) {
+        case "boolConst":
+            return [...root]
+        case "or":
+        case "and":
+            return [...root, "items"]
+        case "not":
+            return [...root, "item"]
+        case "eq":
+        case "ne":
+        case "gt":
+        case "gte":
+        case "lt":
+        case "lte":
+            return [
+                [...root, "left"],
+                [...root, "right"]
+            ]
+        default:
+            throw new Error(`Unsupported expression type ${rule}`);
+    }
+}
 
 export interface BoolConstExpression {
     id: string

@@ -1,14 +1,10 @@
 import type {
+    PaletteItemDescriptor,
     PaletteItemSetting,
     PaletteItemSettingsValues,
     ValueTypeAlias,
 } from "./type.ts";
-import Modal from "../Modal.tsx";
-import RuleEditor from "../logic/components/RuleEditor.tsx";
-import {useState} from "react";
-import type {EditorEditingRule} from "../logic/types.ts";
-import type {ExpressionScope, Key} from "../../logic/type.ts";
-import {useFormEditor} from "../../pages/Programs/editor/context.ts";
+import {useEditorContext} from "../../pages/Programs/editor/EditorContext.tsx";
 
 type OptionItem = {
     label: string;
@@ -16,18 +12,8 @@ type OptionItem = {
 };
 
 type SettingsSidebarProps = {
-    settings: PaletteItemSetting[];
-    values: PaletteItemSettingsValues;
+    items: PaletteItemDescriptor[]
     onChange: (key: string, value: ValueTypeAlias) => void;
-
-    onValidationClick?: () => void;
-    onVisibilityConditionsClick?: () => void;
-    onCalculateValueClick?: () => void;
-    onRequiredConditionClick?: () => void;
-    stepKey: Key;
-
-    editingRule: EditorEditingRule & { scope: ExpressionScope } | null;
-    onEditRule: (rule: EditorEditingRule & { scope: ExpressionScope } | null) => void
 };
 
 function isSettingVisible(
@@ -46,19 +32,28 @@ function isSettingVisible(
     return currentValue === expected;
 }
 
+function getDescriptor(
+    key: string,
+    descriptors: PaletteItemDescriptor[],
+): PaletteItemDescriptor | null {
+    return descriptors.find((x) => x.key === key) ?? null;
+}
+
 export default function SettingsSidebar({
-    settings,
-    values,
     onChange,
-    onValidationClick,
-    onVisibilityConditionsClick,
-    onCalculateValueClick,
-    onEditRule,
+                                            items,
 }: SettingsSidebarProps) {
-    const visibleSettings = settings.filter((setting) =>
-        isSettingVisible(setting, values),
+    // const s = useEditorContext(s=>s)
+    const field = useEditorContext(s=>s.form.steps[s.stepKey!].fields[s.editingField!.key]);
+    // debugger
+    const visibleSettings = getDescriptor(field.descriptorKey, items)!.settings.filter((setting) =>
+        isSettingVisible(setting, field.settingsValues),
     );
-    const {state} = useFormEditor()
+    const editingField = useEditorContext(s=>s.editingField)
+    // const resetEditingField = useEditorContext(s=>s.resetEditingField)
+    // const persistEditingField = useEditorContext(s=>s.persistEditingField)
+    const setEditingRule = useEditorContext(s=>s.setEditingRule)
+
     return (
         <>
             <div className="d-flex flex-column gap-3">
@@ -66,24 +61,24 @@ export default function SettingsSidebar({
                     <button
                         type="button"
                         className="btn btn-light w-100"
-                        onClick={onValidationClick}
+                        onClick={()=>setEditingRule([...editingField!.path, "logic", "validation"], "FIELD_SCOPE_DECISION")}
                     >
                         Валидация
                     </button>
                 </div>
 
-                <div>
-                    <button
-                        type="button"
-                        className="btn btn-light w-100"
-                        onClick={onCalculateValueClick}
-                    >
-                        Рассчитать значение
-                    </button>
-                </div>
+                {/*<div>*/}
+                {/*    <button*/}
+                {/*        type="button"*/}
+                {/*        className="btn btn-light w-100"*/}
+                {/*        onClick={onCalculateValueClick}*/}
+                {/*    >*/}
+                {/*        Рассчитать значение*/}
+                {/*    </button>*/}
+                {/*</div>*/}
 
                 {visibleSettings.map((setting) => {
-                    const value = values?.[setting.key];
+                    const value = field.settingsValues?.[setting.key];
 
                     if (setting.key === "visible") {
                         return (
@@ -108,7 +103,7 @@ export default function SettingsSidebar({
                                     <button
                                         type="button"
                                         className="btn btn-light btn-sm"
-                                        onClick={onVisibilityConditionsClick}
+                                        onClick={()=>setEditingRule([...editingField!.path, "logic", "visibility"], "FIELD_SCOPE_PROPERTY")}
                                     >
                                         Условия
                                     </button>
@@ -140,7 +135,7 @@ export default function SettingsSidebar({
                                     <button
                                         type="button"
                                         className="btn btn-light btn-sm"
-                                        onClick={onVisibilityConditionsClick}
+                                        onClick={()=>setEditingRule([...editingField!.path, "logic", "enabled"], "FIELD_SCOPE_PROPERTY")}
                                     >
                                         Условия
                                     </button>
@@ -172,7 +167,7 @@ export default function SettingsSidebar({
                                     <button
                                         type="button"
                                         className="btn btn-sm btn-light"
-                                        onClick={()=>onEditRule({scope: "FIELD_SCOPE"})}
+                                        onClick={()=>setEditingRule([...editingField!.path, "logic", "required"], "FIELD_SCOPE_PROPERTY")}
                                     >
                                         Условие
                                     </button>
@@ -190,7 +185,7 @@ export default function SettingsSidebar({
                                     type="text"
                                     value={String(value ?? "")}
                                     onChange={(e) => onChange(setting.key, e.target.value)}
-                                    placeholder="Например: +996 (999) 99-99-99"
+                                    placeholder="Например: +7 (999) 99-99-99"
                                 />
                             </div>
                         );

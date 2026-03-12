@@ -1,19 +1,22 @@
 import Input from "../../../components/ui/fieldsUIAdmin/Input/Input.tsx";
-import {useFormEditorActions, useFormEditorSelectors} from "./context.ts";
 import Modal from "../../../components/Modal.tsx";
-import {useState} from "react";
-import type {StepDefinition} from "../../../logic/step.ts";
 import Constructor from "../../../components/constructor/Constructor.tsx";
 import type {FormDefinition} from "../../../logic/type.ts";
+import {useEditorContext} from "./EditorContext.tsx";
 
 export type FormEditorProps = {
     onSave: (form: FormDefinition) => void;
 }
 
 export default function FormEditor({onSave}: FormEditorProps) {
-    const {updateEnabled, updateName} = useFormEditorActions();
-    const {getEnabled, getName, getSteps} = useFormEditorSelectors();
-    const [editingStep, setEditingStep] = useState<StepDefinition | null>(null);
+    const formNameValue = useEditorContext(s => s.form.constants["name"].value);
+    const formEnabledValue = useEditorContext(s => s.form.constants["enabled"].value);
+    const currentStepKey = useEditorContext(s => s.stepKey);
+    const setStepKey = useEditorContext(s => s.setStepKey);
+    const updateConstValue = useEditorContext(s => s.updateConstValue);
+
+    const stepsValue = useEditorContext(s => s.form.steps);
+
     return (
         <>
             <div className="col">
@@ -25,15 +28,19 @@ export default function FormEditor({onSave}: FormEditorProps) {
                         <Input
                             className="mb-3"
                             placeholder="Name"
-                            value={getName()}
-                            onChange={e=>updateName(e.target.value)}
+                            value={formNameValue as string}
+                            onChange={e=>{
+                                updateConstValue("name", e.target.value as string);
+                            }}
                         />
                         <div className="mb-3 form-check">
                             <input
                                 type="checkbox"
                                 className="form-check-input"
-                                checked={getEnabled()}
-                                onChange={e=>updateEnabled(e.target.checked)}
+                                checked={formEnabledValue as boolean}
+                                onChange={e=>{
+                                    updateConstValue("enabled", e.target.checked);
+                                }}
                             />
                             <label className="form-check-label">Enabled</label>
                         </div>
@@ -57,12 +64,12 @@ export default function FormEditor({onSave}: FormEditorProps) {
                             </tr>
                             </thead>
                             <tbody>
-                            {Object.entries(getSteps()).map(([stepKey, step], index) => (
+                            {Object.entries(stepsValue).map(([stepKey, step], index) => (
                                 <tr key={stepKey}>
                                     <td>{index}</td>
                                     <td>{step.title}</td>
                                     <td>
-                                        <button type="button" className="btn btn-info" onClick={()=>setEditingStep(step)}>Edit</button>
+                                        <button type="button" className="btn btn-info" onClick={()=>setStepKey(step.key)}>Edit</button>
                                         <button type="button" className="btn btn-info">Delete</button>
                                     </td>
                                 </tr>
@@ -72,9 +79,9 @@ export default function FormEditor({onSave}: FormEditorProps) {
                     </div>
                 </div>
             </div>
-            <Modal open={!!editingStep} onClose={()=>setEditingStep(null)}>
-                {editingStep && (
-                    <Constructor stepKey={editingStep.key} onSave={onSave}/>
+            <Modal open={!!currentStepKey} onClose={()=>setStepKey(null)}>
+                {currentStepKey && (
+                    <Constructor onSave={onSave}/>
                 )}
             </Modal>
         </>
