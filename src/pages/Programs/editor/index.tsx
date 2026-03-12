@@ -2,7 +2,9 @@ import Input from "../../../components/ui/fieldsUIAdmin/Input/Input.tsx";
 import Modal from "../../../components/Modal.tsx";
 import Constructor from "../../../components/constructor/Constructor.tsx";
 import type {FormDefinition} from "../../../logic/type.ts";
+import type { StepDefinition } from "../../../logic/step.ts";
 import {useEditorContext} from "./EditorContext.tsx";
+import {useState} from "react";
 
 export type FormEditorProps = {
     onSave: (form: FormDefinition) => void;
@@ -14,8 +16,44 @@ export default function FormEditor({onSave}: FormEditorProps) {
     const currentStepKey = useEditorContext(s => s.stepKey);
     const setStepKey = useEditorContext(s => s.setStepKey);
     const updateConstValue = useEditorContext(s => s.updateConstValue);
+    const addStep = useEditorContext((s) => s.addStep);
+    const removeStep = useEditorContext((s) => s.removeStep);
+
 
     const stepsValue = useEditorContext(s => s.form.steps);
+
+    const [isCreateStepModalOpen, setIsCreateStepModalOpen] = useState(false)
+    const [stepTitle, setStepTitle] = useState("")
+
+    const handleOpenCreateStepModal = () => {
+        setStepTitle("")
+        setIsCreateStepModalOpen(true)
+    };
+
+    const handleCloseCreateStepModal = () => {
+        setStepTitle("")
+        setIsCreateStepModalOpen(false)
+    }
+
+    const handleCreateStep = () => {
+        const title = stepTitle.trim()
+
+        if (!title) return
+
+        const step: StepDefinition = {
+            key: crypto.randomUUID(),
+            title,
+            fields: {},
+            transition: {
+                rules: [],
+            },
+        }
+
+        addStep(step)
+        handleCloseCreateStepModal()
+
+        setStepKey(step.key)
+    }
 
     return (
         <>
@@ -52,7 +90,13 @@ export default function FormEditor({onSave}: FormEditorProps) {
                 <div className="card card-primary w-full">
                     <div className="card-header w-full d-flex align-items-center justify-content-between">
                         <div className="card-title">Program steps</div>
-                        <button className="btn btn-success">Add</button>
+                        <button
+                            type="button"
+                            className="btn btn-success"
+                            onClick={handleOpenCreateStepModal}
+                        >
+                            Add
+                        </button>
                     </div>
                     <div className="card-body">
                         <table className="table table-striped">
@@ -70,7 +114,7 @@ export default function FormEditor({onSave}: FormEditorProps) {
                                     <td>{step.title}</td>
                                     <td>
                                         <button type="button" className="btn btn-info" onClick={()=>setStepKey(step.key)}>Edit</button>
-                                        <button type="button" className="btn btn-info">Delete</button>
+                                        <button type="button" className="btn btn-info" onClick={()=>removeStep(step.key)}>Delete</button>
                                     </td>
                                 </tr>
                             ))}
@@ -83,6 +127,33 @@ export default function FormEditor({onSave}: FormEditorProps) {
                 {currentStepKey && (
                     <Constructor onSave={onSave}/>
                 )}
+            </Modal>
+            <Modal open={isCreateStepModalOpen} onClose={handleCloseCreateStepModal}>
+                <div className="card mb-0">
+                    <div className="card-header">
+                        <div className="card-title">Create step</div>
+                    </div>
+
+                    <div className="card-body">
+                        <Input
+                            placeholder="Step title"
+                            value={stepTitle}
+                            onChange={(e) => setStepTitle(e.target.value)}
+                        />
+                    </div>
+
+                    <div className="card-footer d-flex justify-content-end gap-2">
+
+                        <button
+                            type="button"
+                            className="btn btn-success"
+                            onClick={handleCreateStep}
+                            disabled={!stepTitle.trim()}
+                        >
+                            Create
+                        </button>
+                    </div>
+                </div>
             </Modal>
         </>
     )
