@@ -1,38 +1,7 @@
 import type {ObjPath} from "../pages/Programs/editor/EditorContext.tsx";
 import type {ActionExpression} from "../components/logic/types.ts";
 
-export type ValueExpression =
-    | ConstValueExpression
-    | RefValueExpression
-    | FormatValueExpression
-    | ArrayValueExpression
-    | ObjectValueExpression;
-
-export interface ConstValueExpression {
-    type: "const";
-    value: unknown;
-}
-
-export interface RefValueExpression {
-    type: "ref";
-    ref: NodePath;
-}
-
-export interface FormatValueExpression {
-    type: "format";
-    template: string;
-    args: ValueExpression[];
-}
-
-export interface ArrayValueExpression {
-    type: "array";
-    items: ValueExpression[];
-}
-
-export interface ObjectValueExpression {
-    type: "object";
-    entries: Record<string, ValueExpression>;
-}
+export type ValueExpression = ObjPath
 
 // export type WriteRef =
 //     FieldRef |
@@ -76,9 +45,9 @@ export type Boolean2OperandExpression =
     | GteExpression
     | LtExpression
     | LteExpression
+    | InExpression
 
 export type BooleanExpression =
-        | BoolConstExpression
         | AndExpression
         | OrExpression
         | NotExpression
@@ -91,13 +60,16 @@ export type BooleanExpression =
         | InExpression
         | IsEmptyExpression
         | NotEmptyExpression
-
 export function isTwoOperandMode(rule: BooleanExpression) {
-    switch (rule.type) {
-        case "boolConst":
+    return isTwoOperandModeType(rule.type);
+}
+export function isTwoOperandModeType(type: BooleanExpression['type']) {
+    switch (type) {
         case "or":
         case "and":
         case "not":
+        case "isEmpty":
+        case "notEmpty":
             return false
         case "eq":
         case "ne":
@@ -107,14 +79,12 @@ export function isTwoOperandMode(rule: BooleanExpression) {
         case "lte":
             return true
         default:
-            throw new Error(`Unsupported expression type ${rule}`);
+            throw new Error(`Unsupported expression type ${type}`);
     }
 }
 
 export function getChildrenRootPathForRule(root: ObjPath, rule: BooleanExpression | ActionExpression) {
     switch (rule.type) {
-        case "boolConst":
-            return [...root]
         case "or":
         case "and":
             return [...root, "items"]
@@ -133,12 +103,6 @@ export function getChildrenRootPathForRule(root: ObjPath, rule: BooleanExpressio
         default:
             throw new Error(`Unsupported expression type ${rule}`);
     }
-}
-
-export interface BoolConstExpression {
-    id: string
-    type: "boolConst";
-    value: boolean;
 }
 
 export interface AndExpression {
@@ -211,11 +175,11 @@ export interface InExpression {
 export interface IsEmptyExpression {
     id: string
     type: "isEmpty";
-    value: ValueExpression;
+    item: ValueExpression;
 }
 
 export interface NotEmptyExpression {
     id: string
     type: "notEmpty";
-    value: ValueExpression;
+    item: ValueExpression;
 }
