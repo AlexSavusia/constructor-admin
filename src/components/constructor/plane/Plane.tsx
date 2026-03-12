@@ -1,5 +1,5 @@
 import * as React from "react";
-import { useMemo} from "react";
+import {useContext, useMemo, useRef} from "react";
 import classNames from "classnames";
 import {ReactGridLayout, useContainerWidth, verticalCompactor} from "react-grid-layout";
 import type { PaletteItemDescriptor, PaletteItemSettingsValues, ValueTypeAlias} from "../type.ts";
@@ -11,12 +11,11 @@ import type {
     FieldDefinition,
 } from "../../../logic/field.ts";
 import RuleEditor from "../../logic/components/RuleEditor.tsx";
-import {useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
+import {EditorContext, useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
 
 export type PlaneProps = {
     className?: string;
     items: PaletteItemDescriptor[];
-    onSave: (form: FormDefinition) => void,
 };
 
 function clamp(n: number, min: number, max: number) {
@@ -48,7 +47,7 @@ function buildDefaultSettingsValues(
     }, {});
 }
 
-export default function Plane({ onSave, className, items }: PlaneProps) {
+export default function Plane({ className, items }: PlaneProps) {
     const marginX = 0;
     const marginY = 0;
     const paddingX = 0;
@@ -65,7 +64,7 @@ export default function Plane({ onSave, className, items }: PlaneProps) {
     const resetEditingField = useEditorContext(s=>s.resetEditingField)
     const persistEditingField = useEditorContext(s=>s.persistEditingField)
     const setEditingField = useEditorContext(s=>s.setEditingField)
-
+    const ctx = useContext(EditorContext)
     const layoutItems = useMemo(()=>
         Object.entries(currentStep.fields).map(v=>v[1]),
         [currentStep]
@@ -128,15 +127,36 @@ export default function Plane({ onSave, className, items }: PlaneProps) {
             logic: {
                 visibility: {
                     defaultValue: true,
-                    rules: []
+                    rule: {
+                        condition: {
+                            id: crypto.randomUUID(),
+                            type: "and",
+                            items: []
+                        },
+                        actions: []
+                    }
                 },
                 enabled: {
                     defaultValue: true,
-                    rules: []
+                    rule: {
+                        condition: {
+                            id: crypto.randomUUID(),
+                            type: "and",
+                            items: []
+                        },
+                        actions: []
+                    }
                 },
                 required: {
                     defaultValue: true,
-                    rules: []
+                    rule: {
+                        condition: {
+                            id: crypto.randomUUID(),
+                            type: "and",
+                            items: []
+                        },
+                        actions: []
+                    }
                 },
                 // value: {}
             },
@@ -179,10 +199,13 @@ export default function Plane({ onSave, className, items }: PlaneProps) {
                 <div className="card-header">
                     <h3 className="card-title mb-0">Полотно</h3>
                     <div className="card-tools d-flex align-items-center gap-2">
-                        <button type="button" className="btn btn-success btn-sm" onClick={()=>{}}>
-                            <i className="fas fa-save me-1" />
-                            Сохранить
-                        </button>
+                        {/*<button type="button" className="btn btn-success btn-sm" onClick={()=>{*/}
+                        {/*    const {form} = ctx!.getState()*/}
+                        {/*    onSave(form)*/}
+                        {/*}}>*/}
+                        {/*    <i className="fas fa-save me-1" />*/}
+                        {/*    Сохранить*/}
+                        {/*</button>*/}
                     </div>
 
                 </div>

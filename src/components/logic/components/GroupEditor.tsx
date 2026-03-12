@@ -1,18 +1,20 @@
 import ConditionRow from "./ConditionRow.tsx";
 import {
-    type AndExpression,
-    type BoolConstExpression,
-    getChildrenRootPathForRule,
+    type AndExpression, type NotEmptyExpression,
     type OrExpression
 } from "../../../logic/expression.ts";
 import {findByPath, type ObjPath, useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
+import type {BooleanPropertyLogicDefinition} from "../../../logic/logic.ts";
+import type {Rule} from "../types.ts";
 export type GroupEditorProps = {
     rule: AndExpression | OrExpression
     path: ObjPath
 }
 
 export default function GroupEditor({rule, path}: GroupEditorProps) {
-    const editingRule = useEditorContext(s=>s.editingRule)!
+    const {rule: editingRuleUnknown} = useEditorContext(s=>s.editingRule)!
+    const editingRule = 'defaultValue' in editingRuleUnknown ? (editingRuleUnknown as BooleanPropertyLogicDefinition).rule
+        : (editingRuleUnknown as Rule);
     const updateEditingRule = useEditorContext(s=>s.updateEditingRule)
     const addGroup = () => {
         const newGroup: AndExpression | OrExpression = {
@@ -21,30 +23,36 @@ export default function GroupEditor({rule, path}: GroupEditorProps) {
             items: [],
         };
         rule.items.push(newGroup);
-        const npg = getChildrenRootPathForRule(path, newGroup)[1] as ObjPath;
-        updateEditingRule(npg, newGroup);
+        updateEditingRule(path, rule);
     };
 
     const addCondition = () => {
-        const newCondition: BoolConstExpression = {
+        const newCondition: NotEmptyExpression = {
             id: crypto.randomUUID(),
-            type: "boolConst",
-            value: true
+            type: "notEmpty",
+            item: ["constants", "name"]
         };
         rule.items.push(newCondition);
-        const npg = getChildrenRootPathForRule(path, newCondition) as ObjPath;
-        updateEditingRule(npg, newCondition);
+        updateEditingRule(path, rule);
+
     };
 
+    const deleteItem = (idx: number) => {
+        const nr = {
+            ...rule,
+            items: rule.items.filter((_, i) => i !== idx)
+        }
+        updateEditingRule(path, nr);
+    }
     return (
         <div style={{ borderLeft: "2px solid #d9d9d9", paddingLeft: 12, marginBottom: 12 }}>
             <div>
                 <select
                     value={rule.type}
                     onChange={(e) =>{
-                        // debugger
+                        const fuck = path.length == 1 ? [] : path.slice(1, path.length);
                         updateEditingRule(path, {
-                            ...findByPath(editingRule.rule.condition, path) as AndExpression | OrExpression,
+                            ...findByPath(editingRule.condition, fuck) as AndExpression | OrExpression,
                             type: e.target.value as "or" | "and"
                         })
                     }}
@@ -56,18 +64,20 @@ export default function GroupEditor({rule, path}: GroupEditorProps) {
             <div>
                 {rule.items.map((child, index) =>
                     (child.type !== "and" && child.type !== "or") ? (
-                        <ConditionRow
-                            key={child.id}
-                            rule={child}
-                            path={[...path, index]}
-                        />
+                        <div key={child.id}>
+                            <ConditionRow
+                                rule={child}
+                                path={[...path, "items", index]}
+                            />
+                            <button onClick={() => deleteItem(index)}>Delete condition</button>
+                        </div>
                     ) : (
                         <div key={child.id}>
                             <GroupEditor
                                 rule={child}
-                                path={[...path, index]}
+                                path={[...path, "items", index]}
                             />
-                            <button onClick={() => {}}>Delete group</button>
+                            <button onClick={() => deleteItem(index)}>Delete group</button>
                         </div>
                     ))}
             </div>

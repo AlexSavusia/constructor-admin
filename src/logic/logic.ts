@@ -1,19 +1,20 @@
 import type {BooleanExpression, ValueExpression} from "./expression.ts";
 import type {Key} from "./type.ts";
+import type {Rule} from "../components/logic/types.ts";
 
 export type BooleanPropertyLogicDefinition = {
     defaultValue: boolean;
-    rules: BooleanDecisionRule[];
+    rule: Rule;
 }
 
-export type BooleanDecisionRule = {
-    when: BooleanExpression;
-    value: boolean; // dont need probably
-}
+// export type BooleanDecisionRule = {
+//     when: BooleanExpression;
+//     value: boolean; // dont need probably
+// }
 
 export interface ValueLogicDefinition {
     fallback?: ValueExpression;
-    rules: ValueDecisionRule[];
+    rules: ValueDecisionRule;
 }
 
 export interface ValueDecisionRule {

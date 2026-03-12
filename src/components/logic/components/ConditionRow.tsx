@@ -1,124 +1,145 @@
-import type {Boolean2OperandExpression, BooleanExpression} from "../../../logic/expression.ts";
-import {type ObjPath, useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
+import {
+    type AndExpression,
+    type Boolean2OperandExpression,
+    type BooleanExpression,
+    isTwoOperandMode, isTwoOperandModeType, type NotEmptyExpression, type NotExpression, type OrExpression
+} from "../../../logic/expression.ts";
+import {
+    type ObjPath,
+    objPathFromString,
+    objPathToString,
+    useEditorContext
+} from "../../../pages/Programs/editor/EditorContext.tsx";
 
 export type ConditionRowProps = {
     rule: BooleanExpression
     path: ObjPath
 }
-//TODO remove partial
-const OPERATORS_LABELS: Partial<Record<BooleanExpression["type"], string>> = {
+
+const OPERATORS_LABELS: Record<Exclude<BooleanExpression["type"], "and" | "or">, string> = {
     "eq": "equals",
     "ne": "not equals",
     "gt": "greater than",
     "gte": "greater than or equals",
     "lt": "less than",
     "lte": "less than or equals",
-    "boolConst": "boolConst",
-
+    "isEmpty": "isEmpty",
+    "notEmpty": "nnot empty",
+    "not": "not",
+    "in": "in"
 }
 
-const TWO_OPERAND_OPERATORS: Boolean2OperandExpression["type"][] = [
-    'eq', 'ne', 'gt', 'gte', 'lt', 'lte'
-]
-
+type StupidFuck = Exclude<BooleanExpression, Boolean2OperandExpression | AndExpression | OrExpression | NotEmptyExpression | NotExpression>
 export default function ConditionRow({rule, path}: ConditionRowProps) {
-    return null
-    // const editingRule = useEditorContext(s=>s.editingRule)
-    // const currentExpr = find
-    //
-    //
-    // const resolveVariableDisplayString = (varPath: NodePath) => {
-    //     const definition = getDefinitionByPath(varPath);
-    //     if(!definition) return "null";
-    //
-    //     if(definition.__typ == "constant") {
-    //         return `Const ${definition.label}`
-    //     }
-    //
-    //     if(definition.__typ == "variable") {
-    //         return `Var ${definition.label}`
-    //     }
-    //
-    //     if(definition.__typ == "field") {
-    //         return `Field TAKE FROM SETTINGS`
-    //     }
-    //     return `unknown definition __typ ${definition}`
-    // }
-    //
-    // // const firstOperandValue = useMemo(() =>{
-    // //     if(manyOperandMode) {
-    // //         return (rule as Boolean2OperandExpression).left;
-    // //     } else {
-    // //         return (rule as {value: ValueExpression}).value;
-    // //     }
-    // // }, [rule, manyOperandMode])
-    // //
-    // // const secondOperandValue = useMemo(() =>{
-    // //     if(manyOperandMode) {
-    // //         return (rule as Boolean2OperandExpression).right;
-    // //     }
-    // //     return null;
-    // // }, [rule, manyOperandMode])
-    //
-    // const contextVariablePaths = useMemo<NodePath[]>(() => {
-    //     const res: NodePath[] = [];
-    //     let selfKey: string | null = null;
-    //     if(editorState.scope == "FIELD_SCOPE"){
-    //         const self = getSelfByNodePath(path)
-    //         if(self == null)
-    //             throw new Error("self is null in field scope")
-    //         selfKey = self.key!
-    //         const fieldPaths = getFieldPaths(selfKey)
-    //         res.push(...fieldPaths)
-    //     }
-    //
-    //
-    //     const constants = Object.entries(formEditorState.constants).map(v=>["constants", v[0]])
-    //     const variables = Object.entries(formEditorState.variables).map(v=>["variables", v[0]])
-    //
-    //     res.push(...variables)
-    //     res.push(...constants)
-    //     return res;
-    // }, [editorState, path, getFieldPaths, getSelfByNodePath, getVariablePaths, getConstantPaths, formEditorState]);
-    //
-    //
-    //
-    // return (
-    //     <div style={{ display: "flex", gap: 8, alignItems: "center", margin: "8px 0" }}>
-    //         <select
-    //             value={firstPath.join(".")}
-    //             onChange={e=> {
-    //                 const np = e.target.value.split(".") as NodePath;
-    //                 patchCondition(firstPath, {type: "ref", ref: np}) // TODO determine type by np value first
-    //             }}
-    //         >
-    //             {contextVariablePaths.map(p => (
-    //                 <option key={p.join(".")} value={p.join(".")}>{resolveVariableDisplayString(p)}</option>
-    //             ))}
-    //         </select>
-    //         <select
-    //             value={rule.type}
-    //             onChange={e=> {
-    //                 patchCondition(path, {type: e.target.value as BooleanExpression['type']})
-    //             }}
-    //         >
-    //             {Object.entries(OPERATORS_LABELS).map(([op, lbl]) => (
-    //                 <option key={op} value={op}>{lbl}</option>
-    //             ))}
-    //         </select>
-    //         {(secondPath || manyOperandMode) &&
-    //             <select
-    //                 value={secondPath?.join(".") ?? undefined}
-    //                 onChange={e=> {
-    //                     const np = e.target.value.split(".") as NodePath;
-    //                     patchCondition(np, {type: "ref", ref: np}) // TODO determine type by np value first
-    //                 }}
-    //             >
-    //                 {contextVariablePaths.map(p => (
-    //                     <option key={p.join(".")} value={p.join(".")}>{resolveVariableDisplayString(p)}</option>
-    //                 ))}
-    //             </select>
-    //         }
-    //     </div>
-    // )
+    const { scope} = useEditorContext(s=>s.editingRule)!
+    // const editingRule = 'defaultValue' in editingRuleUnknown ? (editingRuleUnknown as BooleanPropertyLogicDefinition).rule
+    //     : (editingRuleUnknown as Rule);
+    const updateEditingRule = useEditorContext(s=>s.updateEditingRule)
+    const getAllContextVariables = useEditorContext(s=>s.getAllContextVariables)
+    const twoOperand = isTwoOperandMode(rule)
+
+    const resolveVariableDisplayString = (p: ObjPath) => {
+        return objPathToString(p)
+    }
+
+    const firstArg = twoOperand
+        ? (rule as Boolean2OperandExpression).left
+        : (rule as StupidFuck).item
+
+    const secondArg = twoOperand ? (rule as Boolean2OperandExpression).right : null
+
+    const contextVariablePaths = getAllContextVariables(scope)
+    const allFields = [
+        ...contextVariablePaths.fields,
+        ...contextVariablePaths.variables,
+        ...contextVariablePaths.constants
+    ]
+
+    return (
+        <div style={{ display: "flex", gap: 8, alignItems: "center", margin: "8px 0" }}>
+            <select
+                value={objPathToString(firstArg)}
+                onChange={e=> {
+                    const np = objPathFromString(e.target.value) as ObjPath;
+                    if(twoOperand) {
+                        updateEditingRule(path, {
+                            ...rule as Boolean2OperandExpression,
+                            left: np
+                        });
+                    }
+                    else {
+                        updateEditingRule(path, {
+                            ...rule as StupidFuck,
+                            item: np
+                        });
+                    }
+                }}
+            >
+                {allFields.map(p => (
+                    <option key={objPathToString(p)} value={objPathToString(p)}>{resolveVariableDisplayString(p)}</option>
+                ))}
+            </select>
+            <select
+                value={rule.type}
+                onChange={e=> {
+                    if(twoOperand) {
+                        // @ts-expect-error no error
+                        if(isTwoOperandModeType(e.target.value)){
+                            // @ts-expect-error no error
+                            updateEditingRule(path, { ...rule, type: e.target.value })
+                        } else {
+                            const nr = {
+                                ...rule,
+                                type: e.target.value,
+                                // @ts-expect-error no error
+                                item: rule.left
+                            }
+                            // @ts-expect-error no error
+                            delete nr.left
+                            // @ts-expect-error no error
+                            updateEditingRule(path, nr)
+                        }
+
+                    } else {
+                        // @ts-expect-error no error
+                        if(!isTwoOperandModeType(e.target.value)){
+                            // @ts-expect-error no error
+                            updateEditingRule(path, { ...rule, type: e.target.value })
+                        } else {
+                            const nr = {
+                                ...rule,
+                                type: e.target.value,
+                                // @ts-expect-error no error
+                                left: rule.item
+                            }
+                            // @ts-expect-error no error
+                            delete nr.item
+                            // @ts-expect-error no error
+                            updateEditingRule(path, nr)
+                        }
+                    }
+                }}
+            >
+                {Object.entries(OPERATORS_LABELS).map(([op, lbl]) => (
+                    <option key={op} value={op}>{lbl}</option>
+                ))}
+            </select>
+            {(twoOperand) &&
+                <select
+                    value={secondArg ? objPathToString(secondArg) : undefined}
+                    onChange={e=> {
+                        const np = objPathFromString(e.target.value) as ObjPath;
+                        updateEditingRule(path, {
+                            ...rule as Boolean2OperandExpression,
+                            right: np
+                        });
+                    }}
+                >
+                    {allFields.map(p => (
+                        <option key={objPathToString(p)} value={objPathToString(p)}>{resolveVariableDisplayString(p)}</option>
+                    ))}
+                </select>
+            }
+        </div>
+    )
 }
