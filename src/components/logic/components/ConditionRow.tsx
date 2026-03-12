@@ -50,7 +50,7 @@ export default function ConditionRow({rule, path}: ConditionRowProps) {
 
     const contextVariablePaths = getAllContextVariables(scope)
     const allFields = [
-        ...contextVariablePaths.fields.filter(p => p == path),
+        ...contextVariablePaths.fields,
         ...contextVariablePaths.variables,
         ...contextVariablePaths.constants
     ]

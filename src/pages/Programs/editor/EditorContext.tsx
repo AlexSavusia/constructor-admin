@@ -171,7 +171,6 @@ export function createContextStore(initialState?: EditorStateValue) {
             })),
             persistEditingRule: () => set((state) => {
                 const updatedState = setByPath(state, state.editingRule!.path, state.editingRule!.rule)
-                console.log(updatedState)
                 return {
                     ...updatedState,
                     editingRule: undefined,

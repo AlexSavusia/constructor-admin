@@ -3,6 +3,7 @@ import Modal from "../../../components/Modal.tsx";
 import Constructor from "../../../components/constructor/Constructor.tsx";
 import type {FormDefinition} from "../../../logic/type.ts";
 import {useEditorContext} from "./EditorContext.tsx";
+import {useEffect} from "react";
 
 export type FormEditorProps = {
     onSave: (form: FormDefinition) => void;
@@ -14,7 +15,7 @@ export default function FormEditor({onSave}: FormEditorProps) {
     const currentStepKey = useEditorContext(s => s.stepKey);
     const setStepKey = useEditorContext(s => s.setStepKey);
     const updateConstValue = useEditorContext(s => s.updateConstValue);
-
+    const addStep = useEditorContext(s => s.addStep);
     const stepsValue = useEditorContext(s => s.form.steps);
 
     return (
