@@ -116,12 +116,14 @@ function setByPath<T, V>(object: T, path: ObjPath, value: V): T {
 export function createContextStore(initialState?: EditorStateValue) {
     return createStore<EditorState>((set) => {
         const EDITOR_ACTIONS: EditorActions = {
-            setEditingField: (stepKey, fieldKey) => set(() => {
+            setEditingField: (stepKey, fieldKey) => set((state) => {
                 const path = ["form", "steps", stepKey, "fields", fieldKey]
+                // state.form[stepKey].fields[fieldKey].
                 return ({
                     editingField: {
                         path,
                         key: fieldKey,
+
                     }
                 }) as Partial<EditorState>
             }),
@@ -132,6 +134,7 @@ export function createContextStore(initialState?: EditorStateValue) {
                 editingField: undefined
             })),
             persistEditingRule: () => set((state) => {
+                //dont forget to make editingField undefined
                 throw new Error("Implement me bruh")
             }),
             updateEditingRule: (path, expr) => set((state) => {
