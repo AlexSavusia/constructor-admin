@@ -160,10 +160,10 @@ export default function Plane({ onSave, className, items }: PlaneProps) {
         addField(currentStepKey, newItem);
     };
 
-    const handleSettingChange = (key: string, value: ValueTypeAlias) => {
-        if (!editingField) return;
+    const updateEditingFieldSettings = useEditorContext(s => s.updateEditingFieldSettings);
 
-        updateFieldSettings(currentStepKey, editingField.key, {[key]: value});
+    const handleSettingChange = (key: string, value: ValueTypeAlias) => {
+        updateEditingFieldSettings({ [key]: value });
     };
 
     const handleDelete = (id: string) => {

@@ -44,15 +44,27 @@ export default function SettingsSidebar({
                                             items,
 }: SettingsSidebarProps) {
     // const s = useEditorContext(s=>s)
-    const field = useEditorContext(s=>s.form.steps[s.stepKey!].fields[s.editingField!.key]);
+    const field = useEditorContext((s) => s.editingField?.draft);
+    const editingField = useEditorContext((s) => s.editingField);
+    const updateEditingFieldSettings = useEditorContext((s) => s.updateEditingFieldSettings);
+
+
+    const persistEditingField = useEditorContext(s => s.persistEditingField);
+    const resetEditingField = useEditorContext(s => s.resetEditingField);
+    const setEditingRule = useEditorContext(s=>s.setEditingRule)
+    if (!field || !editingField) return null;
+
     // debugger
     const visibleSettings = getDescriptor(field.descriptorKey, items)!.settings.filter((setting) =>
         isSettingVisible(setting, field.settingsValues),
     );
-    const editingField = useEditorContext(s=>s.editingField)
+
+    const handleChange = (key: string, value: ValueTypeAlias) => {
+        updateEditingFieldSettings({ [key]: value });
+    };
     // const resetEditingField = useEditorContext(s=>s.resetEditingField)
     // const persistEditingField = useEditorContext(s=>s.persistEditingField)
-    const setEditingRule = useEditorContext(s=>s.setEditingRule)
+
 
     return (
         <>
@@ -90,7 +102,7 @@ export default function SettingsSidebar({
                                             className="form-check-input"
                                             type="checkbox"
                                             checked={Boolean(value)}
-                                            onChange={(e) => onChange(setting.key, e.target.checked)}
+                                            onChange={(e) => handleChange(setting.key, e.target.checked)}
                                         />
                                         <label
                                             className="form-check-label"
@@ -122,7 +134,7 @@ export default function SettingsSidebar({
                                             className="form-check-input"
                                             type="checkbox"
                                             checked={Boolean(value)}
-                                            onChange={(e) => onChange(setting.key, e.target.checked)}
+                                            onChange={(e) => handleChange(setting.key, e.target.checked)}
                                         />
                                         <label
                                             className="form-check-label"
@@ -154,7 +166,7 @@ export default function SettingsSidebar({
                                             className="form-check-input"
                                             type="checkbox"
                                             checked={Boolean(value)}
-                                            onChange={(e) => onChange(setting.key, e.target.checked)}
+                                            onChange={(e) => handleChange(setting.key, e.target.checked)}
                                         />
                                         <label
                                             className="form-check-label"
@@ -184,7 +196,7 @@ export default function SettingsSidebar({
                                     className="form-control"
                                     type="text"
                                     value={String(value ?? "")}
-                                    onChange={(e) => onChange(setting.key, e.target.value)}
+                                    onChange={(e) => handleChange(setting.key, e.target.value)}
                                     placeholder="Например: +7 (999) 99-99-99"
                                 />
                             </div>
@@ -203,7 +215,7 @@ export default function SettingsSidebar({
                             const next = options.map((item, i) =>
                                 i === index ? { ...item, ...patch } : item,
                             );
-                            onChange(setting.key, next);
+                            handleChange(setting.key, next);
                         };
 
                         const addOption = () => {
@@ -215,12 +227,12 @@ export default function SettingsSidebar({
                                     value: `option_${nextIndex}`,
                                 },
                             ];
-                            onChange(setting.key, next);
+                            handleChange(setting.key, next);
                         };
 
                         const removeOption = (index: number) => {
                             const next = options.filter((_, i) => i !== index);
-                            onChange(setting.key, next);
+                            handleChange(setting.key, next);
                         };
 
                         return (
@@ -293,7 +305,7 @@ export default function SettingsSidebar({
                                     className="form-check-input"
                                     type="checkbox"
                                     checked={Boolean(value)}
-                                    onChange={(e) => onChange(setting.key, e.target.checked)}
+                                    onChange={(e) => handleChange(setting.key, e.target.checked)}
                                 />
                                 <label className="form-check-label" htmlFor={setting.key}>
                                     {setting.title}
@@ -309,7 +321,7 @@ export default function SettingsSidebar({
                                 <select
                                     className="form-select"
                                     value={String(value ?? "")}
-                                    onChange={(e) => onChange(setting.key, e.target.value)}
+                                    onChange={(e) => handleChange(setting.key, e.target.value)}
                                 >
                                     {setting.multiValVariants.map((variant) => (
                                         <option key={String(variant)} value={String(variant)}>
@@ -330,7 +342,7 @@ export default function SettingsSidebar({
                                     type="number"
                                     value={Number(value ?? 0)}
                                     onChange={(e) =>
-                                        onChange(setting.key, Number(e.target.value))
+                                        handleChange(setting.key, Number(e.target.value))
                                     }
                                 />
                             </div>
@@ -344,11 +356,29 @@ export default function SettingsSidebar({
                                 className="form-control"
                                 type="text"
                                 value={String(value ?? "")}
-                                onChange={(e) => onChange(setting.key, e.target.value)}
+                                onChange={(e) => handleChange(setting.key, e.target.value)}
                             />
                         </div>
                     );
                 })}
+
+                <div className="d-flex gap-2 mt-3">
+                    <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={persistEditingField}
+                    >
+                        Сохранить
+                    </button>
+
+                    <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={resetEditingField}
+                    >
+                        Отмена
+                    </button>
+                </div>
             </div>
 
         </>
