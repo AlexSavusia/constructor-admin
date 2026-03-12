@@ -32,9 +32,11 @@ export type LogicEditorContextValue = {
     rule: Rule
 }
 
+
 export type FieldEditorContextValue = {
     path: ObjPath
     key: Key
+    draft: FieldDefinition;
 }
 
 export type EditorActions = {
@@ -61,6 +63,7 @@ export type EditorActions = {
 
     setEditingField: (stepKey: Key, fieldKey: Key) => void
     persistEditingField: () => void
+    updateEditingFieldSettings: (settings: PaletteItemSettingsValues) => void;
     resetEditingField: () => void // resets editing object (not field reset)
 }
 
@@ -117,19 +120,28 @@ export function createContextStore(initialState?: EditorStateValue) {
     return createStore<EditorState>((set) => {
         const EDITOR_ACTIONS: EditorActions = {
             setEditingField: (stepKey, fieldKey) => set((state) => {
-                const path = ["form", "steps", stepKey, "fields", fieldKey]
-                // state.form[stepKey].fields[fieldKey].
-                return ({
+                const path: ObjPath = ["form", "steps", stepKey, "fields", fieldKey];
+                const field = state.form.steps[stepKey]?.fields[fieldKey];
+
+                if (!field) return {} as Partial<EditorState>;
+
+                return {
                     editingField: {
                         path,
                         key: fieldKey,
-
+                        draft: structuredClone(field),
                     }
-                }) as Partial<EditorState>
+                } as Partial<EditorState>
             }),
-            persistEditingField: () => {
-                throw new Error("Implement me bruh")
-            },
+            persistEditingField: () => set((state) => {
+                if (!state.editingField) return {} as Partial<EditorState>;
+
+                return {
+                    form: setByPath(state.form, state.editingField.path.slice(1), state.editingField.draft),
+                    editingField: undefined,
+                } as Partial<EditorState>;
+            }),
+
             resetEditingField: () => set(() => ({
                 editingField: undefined
             })),
@@ -297,13 +309,32 @@ export function createContextStore(initialState?: EditorStateValue) {
                                 ...state.form.steps[stepKey].fields,
                                 [fieldKey]: {
                                     ...state.form.steps[stepKey].fields[fieldKey],
-                                    settings: settings,
+                                    settingsValues: {
+                                        ...state.form.steps[stepKey].fields[fieldKey].settingsValues,
+                                        ...settings,
+                                    },
                                 }
                             }
                         }
                     }
                 }
             })),
+            updateEditingFieldSettings: (settings) => set((state) => {
+                if (!state.editingField) return {} as Partial<EditorState>;
+
+                return {
+                    editingField: {
+                        ...state.editingField,
+                        draft: {
+                            ...state.editingField.draft,
+                            settingsValues: {
+                                ...state.editingField.draft.settingsValues,
+                                ...settings,
+                            },
+                        },
+                    },
+                } as Partial<EditorState>;
+            }),
             addVariable: (variable) => set((state) => ({
                 form: {
                     ...state.form,
