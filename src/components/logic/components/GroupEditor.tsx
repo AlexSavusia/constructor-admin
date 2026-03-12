@@ -1,94 +1,83 @@
-import type {ConditionNode, GroupNode} from "../type.ts";
 import ConditionRow from "./ConditionRow.tsx";
-
+import {
+    type AndExpression, type NotEmptyExpression,
+    type OrExpression
+} from "../../../logic/expression.ts";
+import {findByPath, type ObjPath, useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
+import type {BooleanPropertyLogicDefinition} from "../../../logic/logic.ts";
+import type {Rule} from "../types.ts";
 export type GroupEditorProps = {
-    isRoot?: boolean;
-    group: GroupNode
-    onChange: (node: GroupNode) => void
+    rule: AndExpression | OrExpression
+    path: ObjPath
 }
 
-export default function GroupEditor({group, onChange, isRoot}: GroupEditorProps) {
-    const updateChild = (childId: string, nextChild: GroupNode | ConditionNode) => {
-        onChange({
-            ...group,
-            children: group.children.map((c) => (c.id === childId ? nextChild : c)),
-        });
-    };
-
-    const removeChild = (childId: string) => {
-        onChange({
-            ...group,
-            children: group.children.filter((c) => c.id !== childId),
-        });
+export default function GroupEditor({rule, path}: GroupEditorProps) {
+    const {rule: editingRuleUnknown} = useEditorContext(s=>s.editingRule)!
+    const editingRule = 'defaultValue' in editingRuleUnknown ? (editingRuleUnknown as BooleanPropertyLogicDefinition).rule
+        : (editingRuleUnknown as Rule);
+    const updateEditingRule = useEditorContext(s=>s.updateEditingRule)
+    const addGroup = () => {
+        const newGroup: AndExpression | OrExpression = {
+            id: crypto.randomUUID(),
+            type: "and",
+            items: [],
+        };
+        rule.items.push(newGroup);
+        updateEditingRule(path, rule);
     };
 
     const addCondition = () => {
-        const newCondition: ConditionNode = {
+        const newCondition: NotEmptyExpression = {
             id: crypto.randomUUID(),
-            type: "condition",
-            enabled: true,
-            left: { kind: "field", id: "" },
-            operator: "eq",
-            right: { kind: "const", value: "" },
+            type: "notEmpty",
+            item: ["constants", "name"]
         };
+        rule.items.push(newCondition);
+        updateEditingRule(path, rule);
 
-        onChange({
-            ...group,
-            children: [...group.children, newCondition],
-        });
     };
 
-    const addGroup = () => {
-        const newGroup: GroupNode = {
-            id: crypto.randomUUID(),
-            type: "group",
-            enabled: true,
-            operator: "all",
-            children: [],
-        };
-
-        onChange({
-            ...group,
-            children: [...group.children, newGroup],
-        });
-    };
-
+    const deleteItem = (idx: number) => {
+        const nr = {
+            ...rule,
+            items: rule.items.filter((_, i) => i !== idx)
+        }
+        updateEditingRule(path, nr);
+    }
     return (
         <div style={{ borderLeft: "2px solid #d9d9d9", paddingLeft: 12, marginBottom: 12 }}>
             <div>
-                {!isRoot && (
-                    <input
-                        type="checkbox"
-                        checked={group.enabled}
-                        onChange={(e) => onChange({ ...group, enabled: e.target.checked })}
-                        />
-                )}
                 <select
-                    value={group.operator}
-                    onChange={(e) =>
-                        onChange({ ...group, operator: e.target.value as "all" | "any" })
-                    }
+                    value={rule.type}
+                    onChange={(e) =>{
+                        const fuck = path.length == 1 ? [] : path.slice(1, path.length);
+                        updateEditingRule(path, {
+                            ...findByPath(editingRule.condition, fuck) as AndExpression | OrExpression,
+                            type: e.target.value as "or" | "and"
+                        })
+                    }}
                 >
-                    <option value="all">ALL conditions are met</option>
-                    <option value="any">ANY of the following</option>
+                    <option value="and">ALL conditions are met</option>
+                    <option value="or">ANY of the following</option>
                 </select>
             </div>
             <div>
-                {group.children.map((child) =>
-                    child.type === "condition" ? (
-                        <ConditionRow
-                            key={child.id}
-                            node={child}
-                            onChange={(next) => updateChild(child.id, next)}
-                            onDelete={() => removeChild(child.id)}
-                        />
+                {rule.items.map((child, index) =>
+                    (child.type !== "and" && child.type !== "or") ? (
+                        <div key={child.id}>
+                            <ConditionRow
+                                rule={child}
+                                path={[...path, "items", index]}
+                            />
+                            <button onClick={() => deleteItem(index)}>Delete condition</button>
+                        </div>
                     ) : (
                         <div key={child.id}>
                             <GroupEditor
-                                group={child}
-                                onChange={(next) => updateChild(child.id, next)}
+                                rule={child}
+                                path={[...path, "items", index]}
                             />
-                            <button onClick={() => removeChild(child.id)}>Delete group</button>
+                            <button onClick={() => deleteItem(index)}>Delete group</button>
                         </div>
                     ))}
             </div>

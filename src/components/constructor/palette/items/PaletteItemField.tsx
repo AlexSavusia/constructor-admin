@@ -3,18 +3,52 @@ import type {
     PaletteItemProps,
     PaletteItemDescriptor,
     PaletteItemType,
+    ValueTypeAlias,
+    OptionItem,
 } from "../../type.ts";
 import classNames from "classnames";
 
 import InputUI from "../../../ui/fieldsUI/Input/Input.tsx";
 import TextareaUI from "../../../ui/fieldsUI/Textarea/Textarea.tsx";
 import CheckboxUI from "../../../ui/fieldsUI/Checkbox/Checkbox.tsx";
-import RadioButtonsUI from "../../../ui/fieldsUI/RadioButtons/RadioButtons.tsx";
+import RadioButtonsUI, {
+    type RadioItem,
+} from "../../../ui/fieldsUI/RadioButtons/RadioButtons.tsx";
 import SwitchUI from "../../../ui/fieldsUI/Switch/Switch.tsx";
 import InputDateUI from "../../../ui/fieldsUI/InputDate/InputDate.tsx";
+import SelectUI from "../../../ui/fieldsUI/Select/Select.tsx";
 
 import InputPreview from "../../../ui/fieldsUIAdmin/Input/Input.tsx";
 import { useMemo, useState } from "react";
+
+const defaultOptions: RadioItem[] = [
+    { label: "Вариант 1", value: "var1" },
+    { label: "Вариант 2", value: "var2" },
+];
+
+function isRadioItemArray(
+    value:
+        | string
+        | number
+        | boolean
+        | Date
+        | OptionItem[]
+        | ValueTypeAlias[]
+        | undefined,
+): value is RadioItem[] {
+    return (
+        Array.isArray(value) &&
+        value.every(
+            (item) =>
+                item &&
+                typeof item === "object" &&
+                "label" in item &&
+                "value" in item &&
+                typeof item.label === "string" &&
+                (typeof item.value === "string" || typeof item.value === "number"),
+        )
+    );
+}
 
 function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
     const label = String(settingsValues?.label ?? "Название поля");
@@ -27,21 +61,18 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
     const checked = Boolean(settingsValues?.checked ?? false);
     const disabled = Boolean(settingsValues?.disabled ?? false);
 
-    const radioOption1 = String(settingsValues?.radioOption1 ?? "Вариант 1");
-    const radioOption2 = String(settingsValues?.radioOption2 ?? "Вариант 2");
-    const radioValue1 = String(settingsValues?.radioValue1 ?? "var1");
-    const radioValue2 = String(settingsValues?.radioValue2 ?? "var2");
+    const optionsData = useMemo<RadioItem[]>(() => {
+        if (isRadioItemArray(settingsValues?.options)) {
+            return settingsValues.options;
+        }
 
-    const [radioValue, setRadioValue] = useState(radioValue1);
-    const [switchEnabled, setSwitchEnabled] = useState(false);
+        return defaultOptions;
+    }, [settingsValues?.options]);
 
-    const radioData = useMemo(
-        () => [
-            { label: radioOption1, value: radioValue1 },
-            { label: radioOption2, value: radioValue2 },
-        ],
-        [radioOption1, radioOption2, radioValue1, radioValue2],
+    const [radioValue, setRadioValue] = useState<string>(
+        String(optionsData[0]?.value ?? ""),
     );
+    const [switchEnabled, setSwitchEnabled] = useState(false);
 
     if (fieldType === "textarea") {
         return (
@@ -79,7 +110,7 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
                     required={required}
                     currentValue={radioValue}
                     onChange={setRadioValue}
-                    data={radioData}
+                    data={optionsData}
                 />
             </div>
         );
@@ -111,6 +142,20 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
         );
     }
 
+    if (fieldType === "select") {
+        return (
+            <div className={classNames(className)}>
+                <SelectUI
+                    name={name}
+                    label={label}
+                    required={required}
+                    disabled={disabled}
+                    options={optionsData}
+                />
+            </div>
+        );
+    }
+
     return (
         <div className={classNames(className)}>
             <InputUI
@@ -118,6 +163,7 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
                 required={required}
                 type={inputType}
                 placeholder={placeholder}
+                disabled={disabled}
             />
         </div>
     );
@@ -138,6 +184,16 @@ const FieldDescriptor: PaletteItemDescriptor = {
     minWidth: 1,
     settings: [
         {
+            key: "mask",
+            title: "Маска",
+            valType: "string",
+            defaultValue: "",
+            visibleWhen: {
+                key: "fieldType",
+                equals: ["input"],
+            },
+        },
+        {
             key: "fieldType",
             title: "Тип поля",
             valType: "string",
@@ -149,9 +205,9 @@ const FieldDescriptor: PaletteItemDescriptor = {
                 "radio",
                 "switch",
                 "date",
+                "select",
             ],
         },
-
         {
             key: "label",
             title: "Название",
@@ -166,25 +222,34 @@ const FieldDescriptor: PaletteItemDescriptor = {
         },
         {
             key: "required",
-            title: "Обязательное поле",
+            title: "Обязательное",
             valType: "boolean",
             defaultValue: false,
             visibleWhen: {
                 key: "fieldType",
-                equals: ["input", "textarea", "checkbox", "radio", "switch"],
+                equals: ["input", "textarea", "checkbox", "radio", "switch", "select"],
+            },
+        },
+        {
+            key: "visible",
+            title: "Видимость",
+            valType: "boolean",
+            defaultValue: false,
+            visibleWhen: {
+                key: "fieldType",
+                equals: ["input", "textarea", "checkbox", "radio", "switch", "select"],
             },
         },
         {
             key: "disabled",
-            title: "Disabled",
+            title: "Включено",
             valType: "boolean",
             defaultValue: false,
             visibleWhen: {
                 key: "fieldType",
-                equals: ["checkbox", "date"],
+                equals: ["input", "checkbox", "date", "select"],
             },
         },
-
         {
             key: "placeholder",
             title: "Placeholder",
@@ -203,10 +268,9 @@ const FieldDescriptor: PaletteItemDescriptor = {
             multiValVariants: ["text", "email", "number", "password", "tel"],
             visibleWhen: {
                 key: "fieldType",
-                equals: "input",
+                equals: ["input"],
             },
         },
-
         {
             key: "checked",
             title: "Отмечен по умолчанию",
@@ -214,48 +278,17 @@ const FieldDescriptor: PaletteItemDescriptor = {
             defaultValue: false,
             visibleWhen: {
                 key: "fieldType",
-                equals: "checkbox",
-            },
-        },
-
-        {
-            key: "radioOption1",
-            title: "Radio option 1 label",
-            valType: "string",
-            defaultValue: "Вариант 1",
-            visibleWhen: {
-                key: "fieldType",
-                equals: "radio",
+                equals: ["checkbox"],
             },
         },
         {
-            key: "radioValue1",
-            title: "Radio option 1 value",
+            key: "options",
+            title: "Варианты ответа",
             valType: "string",
-            defaultValue: "var1",
+            defaultValue: defaultOptions,
             visibleWhen: {
                 key: "fieldType",
-                equals: "radio",
-            },
-        },
-        {
-            key: "radioOption2",
-            title: "Radio option 2 label",
-            valType: "string",
-            defaultValue: "Вариант 2",
-            visibleWhen: {
-                key: "fieldType",
-                equals: "radio",
-            },
-        },
-        {
-            key: "radioValue2",
-            title: "Radio option 2 value",
-            valType: "string",
-            defaultValue: "var2",
-            visibleWhen: {
-                key: "fieldType",
-                equals: "radio",
+                equals: ["radio", "select"],
             },
         },
     ],

@@ -15,19 +15,25 @@ export type FormDefinition = {
 }
 
 export type ConstVariableDefinition = {
+    __typ: "constant"
     key: Key;
+    label: string
     valueType: ValueType;
     value: unknown;
 }
 
 export type RuntimeVariableDefinition = {
+    __typ: "variable"
     key: Key;
+    label: string
     valueType: ValueType;
     defaultValue?: unknown;
 }
 
 export type ExpressionScope =
     | "FIELD_SCOPE"
+    | "FIELD_SCOPE_DECISION"
+    | "FIELD_SCOPE_PROPERTY"
     | "FIELD_ON_UPDATE_SCOPE"
     | "LOOKUP_BASE_FILTER_SCOPE"
     | "LOOKUP_ROW_SCOPE"

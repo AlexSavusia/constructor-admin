@@ -1,131 +1,145 @@
-import type {CompareOp, ConditionNode, ValueSource} from "../type.ts";
+import {
+    type AndExpression,
+    type Boolean2OperandExpression,
+    type BooleanExpression,
+    isTwoOperandMode, isTwoOperandModeType, type NotEmptyExpression, type NotExpression, type OrExpression
+} from "../../../logic/expression.ts";
+import {
+    type ObjPath,
+    objPathFromString,
+    objPathToString,
+    useEditorContext
+} from "../../../pages/Programs/editor/EditorContext.tsx";
 
 export type ConditionRowProps = {
-    node: ConditionNode;
-    onChange: (node: ConditionNode) => void;
-    onDelete: () => void;
+    rule: BooleanExpression
+    path: ObjPath
 }
 
-export default function ConditionRow({node, onChange, onDelete}: ConditionRowProps) {
+const OPERATORS_LABELS: Record<Exclude<BooleanExpression["type"], "and" | "or">, string> = {
+    "eq": "equals",
+    "ne": "not equals",
+    "gt": "greater than",
+    "gte": "greater than or equals",
+    "lt": "less than",
+    "lte": "less than or equals",
+    "isEmpty": "isEmpty",
+    "notEmpty": "nnot empty",
+    "not": "not",
+    "in": "in"
+}
+
+type StupidFuck = Exclude<BooleanExpression, Boolean2OperandExpression | AndExpression | OrExpression | NotEmptyExpression | NotExpression>
+export default function ConditionRow({rule, path}: ConditionRowProps) {
+    const { scope} = useEditorContext(s=>s.editingRule)!
+    // const editingRule = 'defaultValue' in editingRuleUnknown ? (editingRuleUnknown as BooleanPropertyLogicDefinition).rule
+    //     : (editingRuleUnknown as Rule);
+    const updateEditingRule = useEditorContext(s=>s.updateEditingRule)
+    const getAllContextVariables = useEditorContext(s=>s.getAllContextVariables)
+    const twoOperand = isTwoOperandMode(rule)
+
+    const resolveVariableDisplayString = (p: ObjPath) => {
+        return objPathToString(p)
+    }
+
+    const firstArg = twoOperand
+        ? (rule as Boolean2OperandExpression).left
+        : (rule as StupidFuck).item
+
+    const secondArg = twoOperand ? (rule as Boolean2OperandExpression).right : null
+
+    const contextVariablePaths = getAllContextVariables(scope)
+    const allFields = [
+        ...contextVariablePaths.fields,
+        ...contextVariablePaths.variables,
+        ...contextVariablePaths.constants
+    ]
+
     return (
         <div style={{ display: "flex", gap: 8, alignItems: "center", margin: "8px 0" }}>
-            <input
-                type="checkbox"
-                checked={node.enabled}
-                onChange={(e) => onChange({ ...node, enabled: e.target.checked })}
-            />
-
             <select
-                value={node.left.kind}
-                onChange={(e) =>
-                    onChange({
-                        ...node,
-                        left: { ...node.left, kind: e.target.value as "field" | "variable" },
-                    })
-                }
+                value={objPathToString(firstArg)}
+                onChange={e=> {
+                    const np = objPathFromString(e.target.value) as ObjPath;
+                    if(twoOperand) {
+                        updateEditingRule(path, {
+                            ...rule as Boolean2OperandExpression,
+                            left: np
+                        });
+                    }
+                    else {
+                        updateEditingRule(path, {
+                            ...rule as StupidFuck,
+                            item: np
+                        });
+                    }
+                }}
             >
-                <option value="field">Field</option>
-                <option value="variable">Variable</option>
+                {allFields.map(p => (
+                    <option key={objPathToString(p)} value={objPathToString(p)}>{resolveVariableDisplayString(p)}</option>
+                ))}
             </select>
-
             <select
-                value={node.left.id}
-                onChange={(e) =>
-                    onChange({
-                        ...node,
-                        left: { ...node.left, id: e.target.value },
-                    })
-                }
-            >
-                <option value="">-- select --</option>
-                <option value="driverAge">Driver Age</option>
-                <option value="carPower">Car Power</option>
-                <option value="region">Region</option>
-                <option value="hasDiscount">hasDiscount</option>
-            </select>
-
-            <select
-                value={node.operator}
-                onChange={(e) =>
-                    onChange({
-                        ...node,
-                        operator: e.target.value as CompareOp,
-                    })
-                }
-            >
-                <option value="eq">is equal</option>
-                <option value="ne">is not equal</option>
-                <option value="gt">is greater than</option>
-                <option value="gte">is greater or equal</option>
-                <option value="lt">is lower than</option>
-                <option value="lte">is lower or equal</option>
-                <option value="isTrue">is true</option>
-                <option value="isFalse">is false</option>
-            </select>
-
-            {!["isTrue", "isFalse", "isEmpty", "notEmpty"].includes(node.operator) && (
-                <>
-                    <select
-                        value={node.right?.kind ?? "const"}
-                        onChange={(e) =>
-                            onChange({
-                                ...node,
-                                right: { kind: e.target.value as "const" | "field" | "variable", value: "" } as ValueSource,
-                            })
+                value={rule.type}
+                onChange={e=> {
+                    if(twoOperand) {
+                        // @ts-expect-error no error
+                        if(isTwoOperandModeType(e.target.value)){
+                            // @ts-expect-error no error
+                            updateEditingRule(path, { ...rule, type: e.target.value })
+                        } else {
+                            const nr = {
+                                ...rule,
+                                type: e.target.value,
+                                // @ts-expect-error no error
+                                item: rule.left
+                            }
+                            // @ts-expect-error no error
+                            delete nr.left
+                            // @ts-expect-error no error
+                            updateEditingRule(path, nr)
                         }
-                    >
-                        <option value="const">Const</option>
-                        <option value="field">Field</option>
-                        <option value="variable">Variable</option>
-                    </select>
 
-                    {node.right?.kind === "const" && (
-                        <input
-                            value={String((node.right).value ?? "")}
-                            onChange={(e) =>
-                                onChange({
-                                    ...node,
-                                    right: { kind: "const", value: e.target.value },
-                                })
+                    } else {
+                        // @ts-expect-error no error
+                        if(!isTwoOperandModeType(e.target.value)){
+                            // @ts-expect-error no error
+                            updateEditingRule(path, { ...rule, type: e.target.value })
+                        } else {
+                            const nr = {
+                                ...rule,
+                                type: e.target.value,
+                                // @ts-expect-error no error
+                                left: rule.item
                             }
-                        />
-                    )}
-
-                    {node.right?.kind === "field" && (
-                        <select
-                            value={(node.right).fieldId ?? ""}
-                            onChange={(e) =>
-                                onChange({
-                                    ...node,
-                                    right: { kind: "field", fieldId: e.target.value },
-                                })
-                            }
-                        >
-                            <option value="">-- select field --</option>
-                            <option value="driverAge">Driver Age</option>
-                            <option value="carPower">Car Power</option>
-                            <option value="region">Region</option>
-                        </select>
-                    )}
-
-                    {node.right?.kind === "variable" && (
-                        <select
-                            value={(node.right).variableId ?? ""}
-                            onChange={(e) =>
-                                onChange({
-                                    ...node,
-                                    right: { kind: "variable", variableId: e.target.value },
-                                })
-                            }
-                        >
-                            <option value="">-- select variable --</option>
-                            <option value="hasDiscount">hasDiscount</option>
-                        </select>
-                    )}
-                </>
-            )}
-
-            <button onClick={onDelete}>delete</button>
+                            // @ts-expect-error no error
+                            delete nr.item
+                            // @ts-expect-error no error
+                            updateEditingRule(path, nr)
+                        }
+                    }
+                }}
+            >
+                {Object.entries(OPERATORS_LABELS).map(([op, lbl]) => (
+                    <option key={op} value={op}>{lbl}</option>
+                ))}
+            </select>
+            {(twoOperand) &&
+                <select
+                    value={secondArg ? objPathToString(secondArg) : undefined}
+                    onChange={e=> {
+                        const np = objPathFromString(e.target.value) as ObjPath;
+                        updateEditingRule(path, {
+                            ...rule as Boolean2OperandExpression,
+                            right: np
+                        });
+                    }}
+                >
+                    {allFields.map(p => (
+                        <option key={objPathToString(p)} value={objPathToString(p)}>{resolveVariableDisplayString(p)}</option>
+                    ))}
+                </select>
+            }
         </div>
-    );
+    )
 }

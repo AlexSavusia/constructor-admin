@@ -1,11 +1,17 @@
 import * as React from "react";
-import { useMemo, useState } from "react";
+import {useContext, useMemo, useRef} from "react";
 import classNames from "classnames";
-import {type Layout, ReactGridLayout, useContainerWidth, useGridLayout, verticalCompactor } from "react-grid-layout";
-import type {LayoutPaletteItemDescriptor, PaletteItemDescriptor, PaletteItemSettingsValues, ValueTypeAlias} from "../type.ts";
+import {ReactGridLayout, useContainerWidth, verticalCompactor} from "react-grid-layout";
+import type { PaletteItemDescriptor, PaletteItemSettingsValues, ValueTypeAlias} from "../type.ts";
 
 import RightSidebar from "../../RightSidebar.tsx";
 import SettingsSidebar from "../SettingsSidebar.tsx";
+import type { FormDefinition} from "../../../logic/type.ts";
+import type {
+    FieldDefinition,
+} from "../../../logic/field.ts";
+import RuleEditor from "../../logic/components/RuleEditor.tsx";
+import {EditorContext, useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
 
 export type PlaneProps = {
     className?: string;
@@ -48,33 +54,44 @@ export default function Plane({ className, items }: PlaneProps) {
     const paddingY = 0;
     const cols = 3;
     const rowHeight = 56;
-
-    const [layoutItems, setLayoutItems] = useState<LayoutPaletteItemDescriptor[]>([]);
-    const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+    const currentStepKey = useEditorContext(s => s.stepKey!)
+    const currentStep = useEditorContext(s => s.form.steps[s.stepKey!])
+    const addField = useEditorContext(s => s.addField)
+    const removeField = useEditorContext(s => s.removeField)
+    const updateFieldSettings = useEditorContext(s => s.updateFieldSettings)
+    const updateStepLayout = useEditorContext(s => s.updateStepLayout)
+    const editingField = useEditorContext(s=>s.editingField)
+    const resetEditingField = useEditorContext(s=>s.resetEditingField)
+    const persistEditingField = useEditorContext(s=>s.persistEditingField)
+    const setEditingField = useEditorContext(s=>s.setEditingField)
+    const ctx = useContext(EditorContext)
+    const layoutItems = useMemo(()=>
+        Object.entries(currentStep.fields).map(v=>v[1]),
+        [currentStep]
+    );
+    //const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
     const { width, containerRef, mounted } = useContainerWidth();
+    //const [editingRule, setEditingRule] = useState<EditorEditingRule & {scope: ExpressionScope, path: NodePath} | null>(null);
 
-    const initialLayout = useMemo<Layout>(() => [], []);
-
-    const { layout, setLayout } = useGridLayout({
-        layout: initialLayout,
-        cols,
-    });
+    const stepLayout = useMemo(() => [
+        ...Object.entries(currentStep.fields).map(v=>v[1].layout),
+    ], [currentStep]);
 
     const colW = width / cols;
 
-    const selectedItem = useMemo(
-        () => layoutItems.find((x) => x.id === selectedItemId) ?? null,
-        [layoutItems, selectedItemId],
-    );
-
-    const selectedDescriptor = useMemo(
-        () =>
-            selectedItem
-                ? getDescriptor(selectedItem.descriptorKey, items)
-                : null,
-        [selectedItem, items],
-    );
+    // const selectedItem = useMemo(
+    //     () => layoutItems.find((x) => x.key === selectedItemId) ?? null,
+    //     [layoutItems, selectedItemId],
+    // );
+    //
+    // const selectedDescriptor = useMemo(
+    //     () =>
+    //         selectedItem
+    //             ? getDescriptor(selectedItem.descriptorKey, items)
+    //             : null,
+    //     [selectedItem, items],
+    // );
 
     const onDrop = (e: React.DragEvent) => {
         e.preventDefault();
@@ -94,19 +111,62 @@ export default function Plane({ className, items }: PlaneProps) {
         const y = Math.max(0, Math.round(py / (rowHeight + marginY)));
 
         const id = crypto.randomUUID();
-
-        setLayoutItems((prev) => [
-            ...prev,
-            {
-                id,
-                descriptorKey: descriptor.key,
-                settingsValues: buildDefaultSettingsValues(descriptor),
+// debugger
+        const newItem: FieldDefinition = {
+            //TODO all of this have to be configured here properly
+            capabilities: {
+                canBeVisible: false,
+                canBeEnabled: false,
+                canBeRequired: false,
+                canBeSetValue: false
             },
-        ]);
+            control: "input",
+            fieldType: "input",
+            valueType: "unknown",
+            defaultValue: undefined,
+            logic: {
+                visibility: {
+                    defaultValue: true,
+                    rule: {
+                        condition: {
+                            id: crypto.randomUUID(),
+                            type: "and",
+                            items: []
+                        },
+                        actions: []
+                    }
+                },
+                enabled: {
+                    defaultValue: true,
+                    rule: {
+                        condition: {
+                            id: crypto.randomUUID(),
+                            type: "and",
+                            items: []
+                        },
+                        actions: []
+                    }
+                },
+                required: {
+                    defaultValue: true,
+                    rule: {
+                        condition: {
+                            id: crypto.randomUUID(),
+                            type: "and",
+                            items: []
+                        },
+                        actions: []
+                    }
+                },
+                // value: {}
+            },
+            /////////////////////////////////
 
-        setLayout([
-            ...layout,
-            {
+            __typ: "field",
+            key: id,
+            descriptorKey: descriptor.key,
+            settingsValues: buildDefaultSettingsValues(descriptor),
+            layout: {
                 i: id,
                 x,
                 y,
@@ -115,34 +175,21 @@ export default function Plane({ className, items }: PlaneProps) {
                 minW: descriptor.minWidth,
                 maxW: descriptor.maxWidth,
                 resizeHandles: ["e", "w"],
-            },
-        ]);
+            }
+        }
+        addField(currentStepKey, newItem);
     };
 
-    const handleSettingChange = (key: string, value: ValueTypeAlias) => {
-        if (!selectedItemId) return;
+    const updateEditingFieldSettings = useEditorContext(s => s.updateEditingFieldSettings);
 
-        setLayoutItems((prev) =>
-            prev.map((item) =>
-                item.id === selectedItemId
-                    ? {
-                        ...item,
-                        settingsValues: {
-                            ...item.settingsValues,
-                            [key]: value,
-                        },
-                    }
-                    : {...item},
-            ),
-        );
+    const handleSettingChange = (key: string, value: ValueTypeAlias) => {
+        updateEditingFieldSettings({ [key]: value });
     };
 
     const handleDelete = (id: string) => {
-        setLayoutItems((prev) => prev.filter((item) => item.id !== id));
-        setLayout(layout.filter((item) => item.i !== id));
-
-        if (selectedItemId === id) {
-            setSelectedItemId(null);
+        removeField(currentStepKey, id)
+        if (editingField?.key === id) {
+            resetEditingField();
         }
     };
 
@@ -152,10 +199,13 @@ export default function Plane({ className, items }: PlaneProps) {
                 <div className="card-header">
                     <h3 className="card-title mb-0">Полотно</h3>
                     <div className="card-tools d-flex align-items-center gap-2">
-                        <button type="button" className="btn btn-success btn-sm">
-                            <i className="fas fa-save me-1" />
-                            Сохранить
-                        </button>
+                        {/*<button type="button" className="btn btn-success btn-sm" onClick={()=>{*/}
+                        {/*    const {form} = ctx!.getState()*/}
+                        {/*    onSave(form)*/}
+                        {/*}}>*/}
+                        {/*    <i className="fas fa-save me-1" />*/}
+                        {/*    Сохранить*/}
+                        {/*</button>*/}
                     </div>
 
                 </div>
@@ -190,7 +240,6 @@ export default function Plane({ className, items }: PlaneProps) {
                                 <ReactGridLayout
                                     style={{ background: "rgba(108,117,125,0.37)" }}
                                     width={width}
-                                    layout={layout}
                                     gridConfig={{ cols, rowHeight }}
                                     dragConfig={{
                                         enabled: true,
@@ -198,11 +247,12 @@ export default function Plane({ className, items }: PlaneProps) {
                                         cancel: ".react-resizable-handle, input, textarea, select, button, [contenteditable=true]",
                                     }}
                                     compactor={verticalCompactor}
-                                    onLayoutChange={setLayout}
+                                    layout={stepLayout}
+                                    onLayoutChange={(l) => updateStepLayout(currentStepKey, l)}
                                 >
-                                    {layout.map((it) => {
+                                    {stepLayout.map((it) => {
                                         const layoutItem =
-                                            layoutItems.find((x) => x.id === it.i) ?? null;
+                                            layoutItems.find((x) => x.key === it.i) ?? null;
 
                                         if (!layoutItem) {
                                             return (
@@ -232,7 +282,7 @@ export default function Plane({ className, items }: PlaneProps) {
                                                 key={it.i}
                                                 className={classNames(
                                                     "card shadow-sm mb-0 ",
-                                                    selectedItemId === layoutItem.id && "border border-primary",
+                                                    editingField?.key === layoutItem.key && "border border-primary",
                                                 )}
                                             >
                                                 <div
@@ -260,7 +310,7 @@ export default function Plane({ className, items }: PlaneProps) {
                                                     <button
                                                         type="button"
                                                         className="btn btn-link btn-sm p-0 text-decoration-none"
-                                                        onClick={() => setSelectedItemId(layoutItem.id)}
+                                                        onClick={() => setEditingField(currentStepKey, layoutItem?.key)}
                                                     >
                                                         Настроить
                                                     </button>
@@ -268,7 +318,7 @@ export default function Plane({ className, items }: PlaneProps) {
                                                     <button
                                                         type="button"
                                                         className="btn btn-link btn-sm p-0 text-danger text-decoration-none"
-                                                        onClick={() => handleDelete(layoutItem.id)}
+                                                        onClick={() => handleDelete(layoutItem.key)}
                                                     >
                                                         Удалить
                                                     </button>
@@ -277,7 +327,7 @@ export default function Plane({ className, items }: PlaneProps) {
                                         );
                                     })}
                                 </ReactGridLayout>
-                                {!layout.length && (
+                                {!stepLayout.length && (
                                     <div className="h-100 d-flex align-items-center justify-content-center text-muted">
                                         Перетащите элемент из палитры сюда
                                     </div>
@@ -291,20 +341,19 @@ export default function Plane({ className, items }: PlaneProps) {
                     Перетаскивание — за ручку в шапке блока
                 </div>
             </div>
-
             <RightSidebar
                 title="Настройки поля"
-                open={!!selectedItem && !!selectedDescriptor}
-                onClose={() => setSelectedItemId(null)}
+                open={!!editingField}
+                onClose={resetEditingField}
             >
-                {selectedItem && selectedDescriptor && (
+                {!!editingField && (
                     <SettingsSidebar
-                        settings={selectedDescriptor.settings}
-                        values={selectedItem.settingsValues}
+                        items={items}
                         onChange={handleSettingChange}
                     />
                 )}
             </RightSidebar>
+            <RuleEditor/>
         </>
     );
 }

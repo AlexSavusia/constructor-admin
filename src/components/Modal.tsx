@@ -4,21 +4,22 @@ import classNames from "classnames";
 export type ModalProps = {
     title?: string;
     open: boolean;
-    setOpen: (open: boolean) => void;
+    onClose: () => void;
     children: React.ReactNode;
     className?: string;
     onSave?: () => void;
 }
 
-export default function Modal({title, open, setOpen, onSave, className, children}: ModalProps) {
+export default function Modal({title, open, onClose, onSave, className, children}: ModalProps) {
     return (
         <>
             <div
                 tabIndex={-1}
                 className={classNames("modal fade d-block", {"show": open})}
-                onClick={() => setOpen(false)}
+                onClick={() => onClose()}
                 style={{
                     visibility: open ? "visible" : "hidden",
+                    position: "absolute",
                 }}
             >
                 <div
@@ -31,7 +32,7 @@ export default function Modal({title, open, setOpen, onSave, className, children
                             <button
                                 type="button"
                                 className="btn-close"
-                                onClick={() => setOpen(false)}
+                                onClick={() => onClose()}
                             ></button>
                         </div>
                         <div className="modal-body">
@@ -41,7 +42,7 @@ export default function Modal({title, open, setOpen, onSave, className, children
                             <button
                                 type="button"
                                 className="btn btn-secondary"
-                                onClick={() => setOpen(false)}
+                                onClick={() => onClose()}
                             >
                                 Закрыть
                             </button>
