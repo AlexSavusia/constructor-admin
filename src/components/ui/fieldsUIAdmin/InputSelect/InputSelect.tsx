@@ -105,11 +105,7 @@ export default function InputAutocomplete({
                                               onKeyUp,
                                               ...props
                                           }: Props) {
-    function stripBrackets(value: string) {
-        return value.replace(/\[([^\]]+)]/g, "$1");
-    }
-
-    const inputValue = stripBrackets(value ?? "");
+    const inputValue = value ?? "";
 
     const [isOpen, setIsOpen] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
