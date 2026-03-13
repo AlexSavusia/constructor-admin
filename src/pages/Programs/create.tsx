@@ -6,7 +6,7 @@ import {EditorProvider} from "./editor/EditorProvider.tsx";
 export default function CreateProgramsPage() {
 
     const onSave = (form: FormDefinition) => {
-        debugger
+
         console.log(form)
     }
 

@@ -31,16 +31,10 @@ const OPERATORS_LABELS: Record<Exclude<BooleanExpression["type"], "and" | "or">,
 
 type StupidFuck = Exclude<BooleanExpression, Boolean2OperandExpression | AndExpression | OrExpression | NotEmptyExpression | NotExpression>
 export default function ConditionRow({rule, path}: ConditionRowProps) {
-    const { scope} = useEditorContext(s=>s.editingRule)!
-    // const editingRule = 'defaultValue' in editingRuleUnknown ? (editingRuleUnknown as BooleanPropertyLogicDefinition).rule
-    //     : (editingRuleUnknown as Rule);
+    const {scope} = useEditorContext(s=>s.editingRule)!
     const updateEditingRule = useEditorContext(s=>s.updateEditingRule)
     const getAllContextVariables = useEditorContext(s=>s.getAllContextVariables)
     const twoOperand = isTwoOperandMode(rule)
-
-    const resolveVariableDisplayString = (p: ObjPath) => {
-        return objPathToString(p)
-    }
 
     const firstArg = twoOperand
         ? (rule as Boolean2OperandExpression).left
@@ -49,11 +43,11 @@ export default function ConditionRow({rule, path}: ConditionRowProps) {
     const secondArg = twoOperand ? (rule as Boolean2OperandExpression).right : null
 
     const contextVariablePaths = getAllContextVariables(scope)
-    const allFields = [
+    const allFields = {
         ...contextVariablePaths.fields,
         ...contextVariablePaths.variables,
         ...contextVariablePaths.constants
-    ]
+    }
 
     return (
         <div className="my-2 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm lg:flex-row lg:items-center">
@@ -76,8 +70,8 @@ export default function ConditionRow({rule, path}: ConditionRowProps) {
                     }
                 }}
             >
-                {allFields.map(p => (
-                    <option key={objPathToString(p)} value={objPathToString(p)}>{resolveVariableDisplayString(p)}</option>
+                {Object.entries(allFields).map(([p, l]) => (
+                    <option key={p} value={p}>{l}</option>
                 ))}
             </select>
             <select
@@ -138,8 +132,8 @@ export default function ConditionRow({rule, path}: ConditionRowProps) {
                         });
                     }}
                 >
-                    {allFields.map(p => (
-                        <option key={objPathToString(p)} value={objPathToString(p)}>{resolveVariableDisplayString(p)}</option>
+                    {Object.entries(allFields).map(([p, l]) => (
+                        <option key={p} value={p}>{l}</option>
                     ))}
                 </select>
             }

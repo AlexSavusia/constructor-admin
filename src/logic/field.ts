@@ -1,6 +1,5 @@
 import type {Key, ValueType} from "./type.ts";
 import type {
-    BooleanDecisionRule,
     BooleanPropertyLogicDefinition,
     FieldOnUpdateRule,
     ValueLogicDefinition
@@ -71,9 +70,6 @@ export type LookupRowAvailabilityDefinition = {
     enabled?: BooleanPropertyLogicDefinition
     selectable?: BooleanPropertyLogicDefinition
 }
-
-export type FieldLogicType = keyof FieldLogicDefinition
-
 export type FieldLogicDefinition = {
     visibility?: BooleanPropertyLogicDefinition;
     validation?: BooleanExpression;

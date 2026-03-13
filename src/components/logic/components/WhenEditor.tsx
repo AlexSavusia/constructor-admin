@@ -1,5 +1,5 @@
 import GroupEditor from "./GroupEditor.tsx";
-import {useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
+import {type ObjPath, useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
 import type {BooleanPropertyLogicDefinition, StepTransitionRule} from "../../../logic/logic.ts";
 import type {Rule} from "../types.ts";
 
@@ -26,6 +26,15 @@ export default function WhenEditor() {
         throw new Error(`Invalid scope "${editingRule.scope}"`);
     }
 
+    let path: ObjPath | null = null;
+    switch(editingRule.scope) {
+        case "STEP_TRANSITION_SCOPE":
+            path = ["when"]
+            break;
+        default:
+            path = ["condition"];
+            break;
+    }
 
 
     if (rule.condition.type !== "and" && rule.condition.type !== "or") {
@@ -45,7 +54,7 @@ export default function WhenEditor() {
                             <div className="flex-1 overflow-y-auto px-6 py-5">
                 <div className="mx-auto max-w-6xl">
                     <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 sm:p-5">
-            <GroupEditor rule={rule.condition} path={["condition"]}/>
+            <GroupEditor rule={rule.condition} path={path}/>
                     </div>
                 </div>
                             </div>

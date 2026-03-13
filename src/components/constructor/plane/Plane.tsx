@@ -1,17 +1,16 @@
 import * as React from "react";
-import {useContext, useMemo, useRef} from "react";
+import {useMemo} from "react";
 import classNames from "classnames";
 import {ReactGridLayout, useContainerWidth, verticalCompactor} from "react-grid-layout";
 import type { PaletteItemDescriptor, PaletteItemSettingsValues, ValueTypeAlias} from "../type.ts";
 
 import RightSidebar from "../../RightSidebar.tsx";
 import SettingsSidebar from "../SettingsSidebar.tsx";
-import type { FormDefinition} from "../../../logic/type.ts";
 import type {
     FieldDefinition,
 } from "../../../logic/field.ts";
 import RuleEditor from "../../logic/components/RuleEditor.tsx";
-import {EditorContext, useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
+import { useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
 
 export type PlaneProps = {
     className?: string;
@@ -58,13 +57,10 @@ export default function Plane({ className, items }: PlaneProps) {
     const currentStep = useEditorContext(s => s.form.steps[s.stepKey!])
     const addField = useEditorContext(s => s.addField)
     const removeField = useEditorContext(s => s.removeField)
-    const updateFieldSettings = useEditorContext(s => s.updateFieldSettings)
     const updateStepLayout = useEditorContext(s => s.updateStepLayout)
     const editingField = useEditorContext(s=>s.editingField)
     const resetEditingField = useEditorContext(s=>s.resetEditingField)
-    const persistEditingField = useEditorContext(s=>s.persistEditingField)
     const setEditingField = useEditorContext(s=>s.setEditingField)
-    const ctx = useContext(EditorContext)
     const layoutItems = useMemo(()=>
         Object.entries(currentStep.fields).map(v=>v[1]),
         [currentStep]

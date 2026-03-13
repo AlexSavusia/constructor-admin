@@ -41,9 +41,9 @@ export type FieldEditorContextValue = {
 }
 
 export type ContextFields = {
-    fields: ObjPath[],
-    variables: ObjPath[],
-    constants: ObjPath[],
+    fields: Record<string, string>,
+    variables: Record<string, string>,
+    constants: Record<string, string>,
 }
 
 export type EditorActions = {
@@ -130,6 +130,7 @@ function setByPath<T, V>(object: T, path: ObjPath, value: V): T {
 export function createContextStore(initialState?: EditorStateValue) {
     return createStore<EditorState>((set, get) => {
         const EDITOR_ACTIONS: EditorActions = {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             getAllContextVariables: (scope: ExpressionScope) => {
                 const { form } = get()
                 const {steps, variables, constants} = form
@@ -137,12 +138,27 @@ export function createContextStore(initialState?: EditorStateValue) {
 
                 return {
                     constants: Object.entries(constants)
-                        .map(v=>["constants", v[0]]),
+                        .map(v=>[objPathToString(["constants", v[0]]), v[1].label])
+                        .reduce((acc, item) => {
+                            // @ts-expect-error no error
+                            acc[item[0]] = item[1]
+                            return acc
+                        }, {}),
                     variables: Object.entries(variables)
-                        .map(v=>["variables", v[0]]),
+                        .map(v=>[objPathToString(["variables", v[0]]), v[1].label])
+                        .reduce((acc, item) => {
+                            // @ts-expect-error no error
+                            acc[item[0]] = item[1]
+                            return acc
+                        }, {}),
                     fields: Object.entries(steps).map(st => Object.entries(st[1].fields)
-                        .map(f => [st[0], "fields", f[0]])).flat()
-                }
+                        .map(f => [objPathToString([st[0], "fields", f[0]]), f[1].settingsValues['name']!]))
+                        .flat().reduce((acc, item) => {
+                            // @ts-expect-error no error
+                            acc[item[0]] = item[1]
+                            return acc
+                        }, {})
+                } as ContextFields
 
             },
             setEditingField: (stepKey, fieldKey) => set((state) => {
@@ -180,17 +196,40 @@ export function createContextStore(initialState?: EditorStateValue) {
             }),
             updateEditingRule: (path, expr) => set((state) => {
                 const editingRule = state.editingRule!
-                const r = setByPath('defaultValue' in editingRule.rule ? (editingRule.rule as BooleanPropertyLogicDefinition).rule : (editingRule.rule as Rule), path, expr)
-                const decisionRule = (["FIELD_SCOPE_PROPERTY"] as ExpressionScope[]).includes(editingRule.scope)
-                return {
-                    editingRule: {
-                        ...state.editingRule,
-                        rule: decisionRule ? {
-                            ...editingRule.rule,
-                            rule: r
-                        } : r,
+                switch (editingRule.scope){
+                    case "FIELD_SCOPE_DECISION": {
+                        const r = setByPath((editingRule.rule as Rule), path, expr)
+                        return {
+                            editingRule: {
+                                ...state.editingRule,
+                                rule: r,
+                            }
+                        } as Partial<EditorState>
                     }
-                } as Partial<EditorState>
+                    case "FIELD_SCOPE_PROPERTY": {
+                        const r = setByPath((editingRule.rule as BooleanPropertyLogicDefinition).rule, path, expr)
+                        return {
+                            editingRule: {
+                                ...state.editingRule,
+                                rule: {
+                                    ...editingRule.rule,
+                                    rule: r
+                                }
+                            }
+                        } as Partial<EditorState>
+                    }
+                    case "STEP_TRANSITION_SCOPE":{
+                        const r = setByPath((editingRule.rule as StepTransitionRule), path, expr)
+                        return {
+                            editingRule: {
+                                ...state.editingRule,
+                                rule: r
+                            }
+                        } as Partial<EditorState>
+                    }
+                    default:
+                        throw new Error(`Unknown scope ${editingRule.scope}`)
+                }
             }),
             setEditingRule: (path: ObjPath, scope: ExpressionScope) => set((state) => {
                 let ruleObj = findByPath<Rule>(state, path)

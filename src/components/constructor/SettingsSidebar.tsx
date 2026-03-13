@@ -39,10 +39,7 @@ function getDescriptor(
     return descriptors.find((x) => x.key === key) ?? null;
 }
 
-export default function SettingsSidebar({
-    onChange,
-                                            items,
-}: SettingsSidebarProps) {
+export default function SettingsSidebar({items}: SettingsSidebarProps) {
     // const s = useEditorContext(s=>s)
     const field = useEditorContext((s) => s.editingField?.draft);
     const editingField = useEditorContext((s) => s.editingField);
