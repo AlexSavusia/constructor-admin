@@ -87,7 +87,7 @@ export default function Constructor({className}: ConstructorProps) {
         <div className={classNames(className,  "d-flex flex-column flex-lg-row max-w-[1620px]","w-100","gap-3")}
              style={{ minHeight: "70vh" }}>
             <div  className="flex-shrink-0"
-                  style={{width: "100%",maxWidth: 320}}>
+                  style={{width: "100%",maxWidth: 220}}>
                 <Palette items={PALETTE_ITEMS}/>
             </div>
             <div className="flex-grow-1">
