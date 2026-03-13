@@ -31,15 +31,8 @@ export type RuntimeVariableDefinition = {
 }
 
 export type ExpressionScope =
-    | "FIELD_SCOPE"
-    | "FIELD_SCOPE_DECISION"
-    | "FIELD_SCOPE_PROPERTY"
-    | "FIELD_ON_UPDATE_SCOPE"
-    | "LOOKUP_BASE_FILTER_SCOPE"
-    | "LOOKUP_ROW_SCOPE"
-    | "STEP_TRANSITION_SCOPE";
-
-export type ScopeCapabilities = {
-    canRead: Array<"self" | "field" | "variable" | "constant" | "row">;
-    canWrite?: Array<"field" | "variable">;
-};
+    | "FIELD_SCOPE_DECISION" // простые булевые операции
+    | "FIELD_SCOPE_PROPERTY" // изменение свойств поля
+    | "FIELD_ON_UPDATE_SCOPE" //
+    | "LOOKUP_ROW_SCOPE" // условие доступности строки справочника для выбора
+    | "STEP_TRANSITION_SCOPE"; // переход на следующий шаг

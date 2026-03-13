@@ -112,7 +112,13 @@ export default function SettingsSidebar({items}: SettingsSidebarProps) {
                                     <button
                                         type="button"
                                         className="btn btn-light btn-sm"
-                                        onClick={()=>setEditingRule([...editingField!.path, "logic", "visibility"], "FIELD_SCOPE_PROPERTY")}
+                                        onClick={()=>setEditingRule(
+                                            [...editingField!.path, "logic", "visibility"],
+                                            "FIELD_SCOPE_PROPERTY",
+                                            {
+                                                editingFieldProperty: "visibility"
+                                            }
+                                        )}
                                     >
                                         Условия
                                     </button>
@@ -144,7 +150,13 @@ export default function SettingsSidebar({items}: SettingsSidebarProps) {
                                     <button
                                         type="button"
                                         className="btn btn-light btn-sm"
-                                        onClick={()=>setEditingRule([...editingField!.path, "logic", "enabled"], "FIELD_SCOPE_PROPERTY")}
+                                        onClick={()=>setEditingRule(
+                                            [...editingField!.path, "logic", "enabled"],
+                                            "FIELD_SCOPE_PROPERTY",
+                                            {
+                                                editingFieldProperty: "enabled"
+                                            }
+                                        )}
                                     >
                                         Условия
                                     </button>
@@ -176,7 +188,12 @@ export default function SettingsSidebar({items}: SettingsSidebarProps) {
                                     <button
                                         type="button"
                                         className="btn btn-sm btn-light"
-                                        onClick={()=>setEditingRule([...editingField!.path, "logic", "required"], "FIELD_SCOPE_PROPERTY")}
+                                        onClick={()=>setEditingRule(
+                                            [...editingField!.path, "logic", "required"],
+                                            "FIELD_SCOPE_PROPERTY",
+                                            {
+                                                editingFieldProperty: "required"
+                                            })}
                                     >
                                         Условие
                                     </button>

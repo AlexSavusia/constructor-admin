@@ -49,10 +49,9 @@ export type ConstValueExpression = {
 }
 
 
-//for things like date.now()
 export type FuncValueExpression = {
     __typ: "func"
-    name: string //now
+    name: string
 }
 
 // export type WriteRef =

@@ -1,7 +1,7 @@
 import type {
     Key,
 } from "../../logic/type.ts";
-import type {BooleanExpression} from "../../logic/expression.ts";
+import type {BooleanExpression, ValueExpression} from "../../logic/expression.ts";
 
 export type Rule = {
     condition: BooleanExpression;
@@ -9,17 +9,29 @@ export type Rule = {
 }
 
 export type ActionExpression =
-    | NoOpActionExpression;
+    | NoOpActionExpression
+    | SetValueActionExpression
+    | ClearValueActionExpression
+    | SetFieldPropertyActionExpression
 
 export type NoOpActionExpression = {
     type: "noop"
 }
 
 export type SetValueActionExpression = {
-    type: "setValue"
+    type: "setValue",
+    value: ValueExpression
 }
 
-export type ClearValueActionExpression = {}
+export type ClearValueActionExpression = {
+    type: "clearValue"
+}
+
+export type SetFieldPropertyActionExpression = {
+    type: "setFieldProperty"
+    property: string
+    value: boolean
+}
 
 
 

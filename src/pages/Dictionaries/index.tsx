@@ -277,13 +277,9 @@ export default function DictionariesPage() {
                                 placeholder="Пиши текст..."
                                 value={text}
                                 options={options}
-                                onChange={(nextValue) => {
-                                    console.log("onChange:", nextValue);
-                                    setText(nextValue);
-                                }}
-                                onOptionSelect={(option, nextValue) => {
-                                    console.log("Выбрано:", option);
-                                    console.log("Новое значение:", nextValue);
+                                onChange={(ast, raw) => {
+                                    console.log("onChange:", ast, raw);
+                                    setText(raw);
                                 }}
                             />
                             <div className="mt-3">

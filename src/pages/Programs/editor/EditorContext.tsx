@@ -31,6 +31,7 @@ export type LogicEditorContextValue = {
     path: ObjPath
     scope: ExpressionScope,
     rule: BooleanPropertyLogicDefinition | Rule | StepTransitionRule
+    meta?: EditingRuleMeta
 }
 
 
@@ -44,6 +45,10 @@ export type ContextFields = {
     fields: Record<string, string>,
     variables: Record<string, string>,
     constants: Record<string, string>,
+}
+
+export type EditingRuleMeta = {
+    editingFieldProperty?: "visibility" | "enabled" | "required"
 }
 
 export type EditorActions = {
@@ -63,7 +68,7 @@ export type EditorActions = {
     addVariable: (variable: RuntimeVariableDefinition) => void
     removeVariable: (variableKey: Key) => void
 
-    setEditingRule: (path: ObjPath, scope: ExpressionScope) => void
+    setEditingRule: (path: ObjPath, scope: ExpressionScope, meta?: EditingRuleMeta) => void
     updateEditingRule: (path: ObjPath, expr: BooleanExpression | ActionExpression) => void
     persistEditingRule: () => void
     resetEditingRule: () => void
@@ -231,7 +236,7 @@ export function createContextStore(initialState?: EditorStateValue) {
                         throw new Error(`Unknown scope ${editingRule.scope}`)
                 }
             }),
-            setEditingRule: (path: ObjPath, scope: ExpressionScope) => set((state) => {
+            setEditingRule: (path: ObjPath, scope: ExpressionScope, meta) => set((state) => {
                 let ruleObj = findByPath<Rule>(state, path)
                 if (ruleObj == null) {
                     ruleObj = {
@@ -248,6 +253,7 @@ export function createContextStore(initialState?: EditorStateValue) {
                         rule: ruleObj,
                         scope: scope,
                         path: path,
+                        meta
                     }
                 }) as Partial<EditorState>;
             }),

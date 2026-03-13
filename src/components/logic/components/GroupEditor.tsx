@@ -30,10 +30,7 @@ export default function GroupEditor({rule, path}: GroupEditorProps) {
         const newCondition: NotEmptyExpression = {
             id: crypto.randomUUID(),
             type: "notEmpty",
-            item: {
-                __typ: "ref",
-                path: ["constants", "name"]
-            }
+            item: ["constants", "name"]
         };
         rule.items.push(newCondition);
         updateEditingRule(path, rule);

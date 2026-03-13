@@ -1,13 +1,14 @@
 import WhenEditor from "./WhenEditor.tsx";
 import Modal from "../../Modal.tsx";
 import {useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
+import ThenEditor from "./ThenEditor.tsx";
 
 
 export default function RuleEditor() {
     const editingRule = useEditorContext(s => s.editingRule)
     const resetEditingRule = useEditorContext(s => s.resetEditingRule)
     const persistEditingRule = useEditorContext(s => s.persistEditingRule)
-
+    const hasThenEditor = editingRule?.scope != "STEP_TRANSITION_SCOPE"
     if (!editingRule) {
         return null;
     }
@@ -20,10 +21,7 @@ export default function RuleEditor() {
             onSave={persistEditingRule}
         >
             <WhenEditor/>
-            {/*<ThenEditor*/}
-            {/*    node={rule.then}*/}
-            {/*    onChange={(then) => setRule((s) => ({ ...s, then }))}*/}
-            {/*/>*/}
+            {hasThenEditor && (<ThenEditor/>)}
         </Modal>
     )
 }

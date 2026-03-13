@@ -8,6 +8,8 @@ import {
     useState,
 } from "react";
 import classNames from "classnames";
+import {parseValueExpression} from "./parser.ts";
+import type {ValueExpression} from "../../../../logic/expression.ts";
 
 export type OptionItem = {
     label: string;
@@ -29,8 +31,8 @@ type Props = Omit<
 > & {
     value?: string;
     options: OptionsSource;
-    onChange?: (value: string) => void;
-    onOptionSelect?: (option: OptionItem, nextValue: string) => void;
+    onChange: (value: ValueExpression | null, rawValue: string) => void;
+    //onOptionSelect?: (option: OptionItem, nextValue: string) => void;
     emptyText?: string;
     matchMode?: MatchMode;
 };
@@ -92,8 +94,8 @@ export default function InputAutocomplete({
                                               value,
                                               className = "",
                                               options,
-                                              onChange,
-                                              onOptionSelect,
+                                              onChange: onChangeExt,
+                                              //onOptionSelect,
                                               emptyText = "Nothing found",
                                               disabled,
                                               matchMode = "includes",
@@ -115,6 +117,15 @@ export default function InputAutocomplete({
 
     const rootRef = useRef<HTMLDivElement | null>(null);
     const inputRef = useRef<HTMLInputElement | null>(null);
+
+    const onChange = (value: string) => {
+        let parsed = null
+        try {
+            parsed = parseValueExpression(value)
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        } catch (_) { /* empty */ }
+        onChangeExt(parsed, value);
+    }
 
     useEffect(() => {
         function handleOutsideClick(event: MouseEvent) {
@@ -165,7 +176,7 @@ export default function InputAutocomplete({
     }
 
     function emitChange(nextValue: string) {
-        onChange?.(nextValue);
+        onChange(nextValue);
     }
 
     function handleInputChange(event: ChangeEvent<HTMLInputElement>) {
@@ -196,8 +207,8 @@ export default function InputAutocomplete({
         setIsOpen(false);
         setHighlightedIndex(-1);
 
-        onChange?.(outputResult.nextValue);
-        onOptionSelect?.(option, outputResult.nextValue);
+        onChange(outputResult.nextValue);
+        //onOptionSelect?.(option, outputResult.nextValue);
 
         requestAnimationFrame(() => {
             if (!inputRef.current) return;
