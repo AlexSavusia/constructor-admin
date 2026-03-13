@@ -22,23 +22,6 @@ export default function Constructor({className}: ConstructorProps) {
     // const setEditingRule = useEditorContext(s=>s.setEditingRule)
     return (
         <>
-        <div className={classNames(className,  "d-flex flex-column flex-lg-row max-w-[1620px]","w-100","gap-3")}
-             style={{ minHeight: "70vh" }}>
-            <div  className="flex-shrink-0"
-                  style={{width: "100%",maxWidth: 320}}>
-                <Palette items={PALETTE_ITEMS}/>
-            </div>
-            <div className="flex-grow-1">
-                <Plane items={PALETTE_ITEMS}/>
-            </div>
-            <button
-                type="button"
-                className="btn btn-primary h-fit"
-                onClick={() => setIsTransitionModalOpen(true)}
-            >
-                Edit transition
-            </button>
-        </div>
             <Modal
                 open={isTransitionModalOpen}
                 onClose={() => setIsTransitionModalOpen(false)}
@@ -101,6 +84,24 @@ export default function Constructor({className}: ConstructorProps) {
                     </div>
                 </div>
             </Modal>
+        <div className={classNames(className,  "d-flex flex-column flex-lg-row max-w-[1620px]","w-100","gap-3")}
+             style={{ minHeight: "70vh" }}>
+            <div  className="flex-shrink-0"
+                  style={{width: "100%",maxWidth: 320}}>
+                <Palette items={PALETTE_ITEMS}/>
+            </div>
+            <div className="flex-grow-1">
+                <Plane items={PALETTE_ITEMS}/>
+            </div>
+            <button
+                type="button"
+                className="btn btn-primary h-fit"
+                onClick={() => setIsTransitionModalOpen(true)}
+            >
+                Edit transition
+            </button>
+        </div>
+
         </>
     )
 }
