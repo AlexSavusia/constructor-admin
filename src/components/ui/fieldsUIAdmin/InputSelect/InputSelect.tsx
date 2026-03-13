@@ -17,14 +17,11 @@ export type OptionItem = {
 type OptionsSource = OptionItem[] | Record<string, string>;
 type MatchMode = "includes" | "startsWith";
 
-type ReplaceContext =
-    | {
+type ReplaceContext = {
     query: string;
     replaceFrom: number;
     replaceTo: number;
-    insertSuffix: string;
-}
-    | null;
+};
 
 type Props = Omit<
     InputHTMLAttributes<HTMLInputElement>,
@@ -36,7 +33,6 @@ type Props = Omit<
     onOptionSelect?: (option: OptionItem, nextValue: string) => void;
     emptyText?: string;
     matchMode?: MatchMode;
-    bracketOnly?: boolean;
 };
 
 function normalizeOptions(options: OptionsSource): OptionItem[] {
@@ -53,37 +49,18 @@ function matches(text: string, query: string, mode: MatchMode): boolean {
     const needle = query.toLowerCase();
 
     if (!needle) return true;
+
     return mode === "startsWith"
         ? source.startsWith(needle)
         : source.includes(needle);
 }
 
-function getBracketContext(value: string, caret: number): ReplaceContext {
-    const leftPart = value.slice(0, caret);
-    const openIndex = leftPart.lastIndexOf("[");
-
-    if (openIndex < 0) return null;
-
-    const closeBeforeCaret = leftPart.lastIndexOf("]");
-    if (closeBeforeCaret > openIndex) return null;
-
-    const closeAfterOpen = value.indexOf("]", openIndex);
-    if (closeAfterOpen !== -1 && closeAfterOpen < caret) return null;
-
-    return {
-        query: value.slice(openIndex + 1, caret),
-        replaceFrom: openIndex + 1,
-        replaceTo: caret,
-        insertSuffix: closeAfterOpen === -1 ? "]" : "",
-    };
-}
-
-function getWordContext(value: string, caret: number): ReplaceContext {
+function getReplaceContext(value: string, caret: number): ReplaceContext | null {
     const left = value.slice(0, caret);
     const right = value.slice(caret);
 
-    const leftMatch = left.match(/([^\s()[\]+\-*/.,;:]*)$/);
-    const rightMatch = right.match(/^([^\s()[\]+\-*/.,;:]*)/);
+    const leftMatch = left.match(/([^\s+\-*/(),;:]*)$/);
+    const rightMatch = right.match(/^([^\s+\-*/(),;:]*)/);
 
     const currentLeft = leftMatch?.[1] ?? "";
     const currentRight = rightMatch?.[1] ?? "";
@@ -94,29 +71,17 @@ function getWordContext(value: string, caret: number): ReplaceContext {
         query: currentLeft,
         replaceFrom: caret - currentLeft.length,
         replaceTo: caret + currentRight.length,
-        insertSuffix: "",
     };
-}
-
-function getReplaceContext(
-    value: string,
-    caret: number,
-    bracketOnly: boolean,
-): ReplaceContext {
-    const bracketContext = getBracketContext(value, caret);
-    if (bracketContext || bracketOnly) return bracketContext;
-
-    return getWordContext(value, caret);
 }
 
 function replaceByContext(
     value: string,
-    context: Exclude<ReplaceContext, null>,
+    context: ReplaceContext,
     token: string,
-) {
+): { nextValue: string; nextCaret: number } {
     const before = value.slice(0, context.replaceFrom);
     const after = value.slice(context.replaceTo);
-    const inserted = `${token}${context.insertSuffix}`;
+    const inserted = token;
     const nextValue = `${before}${inserted}${after}`;
     const nextCaret = before.length + inserted.length;
 
@@ -132,14 +97,17 @@ export default function InputAutocomplete({
                                               emptyText = "Nothing found",
                                               disabled,
                                               matchMode = "includes",
-                                              bracketOnly = false,
                                               onFocus,
                                               onBlur,
                                               onClick,
                                               onKeyUp,
                                               ...props
                                           }: Props) {
-    const inputValue = value ?? "";
+    function stripBrackets(value: string) {
+        return value.replace(/\[([^\]]+)]/g, "$1");
+    }
+
+    const inputValue = stripBrackets(value ?? "");
 
     const [isOpen, setIsOpen] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -168,8 +136,8 @@ export default function InputAutocomplete({
     );
 
     const replaceContext = useMemo(
-        () => getReplaceContext(inputValue, caretIndex, bracketOnly),
-        [inputValue, caretIndex, bracketOnly],
+        () => getReplaceContext(inputValue, caretIndex),
+        [inputValue, caretIndex],
     );
 
     const filteredOptions = useMemo(() => {
@@ -177,8 +145,11 @@ export default function InputAutocomplete({
             return normalizedOptions;
         }
 
-
         const query = replaceContext.query.trim();
+
+        if (!query) {
+            return normalizedOptions;
+        }
 
         return normalizedOptions.filter(
             (option) =>
@@ -186,6 +157,7 @@ export default function InputAutocomplete({
                 matches(option.value, query, matchMode),
         );
     }, [normalizedOptions, replaceContext, matchMode]);
+
 
     function syncCaret() {
         const nextCaret = inputRef.current?.selectionStart ?? inputValue.length;
@@ -205,22 +177,33 @@ export default function InputAutocomplete({
 
     function applyOption(option: OptionItem) {
         const currentCaret = inputRef.current?.selectionStart ?? inputValue.length;
-        const context = getReplaceContext(inputValue, currentCaret, bracketOnly);
+        const context = getReplaceContext(inputValue, currentCaret);
 
-        const result = context
+        const displayResult = context
             ? replaceByContext(inputValue, context, option.value)
-            : { nextValue: option.value, nextCaret: option.value.length };
+            : {
+                nextValue: `${inputValue}${option.value}`,
+                nextCaret: `${inputValue}${option.value}`.length,
+            };
+
+        const outputResult = context
+            ? replaceByContext(inputValue, context, `[${option.value}]`)
+            : {
+                nextValue: `${inputValue}[${option.value}]`,
+                nextCaret: `${inputValue}${option.value}`.length,
+            };
 
         setIsOpen(false);
         setHighlightedIndex(-1);
-        emitChange(result.nextValue);
-        onOptionSelect?.(option, result.nextValue);
+
+        onChange?.(outputResult.nextValue);
+        onOptionSelect?.(option, outputResult.nextValue);
 
         requestAnimationFrame(() => {
             if (!inputRef.current) return;
             inputRef.current.focus();
-            inputRef.current.setSelectionRange(result.nextCaret, result.nextCaret);
-            setCaretIndex(result.nextCaret);
+            inputRef.current.setSelectionRange(displayResult.nextCaret, displayResult.nextCaret);
+            setCaretIndex(displayResult.nextCaret);
         });
     }
 
