@@ -1,0 +1,130 @@
+.field {
+    width: 100%;
+}
+
+.fileUpload {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.fileUploadTop {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.fileUploadLabel {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 16px;
+    color: #2e3038;
+}
+
+.required {
+    font-size: 30px;
+    position: relative;
+    line-height: 1;
+    color: #ea4b4b;
+    display: flex;
+    align-items: center;
+    top: 3px;
+}
+
+.fileDropzone {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 56px;
+    padding: 16px 20px;
+    border: 1px dashed #0047bb;
+    border-radius: 9px;
+    background: #fff;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.fileDropzone:hover {
+    background: #f8fbff;
+}
+
+.fileDropzone.dragOver {
+    background: #eef5ff;
+    border-color: #165ab7;
+}
+
+.fileDropzoneText {
+    font-size: 16px;
+    line-height: 1.4;
+    color: #2e3038;
+    text-align: center;
+}
+
+.fileInput {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+}
+
+.fileHint {
+    font-size: 14px;
+    color: #b9bcc6;
+}
+
+.fileList {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.fileItem {
+    border: 1px solid #dddfe3;
+    border-radius: 9px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: #fff;
+}
+
+.fileInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.fileName {
+    font-size: 15px;
+    color: #2e3038;
+    word-break: break-word;
+}
+
+.fileMeta {
+    font-size: 13px;
+    color: #8f95a3;
+}
+
+.fileRemoveBtn {
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: #b9bcc6;
+    font-size: 20px;
+    line-height: 1;
+    padding: 0;
+}
+
+.fileRemoveBtn:hover {
+    color: #ea4b4b;
+}
+
+.errorText {
+    font-size: 14px;
+    color: #ea4b4b;
+}

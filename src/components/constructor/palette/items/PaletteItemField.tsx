@@ -17,6 +17,7 @@ import RadioButtonsUI, {
 import SwitchUI from "../../../ui/fieldsUI/Switch/Switch.tsx";
 import InputDateUI from "../../../ui/fieldsUI/InputDate/InputDate.tsx";
 import SelectUI from "../../../ui/fieldsUI/Select/Select.tsx";
+import FileUploadUI from "../../../ui/fieldsUI/FileUpload/FileUpload.tsx";
 
 import InputPreview from "../../../ui/fieldsUIAdmin/Input/Input.tsx";
 import { useMemo, useState } from "react";
@@ -51,6 +52,20 @@ function isRadioItemArray(
 }
 
 function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
+    const multiple = Boolean(settingsValues?.multiple ?? true);
+    const maxFileSizeMb = Number(settingsValues?.maxFileSizeMb ?? 20);
+    const acceptRaw = String(settingsValues?.accept ?? "jpg,jpeg,heic,png,pdf");
+
+    const accept = useMemo(
+        () =>
+            acceptRaw
+                .split(",")
+                .map((item) => item.trim().toLowerCase())
+                .filter(Boolean),
+        [acceptRaw],
+    );
+    const [files, setFiles] = useState<File[]>([]);
+
     const label = String(settingsValues?.label ?? "Название поля");
     const required = Boolean(settingsValues?.required ?? false);
     const fieldType = String(settingsValues?.fieldType ?? "input") as PaletteItemType;
@@ -155,6 +170,23 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
             </div>
         );
     }
+    if (fieldType === "file") {
+        return (
+            <div className={classNames(className)}>
+                <FileUploadUI
+                    label={label}
+                    required={required}
+                    disabled={disabled}
+                    files={files}
+                    onChange={setFiles}
+                    multiple={multiple}
+                    accept={accept}
+                    maxFileSizeMb={maxFileSizeMb}
+                />
+            </div>
+        );
+    }
+
 
     return (
         <div className={classNames(className)}>
@@ -206,6 +238,7 @@ const FieldDescriptor: PaletteItemDescriptor = {
                 "switch",
                 "date",
                 "select",
+                "file",
             ],
         },
         {
@@ -227,7 +260,7 @@ const FieldDescriptor: PaletteItemDescriptor = {
             defaultValue: false,
             visibleWhen: {
                 key: "fieldType",
-                equals: ["input", "textarea", "checkbox", "radio", "switch", "select"],
+                equals: ["input", "textarea", "checkbox", "radio", "switch", "select", "file"],
             },
         },
         {
@@ -237,7 +270,7 @@ const FieldDescriptor: PaletteItemDescriptor = {
             defaultValue: false,
             visibleWhen: {
                 key: "fieldType",
-                equals: ["input", "textarea", "checkbox", "radio", "switch", "select"],
+                equals: ["input", "textarea", "checkbox", "radio", "switch", "select", "file"],
             },
         },
         {
@@ -247,7 +280,7 @@ const FieldDescriptor: PaletteItemDescriptor = {
             defaultValue: false,
             visibleWhen: {
                 key: "fieldType",
-                equals: ["input", "checkbox", "date", "select"],
+                equals: ["input", "checkbox", "date", "select", "file"],
             },
         },
         {
@@ -289,6 +322,36 @@ const FieldDescriptor: PaletteItemDescriptor = {
             visibleWhen: {
                 key: "fieldType",
                 equals: ["radio", "select"],
+            },
+        },
+        {
+            key: "multiple",
+            title: "Несколько файлов",
+            valType: "boolean",
+            defaultValue: true,
+            visibleWhen: {
+                key: "fieldType",
+                equals: ["file"],
+            },
+        },
+        {
+            key: "accept",
+            title: "Допустимые расширения",
+            valType: "string",
+            defaultValue: "jpg,jpeg,heic,png,pdf",
+            visibleWhen: {
+                key: "fieldType",
+                equals: ["file"],
+            },
+        },
+        {
+            key: "maxFileSizeMb",
+            title: "Макс. размер файла (МБ)",
+            valType: "string",
+            defaultValue: "20",
+            visibleWhen: {
+                key: "fieldType",
+                equals: ["file"],
             },
         },
     ],
