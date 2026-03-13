@@ -186,18 +186,11 @@ export default function InputAutocomplete({
         const currentCaret = inputRef.current?.selectionStart ?? inputValue.length;
         const context = getReplaceContext(inputValue, currentCaret);
 
-        const displayResult = context
-            ? replaceByContext(inputValue, context, option.value)
-            : {
-                nextValue: `${inputValue}${option.value}`,
-                nextCaret: `${inputValue}${option.value}`.length,
-            };
-
         const outputResult = context
             ? replaceByContext(inputValue, context, `[${option.value}]`)
             : {
                 nextValue: `${inputValue}[${option.value}]`,
-                nextCaret: `${inputValue}${option.value}`.length,
+                nextCaret: `${inputValue}[${option.value}]`.length,
             };
 
         setIsOpen(false);
@@ -209,8 +202,8 @@ export default function InputAutocomplete({
         requestAnimationFrame(() => {
             if (!inputRef.current) return;
             inputRef.current.focus();
-            inputRef.current.setSelectionRange(displayResult.nextCaret, displayResult.nextCaret);
-            setCaretIndex(displayResult.nextCaret);
+            inputRef.current.setSelectionRange(outputResult.nextCaret, outputResult.nextCaret);
+            setCaretIndex(outputResult.nextCaret);
         });
     }
 
