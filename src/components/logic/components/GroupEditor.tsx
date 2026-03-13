@@ -67,7 +67,7 @@ export default function GroupEditor({rule, path}: GroupEditorProps) {
                     <option value="or">ANY of the following</option>
                 </select>
                         <span className="hidden rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500 sm:inline-flex">
-                            {rule.items.length} item{rule.items.length === 1 ? "" : "s"}
+                            {rule?.items?.length ?? 0} item{rule?.items?.length === 1 ? "" : "s"}
                         </span>
                     </div>
                 </div>
