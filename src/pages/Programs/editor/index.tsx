@@ -5,7 +5,7 @@ import type {FormDefinition} from "../../../logic/type.ts";
 import type { StepDefinition } from "../../../logic/step.ts";
 import {useState} from "react";
 import {EditorContext, useEditorContext} from "./EditorContext.tsx";
-import {useContext, useEffect} from "react";
+import {useContext} from "react";
 
 export type FormEditorProps = {
     onSave: (form: FormDefinition) => void;

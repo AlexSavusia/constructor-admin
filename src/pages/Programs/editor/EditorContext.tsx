@@ -12,7 +12,7 @@ import type {PaletteItemSettingsValues} from "../../../components/constructor/ty
 import type {Layout} from "react-grid-layout";
 import type {ActionExpression, Rule} from "../../../components/logic/types.ts";
 import type {BooleanExpression} from "../../../logic/expression.ts";
-import type {BooleanPropertyLogicDefinition} from "../../../logic/logic.ts";
+import type {BooleanPropertyLogicDefinition, StepTransitionRule} from "../../../logic/logic.ts";
 
 export type EditorStateValue = {
     stepKey: Key | null;
@@ -30,7 +30,7 @@ export const objPathFromString = (rs: string) => rs.split(".")
 export type LogicEditorContextValue = {
     path: ObjPath
     scope: ExpressionScope,
-    rule: BooleanPropertyLogicDefinition | Rule
+    rule: BooleanPropertyLogicDefinition | Rule | StepTransitionRule
 }
 
 
@@ -74,6 +74,8 @@ export type EditorActions = {
     resetEditingField: () => void // resets editing object (not field reset)
 
     getAllContextVariables: (scope: ExpressionScope) => ContextFields
+    addStepTransitionRule: (stepKey: Key, transition: StepTransitionRule) => void
+    removeStepTransitionRule: (stepKey: Key, idx: number) => void
 }
 
 export type EditorState = EditorStateValue & EditorActions
@@ -386,7 +388,43 @@ export function createContextStore(initialState?: EditorStateValue) {
                         variables: rest
                     }
                 })
-            })
+            }),
+            addStepTransitionRule: (stepKey, rule) => set((state) => ({
+                form: {
+                    ...state.form,
+                    steps: {
+                        ...state.form.steps,
+                        [stepKey]: {
+                            ...state.form.steps[stepKey],
+                            transition: {
+                                ...state.form.steps[stepKey].transition,
+                                rules: [
+                                    ...state.form.steps[stepKey].transition.rules,
+                                    rule
+                                ]
+                            }
+                        }
+                    }
+                }
+            })),
+            removeStepTransitionRule: (stepKey, idx) => set((state) => ({
+                form: {
+                    ...state.form,
+                    steps: {
+                        ...state.form.steps,
+                        [stepKey]: {
+                            ...state.form.steps[stepKey],
+                            transition: {
+                                ...state.form.steps[stepKey].transition,
+                                rules: [
+                                    ...[...state.form.steps[stepKey].transition.rules]
+                                        .filter((_, i) => i !== idx)
+                                ]
+                            }
+                        }
+                    }
+                }
+            }))
         }
 
 
@@ -429,6 +467,7 @@ export function createContextStore(initialState?: EditorStateValue) {
             scope: null
         }) as EditorState;
     })
+
 }
 
 export const EditorContext = createContext<ReturnType<typeof createContextStore> | null>(null);

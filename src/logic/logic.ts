@@ -46,6 +46,8 @@ export type FieldOnUpdateAction =
     | SetRuntimeVariableValueOnUpdateAction;
 
 export type StepTransitionRule = {
+    id: string
+    title: string
     when: BooleanExpression;
     targetStep: Key;
 }

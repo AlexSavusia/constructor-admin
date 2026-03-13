@@ -6,25 +6,18 @@ import PALETTE_ITEMS from "./palette/PaletteItems.ts";
 // import {useEditorContext} from "../../pages/Programs/editor/EditorContext.tsx";
 import Modal from "../Modal.tsx";
 import {useState} from "react";
+import {useEditorContext} from "../../pages/Programs/editor/EditorContext.tsx";
 
 export type ConstructorProps = {
     className?: string;
 }
 
-type TransitionRow = {
-    id: string;
-    name: string;
-};
-
 export default function Constructor({className}: ConstructorProps) {
     const [isTransitionModalOpen, setIsTransitionModalOpen] = useState(false);
-
-    const transitionRows: TransitionRow[] = [
-        { id: "1", name: "Rule 1" },
-        { id: "2", name: "Rule 2" },
-        { id: "3", name: "Rule 3" },
-    ];
-
+    const currentStepKey = useEditorContext(s=>s.stepKey)!
+    const currentTransitionRules = useEditorContext(s=>s.form.steps[s.stepKey!].transition)
+    const setEditingRule = useEditorContext(s=>s.setEditingRule)
+    const addStepTransitionRule = useEditorContext(s=>s.addStepTransitionRule)
     // const currentStepKey = useEditorContext(s=>s.stepKey)
     // const setEditingRule = useEditorContext(s=>s.setEditingRule)
     return (
@@ -53,6 +46,14 @@ export default function Constructor({className}: ConstructorProps) {
                 <div className="card mb-0">
                     <div className="card-header d-flex align-items-center justify-content-between">
                         <div className="card-title mb-0">Transition rules</div>
+                        <button className="btn btn-primary" onClick={() => addStepTransitionRule(currentStepKey, {
+                            id: crypto.randomUUID(),
+                            title: "Simple step",
+                            when: {type: "and", items: [], id: crypto.randomUUID()},
+                            targetStep: "start"
+                        })}>
+                            Add
+                        </button>
                     </div>
 
                     <div className="card-body">
@@ -70,14 +71,18 @@ export default function Constructor({className}: ConstructorProps) {
                             </thead>
 
                             <tbody>
-                            {transitionRows.map((row) => (
+                            {currentTransitionRules.rules.map((row, idx) => (
                                 <tr key={row.id}>
-                                    <td>{row.name}</td>
+                                    <td>{row.title}</td>
                                     <td>
                                         <div className="d-flex gap-2">
                                             <button
                                                 type="button"
                                                 className="btn btn-info btn-sm"
+                                                onClick={() => setEditingRule(
+                                                    ["form", "steps", currentStepKey, "transition", "rules", idx],
+                                                    "STEP_TRANSITION_SCOPE"
+                                                )}
                                             >
                                                 Изменить
                                             </button>
