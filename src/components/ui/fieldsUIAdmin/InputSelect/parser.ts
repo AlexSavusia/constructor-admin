@@ -1,5 +1,5 @@
-import type {ValueExpression} from "../../../../logic/expression.ts";
-import {objPathFromString} from "../../../../pages/Programs/editor/EditorContext.tsx";
+import type {AstValueExpression, ValueExpression} from "../../../../logic/expression.ts";
+import {type ObjPath, objPathFromString} from "../../../../pages/Programs/editor/EditorContext.tsx";
 
 type Token =
     | { type: "ref"; path: string }
@@ -266,4 +266,81 @@ function tokenize(input: string): Token[] {
     }
 
     return tokens
+}
+
+export function valueExpressionToString(expr: ValueExpression): string {
+    return stringify(expr, 0, false)
+}
+
+function stringify(
+    expr: ValueExpression,
+    parentPrecedence: number,
+    isRightChild: boolean
+): string {
+    switch (expr.__typ) {
+        case "ref":
+            return `[${formatPath(expr.path)}]`
+
+        case "func":
+            return `[${expr.name}()]`
+
+        case "const":
+            if (expr.valueType === "string") {
+                return JSON.stringify(String(expr.value))
+            }
+            return String(expr.value)
+
+        case "ast": {
+            const precedence = getPrecedence(expr.operator)
+
+            const left = stringify(expr.left, precedence, false)
+            const right = stringify(expr.right, precedence, true)
+
+            const operator = operatorToString(expr.operator)
+            let result = `${left}${operator}${right}`
+
+            const needParens =
+                precedence < parentPrecedence ||
+                (isRightChild &&
+                    parentPrecedence === precedence &&
+                    (expr.operator === "add" || expr.operator === "sub" || expr.operator === "mul" || expr.operator === "div"))
+
+            if (needParens) {
+                result = `(${result})`
+            }
+
+            return result
+        }
+    }
+}
+
+function operatorToString(operator: AstValueExpression["operator"]): string {
+    switch (operator) {
+        case "add":
+            return "+"
+        case "sub":
+            return "-"
+        case "mul":
+            return "*"
+        case "div":
+            return "/"
+    }
+}
+
+function getPrecedence(operator: AstValueExpression["operator"]): number {
+    switch (operator) {
+        case "add":
+        case "sub":
+            return 1
+        case "mul":
+        case "div":
+            return 2
+    }
+}
+
+function formatPath(path: ObjPath): string {
+    if (Array.isArray(path)) {
+        return path.join(".")
+    }
+    return String(path)
 }

@@ -1,6 +1,3 @@
-import type {
-    Key,
-} from "../../logic/type.ts";
 import type {BooleanExpression, ValueExpression} from "../../logic/expression.ts";
 
 export type Rule = {
@@ -13,6 +10,7 @@ export type ActionExpression =
     | SetValueActionExpression
     | ClearValueActionExpression
     | SetFieldPropertyActionExpression
+    | SetFieldErrorActionExpression
 
 export type NoOpActionExpression = {
     type: "noop"
@@ -33,17 +31,7 @@ export type SetFieldPropertyActionExpression = {
     value: boolean
 }
 
-
-
-
-
-export type EditorPath =
-    | { type: "fieldLogicVisibility"; fieldKey: Key }
-    | { type: "fieldLogicEnabled"; fieldKey: Key }
-    | { type: "fieldLogicRequired"; fieldKey: Key }
-    | { type: "fieldLogicValue"; fieldKey: Key }
-    | { type: "fieldOnUpdateRule"; fieldKey: Key; ruleIndex: number }
-    | { type: "fieldOnUpdateAction"; fieldKey: Key; ruleIndex: number; actionIndex: number }
-    | { type: "stepTransitionRule"; stepKey: Key; ruleIndex: number }
-    | { type: "lookupBaseFilter"; lookupKey: Key }
-    | { type: "lookupRowAvailability"; fieldKey: Key; rowId: string; prop: "enabled" | "selectable" };
+export type SetFieldErrorActionExpression = {
+    type: "setFieldError"
+    text: string
+}

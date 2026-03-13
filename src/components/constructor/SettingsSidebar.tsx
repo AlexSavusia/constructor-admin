@@ -70,7 +70,12 @@ export default function SettingsSidebar({items}: SettingsSidebarProps) {
                     <button
                         type="button"
                         className="btn btn-light w-100"
-                        onClick={()=>setEditingRule([...editingField!.path, "logic", "validation"], "FIELD_SCOPE_DECISION")}
+                        onClick={()=>setEditingRule(
+                            [...editingField!.path, "logic", "validation"],
+                            "FIELD_SCOPE_DECISION",
+                            {
+                                editingFieldProperty: "validation"
+                            })}
                     >
                         Валидация
                     </button>

@@ -48,7 +48,7 @@ export type ContextFields = {
 }
 
 export type EditingRuleMeta = {
-    editingFieldProperty?: "visibility" | "enabled" | "required"
+    editingFieldProperty?: "visibility" | "enabled" | "required" | "validation"
 }
 
 export type EditorActions = {
@@ -136,7 +136,7 @@ export function createContextStore(initialState?: EditorStateValue) {
     return createStore<EditorState>((set, get) => {
         const EDITOR_ACTIONS: EditorActions = {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            getAllContextVariables: (scope: ExpressionScope) => {
+            getAllContextVariables: (_scope: ExpressionScope) => {
                 const { form } = get()
                 const {steps, variables, constants} = form
 

@@ -78,6 +78,11 @@ export type FieldLogicDefinition = {
     value?: ValueLogicDefinition; //this will have higher priority then onUpdate if both are set (or just do not allow setting both?)
 }
 
+export type FieldValidationDefinition = {
+    condition: BooleanExpression,
+    text: string
+}
+
 export type FieldDefinition =
     | InputFieldDefinition
     | OutputFieldDefinition;

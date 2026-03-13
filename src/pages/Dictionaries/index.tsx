@@ -4,6 +4,7 @@ import TableToolbar from "../../components/ui/TableToolbar";
 import PaginationFooter from "../../components/ui/PaginationFooter";
 import DictionaryRow from "../../components/ui/DictionaryRow";
 import InputAutocomplete from "../../components/ui/fieldsUIAdmin/InputSelect/InputSelect.tsx";
+import {valueExpressionToString} from "../../components/ui/fieldsUIAdmin/InputSelect/parser.ts";
 
 type DictionaryItem = {
     id: string;
@@ -278,7 +279,7 @@ export default function DictionariesPage() {
                                 value={text}
                                 options={options}
                                 onChange={(ast, raw) => {
-                                    console.log("onChange:", ast, raw);
+                                    console.log("onChange:", ast, raw, ast ? valueExpressionToString(ast) : "");
                                     setText(raw);
                                 }}
                             />

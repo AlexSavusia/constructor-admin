@@ -1,28 +1,6 @@
 import type {ObjPath} from "../pages/Programs/editor/EditorContext.tsx";
 import type {ActionExpression} from "../components/logic/types.ts";
 
-//[birthdate]+[now()]-33
-const g: ValueExpression = {
-    __typ: "ast",
-    operator: "add",
-    left: {
-        __typ: "ref",
-        path: "some.cool.path".split(".")
-    },
-    right: {
-        __typ: "ast",
-        operator: "sub",
-        left: {
-            __typ: "func",
-            name: "now"
-        },
-        right: {
-            __typ: "const",
-            value: 33,
-            valueType: "number"
-        }
-    }
-}
 
 export type ValueExpression =
     | AstValueExpression

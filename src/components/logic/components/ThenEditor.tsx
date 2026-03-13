@@ -1,5 +1,5 @@
 import type {Rule} from "../types.ts";
-import {type ObjPath, useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
+import {type ObjPath, objPathToString, useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
 import type {BooleanPropertyLogicDefinition} from "../../../logic/logic.ts";
 import ActionRow from "./ActionRow.tsx";
 
@@ -45,7 +45,7 @@ export default function ThenEditor() {
                 <div className="mx-auto max-w-6xl">
                     <div className="rounded-xl border border-slate-100 bg-slate-50/70 p-4 sm:p-5">
                         {rule.actions.map((action, idx) => (
-                            <ActionRow action={action} path={[...path, idx]}/>
+                            <ActionRow key={objPathToString([...path, idx])} action={action} path={[...path, idx]}/>
                         ))}
                         <button onClick={addAction}>+ Add action</button>
                     </div>

@@ -6,11 +6,11 @@ import {
 } from "../../../logic/expression.ts";
 import {
     type ObjPath,
-    objPathFromString,
-    objPathToString,
     useEditorContext
 } from "../../../pages/Programs/editor/EditorContext.tsx";
 import InputAutocomplete from "../../../components/ui/fieldsUIAdmin/InputSelect/InputSelect.tsx";
+import {valueExpressionToString} from "../../ui/fieldsUIAdmin/InputSelect/parser.ts";
+import {useState} from "react";
 
 export type ConditionRowProps = {
     rule: BooleanExpression
@@ -40,8 +40,10 @@ export default function ConditionRow({rule, path}: ConditionRowProps) {
     const firstArg = twoOperand
         ? (rule as Boolean2OperandExpression).left
         : (rule as StupidFuck).item
+    const [rawFirstArg, setRawFirstArg] = useState<string>(valueExpressionToString(firstArg))
 
     const secondArg = twoOperand ? (rule as Boolean2OperandExpression).right : null
+    const [rawSecondArg, setRawSecondArg] = useState<string>(secondArg ? valueExpressionToString(secondArg) : "")
 
     const contextVariablePaths = getAllContextVariables(scope)
     const allFields = {
@@ -49,17 +51,23 @@ export default function ConditionRow({rule, path}: ConditionRowProps) {
         ...contextVariablePaths.variables,
         ...contextVariablePaths.constants
     }
-
+//TODO постоянно конвертировать дерево в строке для value такая себе идея надо хранить выражение строкой
     return (
         <div className="my-2 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm lg:flex-row lg:items-center">
             <InputAutocomplete
                 className="min-h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 lg:flex-1"
                 placeholder="Пиши текст..."
-                value={firstArg}
+                value={rawFirstArg}
                 options={allFields}
                 onChange={(ast, raw) => {
+                    setRawFirstArg(raw)
+                    if(ast) {
+                        updateEditingRule(path, {
+                            ...rule as Boolean2OperandExpression,
+                            left: ast
+                        });
+                    }
                     console.log("onChange:", ast, raw);
-                    setText(raw);
                 }}
             />
             <select
@@ -109,21 +117,22 @@ export default function ConditionRow({rule, path}: ConditionRowProps) {
                 ))}
             </select>
             {(twoOperand) &&
-                <select
+                <InputAutocomplete
                     className="min-h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 lg:flex-1"
-                    value={secondArg ? objPathToString(secondArg) : undefined}
-                    onChange={e=> {
-                        const np = objPathFromString(e.target.value) as ObjPath;
-                        updateEditingRule(path, {
-                            ...rule as Boolean2OperandExpression,
-                            right: np
-                        });
+                    placeholder="Пиши текст..."
+                    value={rawSecondArg}
+                    options={allFields}
+                    onChange={(ast, raw) => {
+                        setRawSecondArg(raw)
+                        if(ast) {
+                            updateEditingRule(path, {
+                                ...rule as Boolean2OperandExpression,
+                                right: ast
+                            });
+                        }
+                        console.log("onChange:", ast, raw);
                     }}
-                >
-                    {Object.entries(allFields).map(([p, l]) => (
-                        <option key={p} value={p}>{l}</option>
-                    ))}
-                </select>
+                />
             }
         </div>
     )

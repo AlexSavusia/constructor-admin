@@ -1,5 +1,6 @@
 import {type ObjPath, useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
-import type {ActionExpression, SetFieldPropertyActionExpression} from "../types.ts";
+import type {ActionExpression, SetFieldErrorActionExpression, SetFieldPropertyActionExpression} from "../types.ts";
+import Input from "../../ui/fieldsUIAdmin/Input/Input.tsx";
 
 export type ActionRowProps = {
     action: ActionExpression;
@@ -18,7 +19,15 @@ export default function ActionRow({action, path}: ActionRowProps) {
         case "FIELD_SCOPE_PROPERTY":
             actionTypes = {
                 ...actionTypes,
-                "setFieldProperty": `Установить значение свойства ${editingRule.meta?.editingFieldProperty ?? ""}`
+                "setFieldProperty": `Установить значение свойства ${editingRule.meta?.editingFieldProperty ?? ""}`,
+                // "clearValue": `Очистить значение поля ${editingRule.meta?.editingFieldProperty ?? ""}`,
+                // "setValue": `Установить значение поля ${editingRule.meta?.editingFieldProperty ?? ""}`
+            }
+            break
+        case "FIELD_SCOPE_DECISION":
+            actionTypes = {
+                ...actionTypes,
+                "setFieldError": `Вывести ошибку`
             }
             break
         default:
@@ -48,6 +57,18 @@ export default function ActionRow({action, path}: ActionRowProps) {
                         }}
                     />
                     <label className="form-check-label text-sm text-slate-700">Enabled</label>
+                </div>
+            )}
+            {action.type == "setFieldError" && (
+                <div className="mb-3 form-check flex items-center gap-2">
+                    <Input
+                        className="mb-3 w-full rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-100"
+                        placeholder="Name"
+                        value={(action as SetFieldErrorActionExpression).text}
+                        onChange={e=>{
+                            updateEditingRule(path, { ...action, text: e.target.value} as SetFieldErrorActionExpression)
+                        }}
+                    />
                 </div>
             )}
 
