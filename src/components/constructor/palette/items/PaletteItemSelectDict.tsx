@@ -16,9 +16,11 @@ function PaletteItemInput({ className, settingsValues }: PaletteItemProps) {
     return (
         <div className={classNames(className)}>
             <SelectUI
+                name={name}
                 label={label}
                 required={required}
-                type={inputType}
+                disabled={disabled}
+                options={optionsData}
             />
         </div>
     )
