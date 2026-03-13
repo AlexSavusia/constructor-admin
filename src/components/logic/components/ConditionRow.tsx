@@ -10,6 +10,7 @@ import {
     objPathToString,
     useEditorContext
 } from "../../../pages/Programs/editor/EditorContext.tsx";
+import InputAutocomplete from "../../../components/ui/fieldsUIAdmin/InputSelect/InputSelect.tsx";
 
 export type ConditionRowProps = {
     rule: BooleanExpression
@@ -51,29 +52,27 @@ export default function ConditionRow({rule, path}: ConditionRowProps) {
 
     return (
         <div className="my-2 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm lg:flex-row lg:items-center">
-            <select
+            <InputAutocomplete
                 className="min-h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 lg:flex-1"
                 value={objPathToString(firstArg)}
-                onChange={e=> {
-                    const np = objPathFromString(e.target.value) as ObjPath;
-                    if(twoOperand) {
+                options={allFields}
+                matchMode="includes"
+                onOptionSelect={(option) => {
+                    const np = objPathFromString(option.value) as ObjPath;
+
+                    if (twoOperand) {
                         updateEditingRule(path, {
-                            ...rule as Boolean2OperandExpression,
-                            left: np
+                            ...(rule as Boolean2OperandExpression),
+                            left: np,
                         });
-                    }
-                    else {
+                    } else {
                         updateEditingRule(path, {
-                            ...rule as StupidFuck,
-                            item: np
+                            ...(rule as StupidFuck),
+                            item: np,
                         });
                     }
                 }}
-            >
-                {Object.entries(allFields).map(([p, l]) => (
-                    <option key={p} value={p}>{l}</option>
-                ))}
-            </select>
+            />
             <select
                 className="min-h-[42px] w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 lg:w-[220px] lg:flex-none"
                 value={rule.type}

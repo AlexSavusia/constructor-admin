@@ -3,6 +3,7 @@ import PageHeader from "../../components/ui/PageHeader";
 import TableToolbar from "../../components/ui/TableToolbar";
 import PaginationFooter from "../../components/ui/PaginationFooter";
 import DictionaryRow from "../../components/ui/DictionaryRow";
+import InputAutocomplete from "../../components/ui/fieldsUIAdmin/InputSelect/InputSelect.tsx";
 
 type DictionaryItem = {
     id: string;
@@ -97,7 +98,23 @@ const MOCK_ITEMS: DictionaryItem[] = [
         groupId: "3",
     },
 ];
+
+const options = [
+    { label: "birthdate", value: "birthdate" },
+    { label: "now()", value: "now()" },
+    { label: "firstname", value: "firstname" },
+    { label: "lastname", value: "lastname" },
+    { label: "age", value: "age" },
+    { label: "email", value: "email" },
+    { label: "phone", value: "phone" },
+    { label: "eq", value: "eq" },
+    { label: "gt", value: "gt" },
+    { label: "lt", value: "lt" },
+];
+
+
 export default function DictionariesPage() {
+    const [text, setText] = useState("[bir");
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(20);
     const [search, setSearch] = useState("");
@@ -254,6 +271,26 @@ export default function DictionariesPage() {
                             countOnPage={pageItems.length}
                             onPageChange={(p) => setPage(Math.max(1, Math.min(totalPages, p)))}
                         />
+
+                        <div style={{ maxWidth: 400 }}>
+                            <InputAutocomplete
+                                placeholder="Пиши текст..."
+                                value={text}
+                                options={options}
+                                onChange={(nextValue) => {
+                                    console.log("onChange:", nextValue);
+                                    setText(nextValue);
+                                }}
+                                onOptionSelect={(option, nextValue) => {
+                                    console.log("Выбрано:", option);
+                                    console.log("Новое значение:", nextValue);
+                                }}
+                            />
+                            <div className="mt-3">
+                                <strong>Текущее значение:</strong>
+                                <pre className="mt-2 p-2 border rounded bg-light">{text}</pre>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
