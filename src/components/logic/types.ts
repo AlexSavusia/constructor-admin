@@ -15,6 +15,12 @@ export type NoOpActionExpression = {
     type: "noop"
 }
 
+export type SetValueActionExpression = {
+    type: "setValue"
+}
+
+export type ClearValueActionExpression = {}
+
 
 
 

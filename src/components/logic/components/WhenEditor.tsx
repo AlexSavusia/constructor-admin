@@ -3,10 +3,6 @@ import {type ObjPath, useEditorContext} from "../../../pages/Programs/editor/Edi
 import type {BooleanPropertyLogicDefinition, StepTransitionRule} from "../../../logic/logic.ts";
 import type {Rule} from "../types.ts";
 
-export type WhenEditorProps = {
-
-}
-
 export default function WhenEditor() {
     const editingRule = useEditorContext(s=>s.editingRule)!
     //const ruleType = "defaultValue" in editingRule.rule ? "property" : "expression"

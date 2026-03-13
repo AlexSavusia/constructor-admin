@@ -1,7 +1,59 @@
 import type {ObjPath} from "../pages/Programs/editor/EditorContext.tsx";
 import type {ActionExpression} from "../components/logic/types.ts";
 
-export type ValueExpression = ObjPath
+//[birthdate]+[now()]-33
+const g: ValueExpression = {
+    __typ: "ast",
+    operator: "add",
+    left: {
+        __typ: "ref",
+        path: "some.cool.path".split(".")
+    },
+    right: {
+        __typ: "ast",
+        operator: "sub",
+        left: {
+            __typ: "func",
+            name: "now"
+        },
+        right: {
+            __typ: "const",
+            value: 33,
+            valueType: "number"
+        }
+    }
+}
+
+export type ValueExpression =
+    | AstValueExpression
+    | RefValueExpression
+    | ConstValueExpression
+    | FuncValueExpression
+
+export type AstValueExpression = {
+    __typ: "ast"
+    operator: "add" | "sub" | "mul" | "div"
+    left: AstValueExpression | RefValueExpression | ConstValueExpression | FuncValueExpression
+    right: AstValueExpression | RefValueExpression | ConstValueExpression | FuncValueExpression
+}
+
+export type RefValueExpression = {
+    __typ: "ref"
+    path: ObjPath
+}
+
+export type ConstValueExpression = {
+    __typ: "const"
+    value: unknown
+    valueType: "string" | "number"
+}
+
+
+//for things like date.now()
+export type FuncValueExpression = {
+    __typ: "func"
+    name: string //now
+}
 
 // export type WriteRef =
 //     FieldRef |
