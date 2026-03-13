@@ -1,4 +1,4 @@
-import {type ChangeEvent, useId } from "react";
+import { type ChangeEvent, useId } from 'react';
 
 type Props = {
     name: string;
@@ -10,7 +10,7 @@ type Props = {
     className?: string;
 };
 
-export default function Checkbox({name, label, checked, disabled, onChange, required, className = ""}: Props) {
+export default function Checkbox({ name, label, checked, disabled, onChange, required, className = '' }: Props) {
     const id = useId();
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

@@ -1,346 +1,342 @@
-import type {AstValueExpression, ValueExpression} from "../../../../logic/expression.ts";
-import {type ObjPath, objPathFromString} from "../../../../pages/Programs/editor/EditorContext.tsx";
+import type { AstValueExpression, ValueExpression } from '../../../../logic/expression.ts';
+import { type ObjPath, objPathFromString } from '../../../../pages/Programs/editor/EditorContext.tsx';
 
 type Token =
-    | { type: "ref"; path: string }
-    | { type: "func"; name: string }
-    | { type: "number"; value: number }
-    | { type: "string"; value: string }
-    | { type: "plus" }
-    | { type: "minus" }
-    | { type: "mul" }
-    | { type: "div" }
-    | { type: "lparen" }
-    | { type: "rparen" }
+    | { type: 'ref'; path: string }
+    | { type: 'func'; name: string }
+    | { type: 'number'; value: number }
+    | { type: 'string'; value: string }
+    | { type: 'plus' }
+    | { type: 'minus' }
+    | { type: 'mul' }
+    | { type: 'div' }
+    | { type: 'lparen' }
+    | { type: 'rparen' };
 
 export function parseValueExpression(input: string): ValueExpression {
-    const tokens = tokenize(input)
+    const tokens = tokenize(input);
     if (tokens.length === 0) {
-        throw new Error("Expression is empty")
+        throw new Error('Expression is empty');
     }
 
-    let pos = 0
+    let pos = 0;
 
     function peek(): Token | undefined {
-        return tokens[pos]
+        return tokens[pos];
     }
 
     function consume(): Token {
-        const token = tokens[pos]
+        const token = tokens[pos];
         if (!token) {
-            throw new Error("Unexpected end of expression")
+            throw new Error('Unexpected end of expression');
         }
-        pos++
-        return token
+        pos++;
+        return token;
     }
 
     function parsePrimary(): ValueExpression {
-        const token = peek()
+        const token = peek();
         if (!token) {
-            throw new Error("Unexpected end of expression")
+            throw new Error('Unexpected end of expression');
         }
 
-        if (token.type === "lparen") {
-            consume()
-            const expr = parseAddSub()
-            const closing = consume()
-            if (closing.type !== "rparen") {
-                throw new Error(`Expected ")" but got "${closing.type}"`)
+        if (token.type === 'lparen') {
+            consume();
+            const expr = parseAddSub();
+            const closing = consume();
+            if (closing.type !== 'rparen') {
+                throw new Error(`Expected ")" but got "${closing.type}"`);
             }
-            return expr
+            return expr;
         }
 
-        consume()
+        consume();
 
         switch (token.type) {
-            case "ref":
+            case 'ref':
                 return {
-                    __typ: "ref",
+                    __typ: 'ref',
                     path: objPathFromString(token.path),
-                }
+                };
 
-            case "func":
+            case 'func':
                 return {
-                    __typ: "func",
+                    __typ: 'func',
                     name: token.name,
-                }
+                };
 
-            case "number":
+            case 'number':
                 return {
-                    __typ: "const",
+                    __typ: 'const',
                     value: token.value,
-                    valueType: "number",
-                }
+                    valueType: 'number',
+                };
 
-            case "string":
+            case 'string':
                 return {
-                    __typ: "const",
+                    __typ: 'const',
                     value: token.value,
-                    valueType: "string",
-                }
+                    valueType: 'string',
+                };
 
             default:
-                throw new Error(`Unexpected token "${token.type}"`)
+                throw new Error(`Unexpected token "${token.type}"`);
         }
     }
 
     function parseMulDiv(): ValueExpression {
-        let left = parsePrimary()
+        let left = parsePrimary();
 
         while (true) {
-            const token = peek()
-            if (!token || (token.type !== "mul" && token.type !== "div")) {
-                break
+            const token = peek();
+            if (!token || (token.type !== 'mul' && token.type !== 'div')) {
+                break;
             }
 
-            consume()
-            const right = parsePrimary()
+            consume();
+            const right = parsePrimary();
 
             left = {
-                __typ: "ast",
-                operator: token.type === "mul" ? "mul" : "div",
+                __typ: 'ast',
+                operator: token.type === 'mul' ? 'mul' : 'div',
                 left,
                 right,
-            }
+            };
         }
 
-        return left
+        return left;
     }
 
     function parseAddSub(): ValueExpression {
-        let left = parseMulDiv()
+        let left = parseMulDiv();
 
         while (true) {
-            const token = peek()
-            if (!token || (token.type !== "plus" && token.type !== "minus")) {
-                break
+            const token = peek();
+            if (!token || (token.type !== 'plus' && token.type !== 'minus')) {
+                break;
             }
 
-            consume()
-            const right = parseMulDiv()
+            consume();
+            const right = parseMulDiv();
 
             left = {
-                __typ: "ast",
-                operator: token.type === "plus" ? "add" : "sub",
+                __typ: 'ast',
+                operator: token.type === 'plus' ? 'add' : 'sub',
                 left,
                 right,
-            }
+            };
         }
 
-        return left
+        return left;
     }
 
-    const result = parseAddSub()
+    const result = parseAddSub();
 
     if (pos < tokens.length) {
-        throw new Error(`Unexpected token "${tokens[pos].type}" at position ${pos}`)
+        throw new Error(`Unexpected token "${tokens[pos].type}" at position ${pos}`);
     }
 
-    return result
+    return result;
 }
 
 function tokenize(input: string): Token[] {
-    const tokens: Token[] = []
-    let i = 0
+    const tokens: Token[] = [];
+    let i = 0;
 
     while (i < input.length) {
-        const ch = input[i]
+        const ch = input[i];
 
         if (/\s/.test(ch)) {
-            i++
-            continue
+            i++;
+            continue;
         }
 
-        if (ch === "+") {
-            tokens.push({ type: "plus" })
-            i++
-            continue
+        if (ch === '+') {
+            tokens.push({ type: 'plus' });
+            i++;
+            continue;
         }
 
-        if (ch === "-") {
-            tokens.push({ type: "minus" })
-            i++
-            continue
+        if (ch === '-') {
+            tokens.push({ type: 'minus' });
+            i++;
+            continue;
         }
 
-        if (ch === "*") {
-            tokens.push({ type: "mul" })
-            i++
-            continue
+        if (ch === '*') {
+            tokens.push({ type: 'mul' });
+            i++;
+            continue;
         }
 
-        if (ch === "/") {
-            tokens.push({ type: "div" })
-            i++
-            continue
+        if (ch === '/') {
+            tokens.push({ type: 'div' });
+            i++;
+            continue;
         }
 
-        if (ch === "(") {
-            tokens.push({ type: "lparen" })
-            i++
-            continue
+        if (ch === '(') {
+            tokens.push({ type: 'lparen' });
+            i++;
+            continue;
         }
 
-        if (ch === ")") {
-            tokens.push({ type: "rparen" })
-            i++
-            continue
+        if (ch === ')') {
+            tokens.push({ type: 'rparen' });
+            i++;
+            continue;
         }
 
         if (ch === '"' || ch === "'") {
-            const quote = ch
-            i++
-            const start = i
+            const quote = ch;
+            i++;
+            const start = i;
 
             while (i < input.length && input[i] !== quote) {
-                i++
+                i++;
             }
 
             if (i >= input.length) {
-                throw new Error(`Unterminated string starting at position ${start - 1}`)
+                throw new Error(`Unterminated string starting at position ${start - 1}`);
             }
 
-            const value = input.slice(start, i)
-            i++
+            const value = input.slice(start, i);
+            i++;
 
             tokens.push({
-                type: "string",
+                type: 'string',
                 value,
-            })
-            continue
+            });
+            continue;
         }
 
         if (/\d/.test(ch)) {
-            const start = i
+            const start = i;
             while (i < input.length && /[\d.]/.test(input[i])) {
-                i++
+                i++;
             }
 
-            const raw = input.slice(start, i)
-            const value = Number(raw)
+            const raw = input.slice(start, i);
+            const value = Number(raw);
 
             if (Number.isNaN(value)) {
-                throw new Error(`Invalid number "${raw}"`)
+                throw new Error(`Invalid number "${raw}"`);
             }
 
             tokens.push({
-                type: "number",
+                type: 'number',
                 value,
-            })
-            continue
+            });
+            continue;
         }
 
-        if (ch === "[") {
-            const closeIndex = input.indexOf("]", i)
+        if (ch === '[') {
+            const closeIndex = input.indexOf(']', i);
             if (closeIndex === -1) {
-                throw new Error(`Unclosed "[" at position ${i}`)
+                throw new Error(`Unclosed "[" at position ${i}`);
             }
 
-            const content = input.slice(i + 1, closeIndex).trim()
+            const content = input.slice(i + 1, closeIndex).trim();
             if (!content) {
-                throw new Error(`Empty brackets at position ${i}`)
+                throw new Error(`Empty brackets at position ${i}`);
             }
 
-            if (content.endsWith("()")) {
-                const name = content.slice(0, -2).trim()
+            if (content.endsWith('()')) {
+                const name = content.slice(0, -2).trim();
                 if (!name) {
-                    throw new Error(`Empty function name at position ${i}`)
+                    throw new Error(`Empty function name at position ${i}`);
                 }
 
                 tokens.push({
-                    type: "func",
+                    type: 'func',
                     name,
-                })
+                });
             } else {
                 tokens.push({
-                    type: "ref",
+                    type: 'ref',
                     path: content,
-                })
+                });
             }
 
-            i = closeIndex + 1
-            continue
+            i = closeIndex + 1;
+            continue;
         }
 
-        throw new Error(`Unexpected character "${ch}" at position ${i}`)
+        throw new Error(`Unexpected character "${ch}" at position ${i}`);
     }
 
-    return tokens
+    return tokens;
 }
 
 export function valueExpressionToString(expr: ValueExpression): string {
-    return stringify(expr, 0, false)
+    return stringify(expr, 0, false);
 }
 
-function stringify(
-    expr: ValueExpression,
-    parentPrecedence: number,
-    isRightChild: boolean
-): string {
+function stringify(expr: ValueExpression, parentPrecedence: number, isRightChild: boolean): string {
     switch (expr.__typ) {
-        case "ref":
-            return `[${formatPath(expr.path)}]`
+        case 'ref':
+            return `[${formatPath(expr.path)}]`;
 
-        case "func":
-            return `[${expr.name}()]`
+        case 'func':
+            return `[${expr.name}()]`;
 
-        case "const":
-            if (expr.valueType === "string") {
-                return JSON.stringify(String(expr.value))
+        case 'const':
+            if (expr.valueType === 'string') {
+                return JSON.stringify(String(expr.value));
             }
-            return String(expr.value)
+            return String(expr.value);
 
-        case "ast": {
-            const precedence = getPrecedence(expr.operator)
+        case 'ast': {
+            const precedence = getPrecedence(expr.operator);
 
-            const left = stringify(expr.left, precedence, false)
-            const right = stringify(expr.right, precedence, true)
+            const left = stringify(expr.left, precedence, false);
+            const right = stringify(expr.right, precedence, true);
 
-            const operator = operatorToString(expr.operator)
-            let result = `${left}${operator}${right}`
+            const operator = operatorToString(expr.operator);
+            let result = `${left}${operator}${right}`;
 
             const needParens =
                 precedence < parentPrecedence ||
                 (isRightChild &&
                     parentPrecedence === precedence &&
-                    (expr.operator === "add" || expr.operator === "sub" || expr.operator === "mul" || expr.operator === "div"))
+                    (expr.operator === 'add' || expr.operator === 'sub' || expr.operator === 'mul' || expr.operator === 'div'));
 
             if (needParens) {
-                result = `(${result})`
+                result = `(${result})`;
             }
 
-            return result
+            return result;
         }
     }
 }
 
-function operatorToString(operator: AstValueExpression["operator"]): string {
+function operatorToString(operator: AstValueExpression['operator']): string {
     switch (operator) {
-        case "add":
-            return "+"
-        case "sub":
-            return "-"
-        case "mul":
-            return "*"
-        case "div":
-            return "/"
+        case 'add':
+            return '+';
+        case 'sub':
+            return '-';
+        case 'mul':
+            return '*';
+        case 'div':
+            return '/';
     }
 }
 
-function getPrecedence(operator: AstValueExpression["operator"]): number {
+function getPrecedence(operator: AstValueExpression['operator']): number {
     switch (operator) {
-        case "add":
-        case "sub":
-            return 1
-        case "mul":
-        case "div":
-            return 2
+        case 'add':
+        case 'sub':
+            return 1;
+        case 'mul':
+        case 'div':
+            return 2;
     }
 }
 
 function formatPath(path: ObjPath): string {
     if (Array.isArray(path)) {
-        return path.join(".")
+        return path.join('.');
     }
-    return String(path)
+    return String(path);
 }

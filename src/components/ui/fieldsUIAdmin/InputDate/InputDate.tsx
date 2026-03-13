@@ -1,7 +1,7 @@
-import { useEffect, useRef, useState } from "react";
-import { DayPicker } from "react-day-picker";
-import { ru } from "date-fns/locale";
-import "react-day-picker/dist/style.css";
+import { useEffect, useRef, useState } from 'react';
+import { DayPicker } from 'react-day-picker';
+import { ru } from 'date-fns/locale';
+import 'react-day-picker/dist/style.css';
 
 type Props = {
     value?: string;
@@ -12,14 +12,14 @@ type Props = {
 };
 
 function formatDate(date: Date) {
-    const day = String(date.getDate()).padStart(2, "0");
-    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
     const year = date.getFullYear();
     return `${day}/${month}/${year}`;
 }
 
 function parseDate(value: string) {
-    const parts = value.split("/");
+    const parts = value.split('/');
     if (parts.length !== 3) return undefined;
 
     const day = Number(parts[0]);
@@ -28,19 +28,14 @@ function parseDate(value: string) {
 
     const date = new Date(year, month, day);
 
-    if (
-        Number.isNaN(date.getTime()) ||
-        date.getDate() !== day ||
-        date.getMonth() !== month ||
-        date.getFullYear() !== year
-    ) {
+    if (Number.isNaN(date.getTime()) || date.getDate() !== day || date.getMonth() !== month || date.getFullYear() !== year) {
         return undefined;
     }
 
     return date;
 }
 
-export default function InputDate({value = "", onChange, disabled, placeholder = "dd/mm/yyyy", className = ""}: Props) {
+export default function InputDate({ value = '', onChange, disabled, placeholder = 'dd/mm/yyyy', className = '' }: Props) {
     const [inputValue, setInputValue] = useState(value);
     const [selected, setSelected] = useState<Date | undefined>(parseDate(value));
     const [open, setOpen] = useState(false);
@@ -59,8 +54,8 @@ export default function InputDate({value = "", onChange, disabled, placeholder =
             }
         }
 
-        document.addEventListener("mousedown", handleClickOutside);
-        return () => document.removeEventListener("mousedown", handleClickOutside);
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => document.removeEventListener('mousedown', handleClickOutside);
     }, []);
 
     function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -101,10 +96,7 @@ export default function InputDate({value = "", onChange, disabled, placeholder =
             </div>
 
             {open && (
-                <div
-                    className="position-absolute bg-white border rounded shadow-sm p-2 mt-1"
-                    style={{ zIndex: 1050 }}
-                >
+                <div className="position-absolute bg-white border rounded shadow-sm p-2 mt-1" style={{ zIndex: 1050 }}>
                     <DayPicker
                         mode="single"
                         selected={selected}

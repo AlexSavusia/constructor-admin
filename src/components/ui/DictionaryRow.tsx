@@ -1,5 +1,5 @@
-import { FaCopy, FaPen, FaPlus, FaTrash } from "react-icons/fa";
-import { IconBtn } from "../../components/ui/IconBtn";
+import { FaCopy, FaPen, FaPlus, FaTrash } from 'react-icons/fa';
+import { IconBtn } from './IconBtn.tsx';
 
 type DictionaryItem = {
     id: string;
@@ -22,43 +22,25 @@ type DictionaryRowProps = {
 };
 
 function getGroupName(groups: GroupItem[], groupId?: string) {
-    return groups.find((x) => x.id === groupId)?.name ?? "-";
+    return groups.find((x) => x.id === groupId)?.name ?? '-';
 }
 
-export default function DictionaryRow({
-                                  item,
-                                  rowNumber,
-                                  groups,
-                                  onCopy,
-                                  onDelete,
-                              }: DictionaryRowProps) {
+export default function DictionaryRow({ item, rowNumber, groups, onCopy, onDelete }: DictionaryRowProps) {
     return (
         <tr>
             <td className="text-muted">{rowNumber}</td>
 
             <td className="font-weight-medium">{item.name}</td>
 
-            <td>
-                {item.description?.trim() ? (
-                    item.description
-                ) : (
-                    <span className="text-muted">—</span>
-                )}
-            </td>
+            <td>{item.description?.trim() ? item.description : <span className="text-muted">—</span>}</td>
 
             <td>
-                <span className="badge badge-light">
-                    {getGroupName(groups, item.groupId)}
-                </span>
+                <span className="badge badge-light">{getGroupName(groups, item.groupId)}</span>
             </td>
 
             <td className="text-right">
                 <div className="btn-group btn-group-sm">
-                    <IconBtn
-                        title="Скопировать API"
-                        className="btn btn-outline-secondary"
-                        onClick={() => void onCopy(item.id)}
-                    >
+                    <IconBtn title="Скопировать API" className="btn btn-outline-secondary" onClick={() => void onCopy(item.id)}>
                         <FaCopy />
                     </IconBtn>
 
@@ -80,11 +62,7 @@ export default function DictionaryRow({
                         <FaPen />
                     </IconBtn>
 
-                    <IconBtn
-                        title="Удалить"
-                        className="btn btn-outline-danger"
-                        onClick={() => onDelete(item.id)}
-                    >
+                    <IconBtn title="Удалить" className="btn btn-outline-danger" onClick={() => onDelete(item.id)}>
                         <FaTrash />
                     </IconBtn>
                 </div>

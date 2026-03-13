@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink } from 'react-router-dom';
 
 type SidebarItemProps = {
     to: string;
@@ -14,7 +14,7 @@ type SideBarProps = {
 function Item({ to, end, icon, label }: SidebarItemProps) {
     return (
         <li className="nav-item">
-            <NavLink to={to} end={end} className={({ isActive }) => `nav-link ${isActive ? "active" : ""}`}>
+            <NavLink to={to} end={end} className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}>
                 <i className={`nav-icon fas ${icon}`} />
                 <p>{label}</p>
             </NavLink>

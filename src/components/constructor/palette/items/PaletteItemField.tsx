@@ -5,48 +5,39 @@ import type {
     PaletteItemType,
     ValueTypeAlias,
     OptionItem,
-} from "../../type.ts";
-import classNames from "classnames";
+} from '../../type.ts';
+import classNames from 'classnames';
 
-import InputUI from "../../../ui/fieldsUI/Input/Input.tsx";
-import TextareaUI from "../../../ui/fieldsUI/Textarea/Textarea.tsx";
-import CheckboxUI from "../../../ui/fieldsUI/Checkbox/Checkbox.tsx";
-import RadioButtonsUI, {
-    type RadioItem,
-} from "../../../ui/fieldsUI/RadioButtons/RadioButtons.tsx";
-import SwitchUI from "../../../ui/fieldsUI/Switch/Switch.tsx";
-import InputDateUI from "../../../ui/fieldsUI/InputDate/InputDate.tsx";
-import SelectUI from "../../../ui/fieldsUI/Select/Select.tsx";
-import FileUploadUI from "../../../ui/fieldsUI/FileUpload/FileUpload.tsx";
+import InputUI from '../../../ui/fieldsUI/Input/Input.tsx';
+import TextareaUI from '../../../ui/fieldsUI/Textarea/Textarea.tsx';
+import CheckboxUI from '../../../ui/fieldsUI/Checkbox/Checkbox.tsx';
+import RadioButtonsUI, { type RadioItem } from '../../../ui/fieldsUI/RadioButtons/RadioButtons.tsx';
+import SwitchUI from '../../../ui/fieldsUI/Switch/Switch.tsx';
+import InputDateUI from '../../../ui/fieldsUI/InputDate/InputDate.tsx';
+import SelectUI from '../../../ui/fieldsUI/Select/Select.tsx';
+import FileUploadUI from '../../../ui/fieldsUI/FileUpload/FileUpload.tsx';
 
-import InputPreview from "../../../ui/fieldsUIAdmin/Input/Input.tsx";
-import { useMemo, useState } from "react";
+import InputPreview from '../../../ui/fieldsUIAdmin/Input/Input.tsx';
+import { useMemo, useState } from 'react';
 
 const defaultOptions: RadioItem[] = [
-    { label: "Вариант 1", value: "var1" },
-    { label: "Вариант 2", value: "var2" },
+    { label: 'Вариант 1', value: 'var1' },
+    { label: 'Вариант 2', value: 'var2' },
 ];
 
 function isRadioItemArray(
-    value:
-        | string
-        | number
-        | boolean
-        | Date
-        | OptionItem[]
-        | ValueTypeAlias[]
-        | undefined,
+    value: string | number | boolean | Date | OptionItem[] | ValueTypeAlias[] | undefined
 ): value is RadioItem[] {
     return (
         Array.isArray(value) &&
         value.every(
             (item) =>
                 item &&
-                typeof item === "object" &&
-                "label" in item &&
-                "value" in item &&
-                typeof item.label === "string" &&
-                (typeof item.value === "string" || typeof item.value === "number"),
+                typeof item === 'object' &&
+                'label' in item &&
+                'value' in item &&
+                typeof item.label === 'string' &&
+                (typeof item.value === 'string' || typeof item.value === 'number')
         )
     );
 }
@@ -54,25 +45,25 @@ function isRadioItemArray(
 function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
     const multiple = Boolean(settingsValues?.multiple ?? true);
     const maxFileSizeMb = Number(settingsValues?.maxFileSizeMb ?? 20);
-    const acceptRaw = String(settingsValues?.accept ?? "jpg,jpeg,heic,png,pdf");
+    const acceptRaw = String(settingsValues?.accept ?? 'jpg,jpeg,heic,png,pdf');
 
     const accept = useMemo(
         () =>
             acceptRaw
-                .split(",")
+                .split(',')
                 .map((item) => item.trim().toLowerCase())
                 .filter(Boolean),
-        [acceptRaw],
+        [acceptRaw]
     );
     const [files, setFiles] = useState<File[]>([]);
 
-    const label = String(settingsValues?.label ?? "Название поля");
+    const label = String(settingsValues?.label ?? 'Название поля');
     const required = Boolean(settingsValues?.required ?? false);
-    const fieldType = String(settingsValues?.fieldType ?? "input") as PaletteItemType;
+    const fieldType = String(settingsValues?.fieldType ?? 'input') as PaletteItemType;
 
-    const inputType = String(settingsValues?.inputType ?? "text");
-    const placeholder = String(settingsValues?.placeholder ?? "");
-    const name = String(settingsValues?.name ?? "field");
+    const inputType = String(settingsValues?.inputType ?? 'text');
+    const placeholder = String(settingsValues?.placeholder ?? '');
+    const name = String(settingsValues?.name ?? 'field');
     const checked = Boolean(settingsValues?.checked ?? false);
     const disabled = Boolean(settingsValues?.disabled ?? false);
 
@@ -84,24 +75,18 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
         return defaultOptions;
     }, [settingsValues?.options]);
 
-    const [radioValue, setRadioValue] = useState<string>(
-        String(optionsData[0]?.value ?? ""),
-    );
+    const [radioValue, setRadioValue] = useState<string>(String(optionsData[0]?.value ?? ''));
     const [switchEnabled, setSwitchEnabled] = useState(false);
 
-    if (fieldType === "textarea") {
+    if (fieldType === 'textarea') {
         return (
             <div className={classNames(className)}>
-                <TextareaUI
-                    label={label}
-                    required={required}
-                    placeholder={placeholder}
-                />
+                <TextareaUI label={label} required={required} placeholder={placeholder} />
             </div>
         );
     }
 
-    if (fieldType === "checkbox") {
+    if (fieldType === 'checkbox') {
         return (
             <div className={classNames(className)}>
                 <CheckboxUI
@@ -116,7 +101,7 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
         );
     }
 
-    if (fieldType === "radio") {
+    if (fieldType === 'radio') {
         return (
             <div className={classNames(className)}>
                 <RadioButtonsUI
@@ -131,46 +116,30 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
         );
     }
 
-    if (fieldType === "switch") {
+    if (fieldType === 'switch') {
         return (
             <div className={classNames(className)}>
-                <SwitchUI
-                    name={name}
-                    label={label}
-                    required={required}
-                    checked={switchEnabled}
-                    onChange={setSwitchEnabled}
-                />
+                <SwitchUI name={name} label={label} required={required} checked={switchEnabled} onChange={setSwitchEnabled} />
             </div>
         );
     }
 
-    if (fieldType === "date") {
+    if (fieldType === 'date') {
         return (
             <div className={classNames(className)}>
-                <InputDateUI
-                    label={label}
-                    disabled={disabled}
-                    onChange={() => {}}
-                />
+                <InputDateUI label={label} disabled={disabled} onChange={() => {}} />
             </div>
         );
     }
 
-    if (fieldType === "select") {
+    if (fieldType === 'select') {
         return (
             <div className={classNames(className)}>
-                <SelectUI
-                    name={name}
-                    label={label}
-                    required={required}
-                    disabled={disabled}
-                    options={optionsData}
-                />
+                <SelectUI name={name} label={label} required={required} disabled={disabled} options={optionsData} />
             </div>
         );
     }
-    if (fieldType === "file") {
+    if (fieldType === 'file') {
         return (
             <div className={classNames(className)}>
                 <FileUploadUI
@@ -187,171 +156,155 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
         );
     }
 
-
     return (
         <div className={classNames(className)}>
-            <InputUI
-                label={label}
-                required={required}
-                type={inputType}
-                placeholder={placeholder}
-                disabled={disabled}
-            />
+            <InputUI label={label} required={required} type={inputType} placeholder={placeholder} disabled={disabled} />
         </div>
     );
 }
 
 function PaletteItemFieldPreview({ className }: PaletteItemPreviewProps) {
     return (
-        <div className={classNames("mb-0", className)}>
+        <div className={classNames('mb-0', className)}>
             <InputPreview placeholder="placeholder" />
         </div>
     );
 }
 
 const FieldDescriptor: PaletteItemDescriptor = {
-    key: "field",
-    title: "Поле формы",
-    type: "input",
+    key: 'field',
+    title: 'Поле формы',
+    type: 'input',
     minWidth: 1,
     settings: [
         {
-            key: "mask",
-            title: "Маска",
-            valType: "string",
-            defaultValue: "",
+            key: 'mask',
+            title: 'Маска',
+            valType: 'string',
+            defaultValue: '',
             visibleWhen: {
-                key: "fieldType",
-                equals: ["input"],
+                key: 'fieldType',
+                equals: ['input'],
             },
         },
         {
-            key: "fieldType",
-            title: "Тип поля",
-            valType: "string",
-            defaultValue: "input",
-            multiValVariants: [
-                "input",
-                "textarea",
-                "checkbox",
-                "radio",
-                "switch",
-                "date",
-                "select",
-                "file",
-            ],
+            key: 'fieldType',
+            title: 'Тип поля',
+            valType: 'string',
+            defaultValue: 'input',
+            multiValVariants: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'date', 'select', 'file'],
         },
         {
-            key: "label",
-            title: "Название",
-            valType: "string",
-            defaultValue: "Название поля",
+            key: 'label',
+            title: 'Название',
+            valType: 'string',
+            defaultValue: 'Название поля',
         },
         {
-            key: "name",
-            title: "Name",
-            valType: "string",
-            defaultValue: "field",
+            key: 'name',
+            title: 'Name',
+            valType: 'string',
+            defaultValue: 'field',
         },
         {
-            key: "required",
-            title: "Обязательное",
-            valType: "boolean",
+            key: 'required',
+            title: 'Обязательное',
+            valType: 'boolean',
             defaultValue: false,
             visibleWhen: {
-                key: "fieldType",
-                equals: ["input", "textarea", "checkbox", "radio", "switch", "select", "file"],
+                key: 'fieldType',
+                equals: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'select', 'file'],
             },
         },
         {
-            key: "visible",
-            title: "Видимость",
-            valType: "boolean",
+            key: 'visible',
+            title: 'Видимость',
+            valType: 'boolean',
             defaultValue: false,
             visibleWhen: {
-                key: "fieldType",
-                equals: ["input", "textarea", "checkbox", "radio", "switch", "select", "file"],
+                key: 'fieldType',
+                equals: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'select', 'file'],
             },
         },
         {
-            key: "disabled",
-            title: "Включено",
-            valType: "boolean",
+            key: 'disabled',
+            title: 'Включено',
+            valType: 'boolean',
             defaultValue: false,
             visibleWhen: {
-                key: "fieldType",
-                equals: ["input", "checkbox", "date", "select", "file"],
+                key: 'fieldType',
+                equals: ['input', 'checkbox', 'date', 'select', 'file'],
             },
         },
         {
-            key: "placeholder",
-            title: "Placeholder",
-            valType: "string",
-            defaultValue: "",
+            key: 'placeholder',
+            title: 'Placeholder',
+            valType: 'string',
+            defaultValue: '',
             visibleWhen: {
-                key: "fieldType",
-                equals: ["input", "textarea"],
+                key: 'fieldType',
+                equals: ['input', 'textarea'],
             },
         },
         {
-            key: "inputType",
-            title: "HTML type input",
-            valType: "string",
-            defaultValue: "text",
-            multiValVariants: ["text", "email", "number", "password", "tel"],
+            key: 'inputType',
+            title: 'HTML type input',
+            valType: 'string',
+            defaultValue: 'text',
+            multiValVariants: ['text', 'email', 'number', 'password', 'tel'],
             visibleWhen: {
-                key: "fieldType",
-                equals: ["input"],
+                key: 'fieldType',
+                equals: ['input'],
             },
         },
         {
-            key: "checked",
-            title: "Отмечен по умолчанию",
-            valType: "boolean",
+            key: 'checked',
+            title: 'Отмечен по умолчанию',
+            valType: 'boolean',
             defaultValue: false,
             visibleWhen: {
-                key: "fieldType",
-                equals: ["checkbox"],
+                key: 'fieldType',
+                equals: ['checkbox'],
             },
         },
         {
-            key: "options",
-            title: "Варианты ответа",
-            valType: "string",
+            key: 'options',
+            title: 'Варианты ответа',
+            valType: 'string',
             defaultValue: defaultOptions,
             visibleWhen: {
-                key: "fieldType",
-                equals: ["radio", "select"],
+                key: 'fieldType',
+                equals: ['radio', 'select'],
             },
         },
         {
-            key: "multiple",
-            title: "Несколько файлов",
-            valType: "boolean",
+            key: 'multiple',
+            title: 'Несколько файлов',
+            valType: 'boolean',
             defaultValue: true,
             visibleWhen: {
-                key: "fieldType",
-                equals: ["file"],
+                key: 'fieldType',
+                equals: ['file'],
             },
         },
         {
-            key: "accept",
-            title: "Допустимые расширения",
-            valType: "string",
-            defaultValue: "jpg,jpeg,heic,png,pdf",
+            key: 'accept',
+            title: 'Допустимые расширения',
+            valType: 'string',
+            defaultValue: 'jpg,jpeg,heic,png,pdf',
             visibleWhen: {
-                key: "fieldType",
-                equals: ["file"],
+                key: 'fieldType',
+                equals: ['file'],
             },
         },
         {
-            key: "maxFileSizeMb",
-            title: "Макс. размер файла (МБ)",
-            valType: "string",
-            defaultValue: "20",
+            key: 'maxFileSizeMb',
+            title: 'Макс. размер файла (МБ)',
+            valType: 'string',
+            defaultValue: '20',
             visibleWhen: {
-                key: "fieldType",
-                equals: ["file"],
+                key: 'fieldType',
+                equals: ['file'],
             },
         },
     ],

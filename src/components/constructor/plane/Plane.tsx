@@ -1,16 +1,14 @@
-import * as React from "react";
-import {useMemo} from "react";
-import classNames from "classnames";
-import {ReactGridLayout, useContainerWidth, verticalCompactor} from "react-grid-layout";
-import type { PaletteItemDescriptor, PaletteItemSettingsValues, ValueTypeAlias} from "../type.ts";
+import * as React from 'react';
+import { useMemo } from 'react';
+import classNames from 'classnames';
+import { ReactGridLayout, useContainerWidth, verticalCompactor } from 'react-grid-layout';
+import type { PaletteItemDescriptor, PaletteItemSettingsValues, ValueTypeAlias } from '../type.ts';
 
-import RightSidebar from "../../RightSidebar.tsx";
-import SettingsSidebar from "../SettingsSidebar.tsx";
-import type {
-    FieldDefinition,
-} from "../../../logic/field.ts";
-import RuleEditor from "../../logic/components/RuleEditor.tsx";
-import { useEditorContext} from "../../../pages/Programs/editor/EditorContext.tsx";
+import RightSidebar from '../../RightSidebar.tsx';
+import SettingsSidebar from '../SettingsSidebar.tsx';
+import type { FieldDefinition } from '../../../logic/field.ts';
+import RuleEditor from '../../logic/components/RuleEditor.tsx';
+import { useEditorContext } from '../../../pages/Programs/editor/EditorContext.tsx';
 
 export type PlaneProps = {
     className?: string;
@@ -21,26 +19,21 @@ function clamp(n: number, min: number, max: number) {
     return Math.max(min, Math.min(max, n));
 }
 
-function getDescriptor(
-    key: string,
-    descriptors: PaletteItemDescriptor[],
-): PaletteItemDescriptor | null {
+function getDescriptor(key: string, descriptors: PaletteItemDescriptor[]): PaletteItemDescriptor | null {
     return descriptors.find((x) => x.key === key) ?? null;
 }
 
-function buildDefaultSettingsValues(
-    descriptor: PaletteItemDescriptor,
-): PaletteItemSettingsValues {
+function buildDefaultSettingsValues(descriptor: PaletteItemDescriptor): PaletteItemSettingsValues {
     return descriptor.settings.reduce<PaletteItemSettingsValues>((acc, setting) => {
         if (setting.defaultValue !== undefined) {
             acc[setting.key] = setting.defaultValue as ValueTypeAlias | ValueTypeAlias[];
             return acc;
         }
 
-        if (setting.valType === "string") acc[setting.key] = "";
-        if (setting.valType === "number") acc[setting.key] = 0;
-        if (setting.valType === "boolean") acc[setting.key] = false;
-        if (setting.valType === "datetime") acc[setting.key] = new Date();
+        if (setting.valType === 'string') acc[setting.key] = '';
+        if (setting.valType === 'number') acc[setting.key] = 0;
+        if (setting.valType === 'boolean') acc[setting.key] = false;
+        if (setting.valType === 'datetime') acc[setting.key] = new Date();
 
         return acc;
     }, {});
@@ -53,26 +46,21 @@ export default function Plane({ className, items }: PlaneProps) {
     const paddingY = 0;
     const cols = 3;
     const rowHeight = 56;
-    const currentStepKey = useEditorContext(s => s.stepKey!)
-    const currentStep = useEditorContext(s => s.form.steps[s.stepKey!])
-    const addField = useEditorContext(s => s.addField)
-    const removeField = useEditorContext(s => s.removeField)
-    const updateStepLayout = useEditorContext(s => s.updateStepLayout)
-    const editingField = useEditorContext(s=>s.editingField)
-    const resetEditingField = useEditorContext(s=>s.resetEditingField)
-    const setEditingField = useEditorContext(s=>s.setEditingField)
-    const layoutItems = useMemo(()=>
-        Object.entries(currentStep.fields).map(v=>v[1]),
-        [currentStep]
-    );
+    const currentStepKey = useEditorContext((s) => s.stepKey!);
+    const currentStep = useEditorContext((s) => s.form.steps[s.stepKey!]);
+    const addField = useEditorContext((s) => s.addField);
+    const removeField = useEditorContext((s) => s.removeField);
+    const updateStepLayout = useEditorContext((s) => s.updateStepLayout);
+    const editingField = useEditorContext((s) => s.editingField);
+    const resetEditingField = useEditorContext((s) => s.resetEditingField);
+    const setEditingField = useEditorContext((s) => s.setEditingField);
+    const layoutItems = useMemo(() => Object.entries(currentStep.fields).map((v) => v[1]), [currentStep]);
     //const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
     const { width, containerRef, mounted } = useContainerWidth();
     //const [editingRule, setEditingRule] = useState<EditorEditingRule & {scope: ExpressionScope, path: NodePath} | null>(null);
 
-    const stepLayout = useMemo(() => [
-        ...Object.entries(currentStep.fields).map(v=>v[1].layout),
-    ], [currentStep]);
+    const stepLayout = useMemo(() => [...Object.entries(currentStep.fields).map((v) => v[1].layout)], [currentStep]);
 
     const colW = width / cols;
 
@@ -92,7 +80,7 @@ export default function Plane({ className, items }: PlaneProps) {
     const onDrop = (e: React.DragEvent) => {
         e.preventDefault();
 
-        const descriptorKey = e.dataTransfer.getData("application/x-descriptor");
+        const descriptorKey = e.dataTransfer.getData('application/x-descriptor');
         if (!descriptorKey || !containerRef.current) return;
 
         const descriptor = getDescriptor(descriptorKey, items);
@@ -107,18 +95,18 @@ export default function Plane({ className, items }: PlaneProps) {
         const y = Math.max(0, Math.round(py / (rowHeight + marginY)));
 
         const id = crypto.randomUUID();
-// debugger
+        // debugger
         const newItem: FieldDefinition = {
             //TODO all of this have to be configured here properly
             capabilities: {
                 canBeVisible: false,
                 canBeEnabled: false,
                 canBeRequired: false,
-                canBeSetValue: false
+                canBeSetValue: false,
             },
-            control: "input",
-            fieldType: "input",
-            valueType: "unknown",
+            control: 'input',
+            fieldType: 'input',
+            valueType: 'unknown',
             defaultValue: undefined,
             logic: {
                 visibility: {
@@ -126,39 +114,39 @@ export default function Plane({ className, items }: PlaneProps) {
                     rule: {
                         condition: {
                             id: crypto.randomUUID(),
-                            type: "and",
-                            items: []
+                            type: 'and',
+                            items: [],
                         },
-                        actions: []
-                    }
+                        actions: [],
+                    },
                 },
                 enabled: {
                     defaultValue: true,
                     rule: {
                         condition: {
                             id: crypto.randomUUID(),
-                            type: "and",
-                            items: []
+                            type: 'and',
+                            items: [],
                         },
-                        actions: []
-                    }
+                        actions: [],
+                    },
                 },
                 required: {
                     defaultValue: true,
                     rule: {
                         condition: {
                             id: crypto.randomUUID(),
-                            type: "and",
-                            items: []
+                            type: 'and',
+                            items: [],
                         },
-                        actions: []
-                    }
+                        actions: [],
+                    },
                 },
                 // value: {}
             },
             /////////////////////////////////
 
-            __typ: "field",
+            __typ: 'field',
             key: id,
             descriptorKey: descriptor.key,
             settingsValues: buildDefaultSettingsValues(descriptor),
@@ -170,20 +158,20 @@ export default function Plane({ className, items }: PlaneProps) {
                 h: 3,
                 minW: descriptor.minWidth,
                 maxW: descriptor.maxWidth,
-                resizeHandles: ["e", "w"],
-            }
-        }
+                resizeHandles: ['e', 'w'],
+            },
+        };
         addField(currentStepKey, newItem);
     };
 
-    const updateEditingFieldSettings = useEditorContext(s => s.updateEditingFieldSettings);
+    const updateEditingFieldSettings = useEditorContext((s) => s.updateEditingFieldSettings);
 
     const handleSettingChange = (key: string, value: ValueTypeAlias) => {
         updateEditingFieldSettings({ [key]: value });
     };
 
     const handleDelete = (id: string) => {
-        removeField(currentStepKey, id)
+        removeField(currentStepKey, id);
         if (editingField?.key === id) {
             resetEditingField();
         }
@@ -191,7 +179,7 @@ export default function Plane({ className, items }: PlaneProps) {
 
     return (
         <>
-            <div className={classNames(className, "card card-outline card-secondary h-100 mb-0")}>
+            <div className={classNames(className, 'card card-outline card-secondary h-100 mb-0')}>
                 <div className="card-header">
                     <h3 className="card-title mb-0">Полотно</h3>
                     <div className="card-tools d-flex align-items-center gap-2">
@@ -203,25 +191,24 @@ export default function Plane({ className, items }: PlaneProps) {
                         {/*    Сохранить*/}
                         {/*</button>*/}
                     </div>
-
                 </div>
 
                 <div className="card-body p-2">
                     <div
                         onDrop={onDrop}
                         onDragOver={(e) => e.preventDefault()}
-                        className={classNames("w-100")}
+                        className={classNames('w-100')}
                         ref={containerRef}
                     >
                         {mounted && (
                             <div
                                 className="position-relative rounded"
                                 style={{
-                                    width: "100%",
+                                    width: '100%',
                                     height: '100%',
-                                    border: "1px dashed rgba(0,0,0,.25)",
-                                    backgroundColor: "var(--bs-body-bg)",
-                                    overflow: "hidden",
+                                    border: '1px dashed rgba(0,0,0,.25)',
+                                    backgroundColor: 'var(--bs-body-bg)',
+                                    overflow: 'hidden',
                                     backgroundImage: `
                                     repeating-linear-gradient(
                                       to right,
@@ -234,21 +221,20 @@ export default function Plane({ className, items }: PlaneProps) {
                                 }}
                             >
                                 <ReactGridLayout
-                                    style={{ background: "rgba(108,117,125,0.37)" }}
+                                    style={{ background: 'rgba(108,117,125,0.37)' }}
                                     width={width}
                                     gridConfig={{ cols, rowHeight }}
                                     dragConfig={{
                                         enabled: true,
-                                        handle: ".handle",
-                                        cancel: ".react-resizable-handle, input, textarea, select, button, [contenteditable=true]",
+                                        handle: '.handle',
+                                        cancel: '.react-resizable-handle, input, textarea, select, button, [contenteditable=true]',
                                     }}
                                     compactor={verticalCompactor}
                                     layout={stepLayout}
                                     onLayoutChange={(l) => updateStepLayout(currentStepKey, l)}
                                 >
                                     {stepLayout.map((it) => {
-                                        const layoutItem =
-                                            layoutItems.find((x) => x.key === it.i) ?? null;
+                                        const layoutItem = layoutItems.find((x) => x.key === it.i) ?? null;
 
                                         if (!layoutItem) {
                                             return (
@@ -269,31 +255,23 @@ export default function Plane({ className, items }: PlaneProps) {
                                         }
 
                                         const { Element } = descriptor;
-                                        const fieldTitle =
-                                            String(layoutItem.settingsValues?.label ?? "") ||
-                                            descriptor.title;
+                                        const fieldTitle = String(layoutItem.settingsValues?.label ?? '') || descriptor.title;
 
                                         return (
                                             <div
                                                 key={it.i}
                                                 className={classNames(
-                                                    "card shadow-sm mb-0 ",
-                                                    editingField?.key === layoutItem.key && "border border-primary",
+                                                    'card shadow-sm mb-0 ',
+                                                    editingField?.key === layoutItem.key && 'border border-primary'
                                                 )}
                                             >
                                                 <div
                                                     className="card-header handle text-muted py-1 d-flex align-items-center justify-content-end"
-                                                    style={{ cursor: "move" }}
+                                                    style={{ cursor: 'move' }}
                                                 >
-                                                    <span className="small text-truncate me-2">
-                                                        {fieldTitle}
-                                                    </span>
+                                                    <span className="small text-truncate me-2">{fieldTitle}</span>
 
-                                                    <span
-                                                        className="text-muted"
-                                                        title="Переместить"
-                                                        style={{ lineHeight: 1 }}
-                                                    >
+                                                    <span className="text-muted" title="Переместить" style={{ lineHeight: 1 }}>
                                                         <i className="fas fa-grip-lines" />
                                                     </span>
                                                 </div>
@@ -333,23 +311,12 @@ export default function Plane({ className, items }: PlaneProps) {
                     </div>
                 </div>
 
-                <div className="card-footer text-muted small">
-                    Перетаскивание — за ручку в шапке блока
-                </div>
+                <div className="card-footer text-muted small">Перетаскивание — за ручку в шапке блока</div>
             </div>
-            <RightSidebar
-                title="Настройки поля"
-                open={!!editingField}
-                onClose={resetEditingField}
-            >
-                {!!editingField && (
-                    <SettingsSidebar
-                        items={items}
-                        onChange={handleSettingChange}
-                    />
-                )}
+            <RightSidebar title="Настройки поля" open={!!editingField} onClose={resetEditingField}>
+                {!!editingField && <SettingsSidebar items={items} onChange={handleSettingChange} />}
             </RightSidebar>
-            <RuleEditor/>
+            <RuleEditor />
         </>
     );
 }

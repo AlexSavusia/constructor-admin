@@ -1,5 +1,5 @@
-import {type TextareaHTMLAttributes, useId} from "react";
-import "./Textarea.css";
+import { type TextareaHTMLAttributes, useId } from 'react';
+import './Textarea.css';
 
 type Props = TextareaHTMLAttributes<HTMLTextAreaElement> & {
     value?: string;
@@ -9,7 +9,7 @@ type Props = TextareaHTMLAttributes<HTMLTextAreaElement> & {
     required?: boolean;
 };
 
-export default function Textarea({ value, placeholder, label, onChange,required, ...props }: Props) {
+export default function Textarea({ value, placeholder, label, onChange, required, ...props }: Props) {
     const id = useId();
     return (
         <div className="Textarea">
@@ -26,7 +26,5 @@ export default function Textarea({ value, placeholder, label, onChange,required,
             />
             {required && <div className="errorText">Заполните поле</div>}
         </div>
-
-
     );
 }

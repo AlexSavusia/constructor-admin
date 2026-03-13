@@ -1,3 +1,3 @@
 export default function CalculationsEditPage() {
-    return <p>calc edit</p>
+    return <p>calc edit</p>;
 }

@@ -1,17 +1,12 @@
-import type {
-    PaletteItemPreviewProps,
-    PaletteItemProps,
-    PaletteItemDescriptor,
-} from "../../type.ts";
+import type { PaletteItemPreviewProps, PaletteItemProps, PaletteItemDescriptor } from '../../type.ts';
 
-import classNames from "classnames";
+import classNames from 'classnames';
 
 function PaletteItemDescription({ className, settingsValues }: PaletteItemProps) {
-    const text = String(settingsValues?.text ?? "Заголовок раздела");
-
+    const text = String(settingsValues?.text ?? 'Заголовок раздела');
 
     return (
-        <div className={classNames("mb-0", className)}>
+        <div className={classNames('mb-0', className)}>
             <strong>{text}</strong>
         </div>
     );
@@ -19,25 +14,25 @@ function PaletteItemDescription({ className, settingsValues }: PaletteItemProps)
 
 function PaletteItemDescriptionPreview({ className }: PaletteItemPreviewProps) {
     return (
-        <div className={classNames("mb-0 text-center", className)}>
+        <div className={classNames('mb-0 text-center', className)}>
             <strong>Соглашение</strong>
         </div>
     );
 }
 
 const AgreeDescriptor: PaletteItemDescriptor = {
-    key: "agree",
-    title: "Заголовок / раздел",
-    type: "description",
+    key: 'agree',
+    title: 'Заголовок / раздел',
+    type: 'description',
     minWidth: 1,
 
     settings: [
         {
-            key: "text",
-            title: "Текст",
-            valType: "string",
-            defaultValue: "Соглашение",
-        }
+            key: 'text',
+            title: 'Текст',
+            valType: 'string',
+            defaultValue: 'Соглашение',
+        },
     ],
 
     ElementPreview: PaletteItemDescriptionPreview,

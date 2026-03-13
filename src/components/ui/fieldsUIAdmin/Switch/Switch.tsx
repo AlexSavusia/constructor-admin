@@ -1,4 +1,4 @@
-import {type ChangeEvent, type ReactNode, useId } from "react";
+import { type ChangeEvent, type ReactNode, useId } from 'react';
 
 type Props = {
     name?: string;
@@ -9,7 +9,7 @@ type Props = {
     className?: string;
 };
 
-export default function Switch({name, checked, disabled, onChange, children, className = ""}: Props) {
+export default function Switch({ name, checked, disabled, onChange, children, className = '' }: Props) {
     const id = useId();
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {

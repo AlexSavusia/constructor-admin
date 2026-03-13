@@ -50,7 +50,7 @@
     background: #fff;
 }
 
-.input:not(:placeholder-shown)+.label {
+.input:not(:placeholder-shown) + .label {
     top: 2px;
     font-size: 12px;
     padding: 4px;

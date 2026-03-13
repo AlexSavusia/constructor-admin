@@ -1,15 +1,7 @@
-import {
-    type ChangeEvent,
-    type InputHTMLAttributes,
-    type KeyboardEvent,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from "react";
-import classNames from "classnames";
-import {parseValueExpression} from "./parser.ts";
-import type {ValueExpression} from "../../../../logic/expression.ts";
+import { type ChangeEvent, type InputHTMLAttributes, type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
+import classNames from 'classnames';
+import { parseValueExpression } from './parser.ts';
+import type { ValueExpression } from '../../../../logic/expression.ts';
 
 export type OptionItem = {
     label: string;
@@ -17,7 +9,7 @@ export type OptionItem = {
 };
 
 type OptionsSource = OptionItem[] | Record<string, string>;
-type MatchMode = "includes" | "startsWith";
+type MatchMode = 'includes' | 'startsWith';
 
 type ReplaceContext = {
     query: string;
@@ -25,10 +17,7 @@ type ReplaceContext = {
     replaceTo: number;
 };
 
-type Props = Omit<
-    InputHTMLAttributes<HTMLInputElement>,
-    "value" | "onChange" | "onSelect"
-> & {
+type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 'onSelect'> & {
     value?: string;
     options: OptionsSource;
     onChange: (value: ValueExpression | null, rawValue: string) => void;
@@ -52,9 +41,7 @@ function matches(text: string, query: string, mode: MatchMode): boolean {
 
     if (!needle) return true;
 
-    return mode === "startsWith"
-        ? source.startsWith(needle)
-        : source.includes(needle);
+    return mode === 'startsWith' ? source.startsWith(needle) : source.includes(needle);
 }
 
 function getReplaceContext(value: string, caret: number): ReplaceContext | null {
@@ -64,8 +51,8 @@ function getReplaceContext(value: string, caret: number): ReplaceContext | null 
     const leftMatch = left.match(/([^\s+\-*/(),;:]*)$/);
     const rightMatch = right.match(/^([^\s+\-*/(),;:]*)/);
 
-    const currentLeft = leftMatch?.[1] ?? "";
-    const currentRight = rightMatch?.[1] ?? "";
+    const currentLeft = leftMatch?.[1] ?? '';
+    const currentRight = rightMatch?.[1] ?? '';
 
     if (!currentLeft.trim()) return null;
 
@@ -76,11 +63,7 @@ function getReplaceContext(value: string, caret: number): ReplaceContext | null 
     };
 }
 
-function replaceByContext(
-    value: string,
-    context: ReplaceContext,
-    token: string,
-): { nextValue: string; nextCaret: number } {
+function replaceByContext(value: string, context: ReplaceContext, token: string): { nextValue: string; nextCaret: number } {
     const before = value.slice(0, context.replaceFrom);
     const after = value.slice(context.replaceTo);
     const inserted = token;
@@ -91,21 +74,21 @@ function replaceByContext(
 }
 
 export default function InputAutocomplete({
-                                              value,
-                                              className = "",
-                                              options,
-                                              onChange: onChangeExt,
-                                              //onOptionSelect,
-                                              emptyText = "Nothing found",
-                                              disabled,
-                                              matchMode = "includes",
-                                              onFocus,
-                                              onBlur,
-                                              onClick,
-                                              onKeyUp,
-                                              ...props
-                                          }: Props) {
-    const inputValue = value ?? "";
+    value,
+    className = '',
+    options,
+    onChange: onChangeExt,
+    //onOptionSelect,
+    emptyText = 'Nothing found',
+    disabled,
+    matchMode = 'includes',
+    onFocus,
+    onBlur,
+    onClick,
+    onKeyUp,
+    ...props
+}: Props) {
+    const inputValue = value ?? '';
 
     const [isOpen, setIsOpen] = useState(false);
     const [highlightedIndex, setHighlightedIndex] = useState(-1);
@@ -115,13 +98,15 @@ export default function InputAutocomplete({
     const inputRef = useRef<HTMLInputElement | null>(null);
 
     const onChange = (value: string) => {
-        let parsed = null
+        let parsed = null;
         try {
-            parsed = parseValueExpression(value)
+            parsed = parseValueExpression(value);
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        } catch (_) { /* empty */ }
+        } catch (_) {
+            /* empty */
+        }
         onChangeExt(parsed, value);
-    }
+    };
 
     useEffect(() => {
         function handleOutsideClick(event: MouseEvent) {
@@ -131,21 +116,15 @@ export default function InputAutocomplete({
             }
         }
 
-        document.addEventListener("mousedown", handleOutsideClick);
+        document.addEventListener('mousedown', handleOutsideClick);
         return () => {
-            document.removeEventListener("mousedown", handleOutsideClick);
+            document.removeEventListener('mousedown', handleOutsideClick);
         };
     }, []);
 
-    const normalizedOptions = useMemo(
-        () => normalizeOptions(options),
-        [options],
-    );
+    const normalizedOptions = useMemo(() => normalizeOptions(options), [options]);
 
-    const replaceContext = useMemo(
-        () => getReplaceContext(inputValue, caretIndex),
-        [inputValue, caretIndex],
-    );
+    const replaceContext = useMemo(() => getReplaceContext(inputValue, caretIndex), [inputValue, caretIndex]);
 
     const filteredOptions = useMemo(() => {
         if (!replaceContext) {
@@ -159,12 +138,9 @@ export default function InputAutocomplete({
         }
 
         return normalizedOptions.filter(
-            (option) =>
-                matches(option.label, query, matchMode) ||
-                matches(option.value, query, matchMode),
+            (option) => matches(option.label, query, matchMode) || matches(option.value, query, matchMode)
         );
     }, [normalizedOptions, replaceContext, matchMode]);
-
 
     function syncCaret() {
         const nextCaret = inputRef.current?.selectionStart ?? inputValue.length;
@@ -189,9 +165,9 @@ export default function InputAutocomplete({
         const outputResult = context
             ? replaceByContext(inputValue, context, `[${option.value}]`)
             : {
-                nextValue: `${inputValue}[${option.value}]`,
-                nextCaret: `${inputValue}[${option.value}]`.length,
-            };
+                  nextValue: `${inputValue}[${option.value}]`,
+                  nextCaret: `${inputValue}[${option.value}]`.length,
+              };
 
         setIsOpen(false);
         setHighlightedIndex(-1);
@@ -208,7 +184,7 @@ export default function InputAutocomplete({
     }
 
     function handleKeyDown(event: KeyboardEvent<HTMLInputElement>) {
-        if (!isOpen && (event.key === "ArrowDown" || event.key === "ArrowUp")) {
+        if (!isOpen && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
             if (filteredOptions.length > 0) {
                 event.preventDefault();
                 setIsOpen(true);
@@ -217,25 +193,21 @@ export default function InputAutocomplete({
             return;
         }
 
-        if (event.key === "ArrowDown" && filteredOptions.length > 0) {
+        if (event.key === 'ArrowDown' && filteredOptions.length > 0) {
             event.preventDefault();
             setIsOpen(true);
-            setHighlightedIndex((prev) =>
-                prev < filteredOptions.length - 1 ? prev + 1 : 0,
-            );
+            setHighlightedIndex((prev) => (prev < filteredOptions.length - 1 ? prev + 1 : 0));
             return;
         }
 
-        if (event.key === "ArrowUp" && filteredOptions.length > 0) {
+        if (event.key === 'ArrowUp' && filteredOptions.length > 0) {
             event.preventDefault();
             setIsOpen(true);
-            setHighlightedIndex((prev) =>
-                prev > 0 ? prev - 1 : filteredOptions.length - 1,
-            );
+            setHighlightedIndex((prev) => (prev > 0 ? prev - 1 : filteredOptions.length - 1));
             return;
         }
 
-        if ((event.key === "Enter" || event.key === "Tab") && isOpen) {
+        if ((event.key === 'Enter' || event.key === 'Tab') && isOpen) {
             const option = filteredOptions[highlightedIndex];
             if (option) {
                 event.preventDefault();
@@ -244,7 +216,7 @@ export default function InputAutocomplete({
             return;
         }
 
-        if (event.key === "Escape") {
+        if (event.key === 'Escape') {
             setIsOpen(false);
             setHighlightedIndex(-1);
         }
@@ -257,7 +229,7 @@ export default function InputAutocomplete({
                 ref={inputRef}
                 disabled={disabled}
                 autoComplete="off"
-                className={classNames("form-control", className)}
+                className={classNames('form-control', className)}
                 value={inputValue}
                 onChange={handleInputChange}
                 onKeyDown={handleKeyDown}
@@ -282,16 +254,13 @@ export default function InputAutocomplete({
             />
 
             {isOpen && !disabled && (
-                <div
-                    className="dropdown-menu show w-100"
-                    style={{ maxHeight: 240, overflowY: "auto" }}
-                >
+                <div className="dropdown-menu show w-100" style={{ maxHeight: 240, overflowY: 'auto' }}>
                     {filteredOptions.length > 0 ? (
                         filteredOptions.map((option, index) => (
                             <button
                                 key={`${option.value}-${index}`}
                                 type="button"
-                                className={classNames("dropdown-item", {
+                                className={classNames('dropdown-item', {
                                     active: index === highlightedIndex,
                                 })}
                                 onMouseDown={(event) => {
@@ -300,11 +269,7 @@ export default function InputAutocomplete({
                                 }}
                             >
                                 <div>{option.label}</div>
-                                {option.label !== option.value && (
-                                    <small className="text-muted">
-                                        {option.value}
-                                    </small>
-                                )}
+                                {option.label !== option.value && <small className="text-muted">{option.value}</small>}
                             </button>
                         ))
                     ) : (

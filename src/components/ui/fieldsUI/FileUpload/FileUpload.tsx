@@ -1,5 +1,5 @@
-import {type ChangeEvent, type DragEvent, useMemo, useRef, useState } from "react";
-import "./FileUpload.css";
+import { type ChangeEvent, type DragEvent, useMemo, useRef, useState } from 'react';
+import './FileUpload.css';
 
 type Props = {
     label: string;
@@ -14,45 +14,36 @@ type Props = {
 };
 
 export default function FileUploadUI({
-                                         label,
-                                         error,
-                                         required,
-                                         disabled = false,
-                                         multiple = true,
-                                         files = [],
-                                         onChange,
-                                         accept = ["jpg", "jpeg", "heic", "png", "pdf"],
-                                         maxFileSizeMb = 20,
-                                     }: Props) {
+    label,
+    error,
+    required,
+    disabled = false,
+    multiple = true,
+    files = [],
+    onChange,
+    accept = ['jpg', 'jpeg', 'heic', 'png', 'pdf'],
+    maxFileSizeMb = 20,
+}: Props) {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [dragOver, setDragOver] = useState(false);
-    const [localError, setLocalError] = useState("");
+    const [localError, setLocalError] = useState('');
 
-    const acceptedLabel = useMemo(
-        () => accept.map((item) => item.toUpperCase()).join(", "),
-        [accept],
-    );
+    const acceptedLabel = useMemo(() => accept.map((item) => item.toUpperCase()).join(', '), [accept]);
 
     function validateFiles(selectedFiles: File[]) {
         const invalidFiles = selectedFiles.filter((file) => {
-            const extension = file.name.split(".").pop()?.toLowerCase();
+            const extension = file.name.split('.').pop()?.toLowerCase();
             const fileSizeMb = file.size / 1024 / 1024;
 
-            return (
-                !extension ||
-                !accept.includes(extension) ||
-                fileSizeMb > maxFileSizeMb
-            );
+            return !extension || !accept.includes(extension) || fileSizeMb > maxFileSizeMb;
         });
 
         if (invalidFiles.length > 0) {
-            setLocalError(
-                `Допустимы файлы ${acceptedLabel}, размер не более ${maxFileSizeMb} МБ`,
-            );
+            setLocalError(`Допустимы файлы ${acceptedLabel}, размер не более ${maxFileSizeMb} МБ`);
             return false;
         }
 
-        setLocalError("");
+        setLocalError('');
         return true;
     }
 
@@ -107,17 +98,11 @@ export default function FileUploadUI({
                             <div key={`${file.name}-${index}`} className="fileItem">
                                 <div className="fileInfo">
                                     <span className="fileName">{file.name}</span>
-                                    <span className="fileMeta">
-                                        {(file.size / 1024 / 1024).toFixed(2)} МБ
-                                    </span>
+                                    <span className="fileMeta">{(file.size / 1024 / 1024).toFixed(2)} МБ</span>
                                 </div>
 
                                 {!disabled && (
-                                    <button
-                                        type="button"
-                                        className="fileRemoveBtn"
-                                        onClick={() => handleRemoveFile(index)}
-                                    >
+                                    <button type="button" className="fileRemoveBtn" onClick={() => handleRemoveFile(index)}>
                                         ×
                                     </button>
                                 )}
@@ -128,7 +113,7 @@ export default function FileUploadUI({
 
                 {!disabled && (
                     <label
-                        className={`fileDropzone ${dragOver ? "dragOver" : ""}`}
+                        className={`fileDropzone ${dragOver ? 'dragOver' : ''}`}
                         onDrop={handleDrop}
                         onDragOver={handleDragOver}
                         onDragLeave={handleDragLeave}
@@ -140,9 +125,7 @@ export default function FileUploadUI({
                             multiple={multiple}
                             onChange={handleInputChange}
                         />
-                        <span className="fileDropzoneText">
-                            Выберите файлы или перетащите их сюда
-                        </span>
+                        <span className="fileDropzoneText">Выберите файлы или перетащите их сюда</span>
                     </label>
                 )}
 
@@ -150,9 +133,7 @@ export default function FileUploadUI({
                     Файлы {acceptedLabel}, не больше {maxFileSizeMb} МБ
                 </div>
 
-                {(error || localError) && (
-                    <div className="errorText">{error || localError}</div>
-                )}
+                {(error || localError) && <div className="errorText">{error || localError}</div>}
             </div>
         </div>
     );

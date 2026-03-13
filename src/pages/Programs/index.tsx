@@ -1,3 +1,3 @@
 export default function ProgramsPage() {
-    return <p>programs</p>
+    return <p>programs</p>;
 }

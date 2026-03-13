@@ -1,36 +1,30 @@
-import type {ObjPath} from "../pages/Programs/editor/EditorContext.tsx";
-import type {ActionExpression} from "../components/logic/types.ts";
+import type { ObjPath } from '../pages/Programs/editor/EditorContext.tsx';
+import type { ActionExpression } from '../components/logic/types.ts';
 
-
-export type ValueExpression =
-    | AstValueExpression
-    | RefValueExpression
-    | ConstValueExpression
-    | FuncValueExpression
+export type ValueExpression = AstValueExpression | RefValueExpression | ConstValueExpression | FuncValueExpression;
 
 export type AstValueExpression = {
-    __typ: "ast"
-    operator: "add" | "sub" | "mul" | "div"
-    left: AstValueExpression | RefValueExpression | ConstValueExpression | FuncValueExpression
-    right: AstValueExpression | RefValueExpression | ConstValueExpression | FuncValueExpression
-}
+    __typ: 'ast';
+    operator: 'add' | 'sub' | 'mul' | 'div';
+    left: AstValueExpression | RefValueExpression | ConstValueExpression | FuncValueExpression;
+    right: AstValueExpression | RefValueExpression | ConstValueExpression | FuncValueExpression;
+};
 
 export type RefValueExpression = {
-    __typ: "ref"
-    path: ObjPath
-}
+    __typ: 'ref';
+    path: ObjPath;
+};
 
 export type ConstValueExpression = {
-    __typ: "const"
-    value: unknown
-    valueType: "string" | "number"
-}
-
+    __typ: 'const';
+    value: unknown;
+    valueType: 'string' | 'number';
+};
 
 export type FuncValueExpression = {
-    __typ: "func"
-    name: string
-}
+    __typ: 'func';
+    name: string;
+};
 
 // export type WriteRef =
 //     FieldRef |
@@ -74,39 +68,39 @@ export type Boolean2OperandExpression =
     | GteExpression
     | LtExpression
     | LteExpression
-    | InExpression
+    | InExpression;
 
 export type BooleanExpression =
-        | AndExpression
-        | OrExpression
-        | NotExpression
-        | EqExpression
-        | NeExpression
-        | GtExpression
-        | GteExpression
-        | LtExpression
-        | LteExpression
-        | InExpression
-        | IsEmptyExpression
-        | NotEmptyExpression
+    | AndExpression
+    | OrExpression
+    | NotExpression
+    | EqExpression
+    | NeExpression
+    | GtExpression
+    | GteExpression
+    | LtExpression
+    | LteExpression
+    | InExpression
+    | IsEmptyExpression
+    | NotEmptyExpression;
 export function isTwoOperandMode(rule: BooleanExpression) {
     return isTwoOperandModeType(rule.type);
 }
 export function isTwoOperandModeType(type: BooleanExpression['type']) {
     switch (type) {
-        case "or":
-        case "and":
-        case "not":
-        case "isEmpty":
-        case "notEmpty":
-            return false
-        case "eq":
-        case "ne":
-        case "gt":
-        case "gte":
-        case "lt":
-        case "lte":
-            return true
+        case 'or':
+        case 'and':
+        case 'not':
+        case 'isEmpty':
+        case 'notEmpty':
+            return false;
+        case 'eq':
+        case 'ne':
+        case 'gt':
+        case 'gte':
+        case 'lt':
+        case 'lte':
+            return true;
         default:
             throw new Error(`Unsupported expression type ${type}`);
     }
@@ -114,101 +108,101 @@ export function isTwoOperandModeType(type: BooleanExpression['type']) {
 
 export function getChildrenRootPathForRule(root: ObjPath, rule: BooleanExpression | ActionExpression) {
     switch (rule.type) {
-        case "or":
-        case "and":
-            return [...root, "items"]
-        case "not":
-            return [...root, "item"]
-        case "eq":
-        case "ne":
-        case "gt":
-        case "gte":
-        case "lt":
-        case "lte":
+        case 'or':
+        case 'and':
+            return [...root, 'items'];
+        case 'not':
+            return [...root, 'item'];
+        case 'eq':
+        case 'ne':
+        case 'gt':
+        case 'gte':
+        case 'lt':
+        case 'lte':
             return [
-                [...root, "left"],
-                [...root, "right"]
-            ]
+                [...root, 'left'],
+                [...root, 'right'],
+            ];
         default:
             throw new Error(`Unsupported expression type ${rule}`);
     }
 }
 
 export interface AndExpression {
-    id: string
-    type: "and";
+    id: string;
+    type: 'and';
     items: BooleanExpression[];
 }
 
 export interface OrExpression {
-    id: string
-    type: "or";
+    id: string;
+    type: 'or';
     items: BooleanExpression[];
 }
 
 export interface NotExpression {
-    id: string
-    type: "not";
+    id: string;
+    type: 'not';
     item: BooleanExpression;
 }
 
 export interface EqExpression {
-    id: string
-    type: "eq";
+    id: string;
+    type: 'eq';
     left: ValueExpression;
     right: ValueExpression;
 }
 
 export interface NeExpression {
-    id: string
-    type: "ne";
+    id: string;
+    type: 'ne';
     left: ValueExpression;
     right: ValueExpression;
 }
 
 export interface GtExpression {
-    id: string
-    type: "gt";
+    id: string;
+    type: 'gt';
     left: ValueExpression;
     right: ValueExpression;
 }
 
 export interface GteExpression {
-    id: string
-    type: "gte";
+    id: string;
+    type: 'gte';
     left: ValueExpression;
     right: ValueExpression;
 }
 
 export interface LtExpression {
-    id: string
-    type: "lt";
+    id: string;
+    type: 'lt';
     left: ValueExpression;
     right: ValueExpression;
 }
 
 export interface LteExpression {
-    id: string
-    type: "lte";
+    id: string;
+    type: 'lte';
     left: ValueExpression;
     right: ValueExpression;
 }
 
 export interface InExpression {
-    id: string
-    type: "in";
+    id: string;
+    type: 'in';
     left: ValueExpression;
     right: ValueExpression;
 }
 
 export interface IsEmptyExpression {
-    id: string
-    type: "isEmpty";
+    id: string;
+    type: 'isEmpty';
     item: ValueExpression;
 }
 
 export interface NotEmptyExpression {
-    id: string
-    type: "notEmpty";
+    id: string;
+    type: 'notEmpty';
     item: ValueExpression;
 }

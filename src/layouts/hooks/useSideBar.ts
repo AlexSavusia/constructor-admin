@@ -1,11 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 type Options = {
     storageKey?: string;
     desktopMinWidth?: number;
     defaultCollapsed?: boolean;
 };
-
 
 type SidebarApi = {
     isDesktop: boolean;
@@ -26,7 +25,7 @@ function readBool(key: string, fallback: boolean) {
     try {
         const raw = sessionStorage.getItem(key);
         if (raw == null) return fallback;
-        return raw === "1";
+        return raw === '1';
     } catch {
         return fallback;
     }
@@ -34,29 +33,31 @@ function readBool(key: string, fallback: boolean) {
 
 function writeBool(key: string, value: boolean) {
     try {
-        sessionStorage.setItem(key, value ? "1" : "0");
-    } catch(e) { console.error(e) }
+        sessionStorage.setItem(key, value ? '1' : '0');
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 export function useSideBar(options: Options = {}): SidebarApi {
-    const storageKey = options.storageKey ?? "ui.sidebar.collapsed";
+    const storageKey = options.storageKey ?? 'ui.sidebar.collapsed';
     const desktopMinWidth = options.desktopMinWidth ?? 992;
     const defaultCollapsed = options.defaultCollapsed ?? false;
 
     const [isDesktop, setIsDesktop] = useState(() =>
-        typeof window === "undefined" ? true : window.innerWidth >= desktopMinWidth
+        typeof window === 'undefined' ? true : window.innerWidth >= desktopMinWidth
     );
 
     const [isCollapsed, setIsCollapsed] = useState(() =>
-        typeof window === "undefined" ? defaultCollapsed : readBool(storageKey, defaultCollapsed)
+        typeof window === 'undefined' ? defaultCollapsed : readBool(storageKey, defaultCollapsed)
     );
 
     const [overlayOpenRaw, setOverlayOpenRaw] = useState(false);
 
     useEffect(() => {
         const onResize = () => setIsDesktop(window.innerWidth >= desktopMinWidth);
-        window.addEventListener("resize", onResize, { passive: true });
-        return () => window.removeEventListener("resize", onResize);
+        window.addEventListener('resize', onResize, { passive: true });
+        return () => window.removeEventListener('resize', onResize);
     }, [desktopMinWidth]);
 
     const isOverlayOpen = !isDesktop && overlayOpenRaw;
@@ -96,34 +97,34 @@ export function useSideBar(options: Options = {}): SidebarApi {
         if (!isOverlayOpen) return;
 
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") setOverlayOpenRaw(false);
+            if (e.key === 'Escape') setOverlayOpenRaw(false);
         };
 
         const onPointerDown = (e: MouseEvent) => {
             const target = e.target as HTMLElement | null;
             if (!target) return;
-            if (target.closest(".app-sidebar")) return;
+            if (target.closest('.app-sidebar')) return;
             setOverlayOpenRaw(false);
         };
 
-        document.addEventListener("keydown", onKeyDown);
-        document.addEventListener("mousedown", onPointerDown);
+        document.addEventListener('keydown', onKeyDown);
+        document.addEventListener('mousedown', onPointerDown);
         return () => {
-            document.removeEventListener("keydown", onKeyDown);
-            document.removeEventListener("mousedown", onPointerDown);
+            document.removeEventListener('keydown', onKeyDown);
+            document.removeEventListener('mousedown', onPointerDown);
         };
     }, [isOverlayOpen]);
 
     const wrapperClassName = useMemo(() => {
-        const cls = ["app-wrapper"];
+        const cls = ['app-wrapper'];
 
         if (isDesktop) {
-            if (isCollapsed) cls.push("sidebar-collapse");
+            if (isCollapsed) cls.push('sidebar-collapse');
         } else {
-            if (isOverlayOpen) cls.push("sidebar-open");
+            if (isOverlayOpen) cls.push('sidebar-open');
         }
 
-        return cls.join(" ");
+        return cls.join(' ');
     }, [isDesktop, isCollapsed, isOverlayOpen]);
 
     return {

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo } from 'react';
 
 function clamp(n: number, min: number, max: number) {
     return Math.max(min, Math.min(max, n));
@@ -47,43 +47,28 @@ export default function PaginationFooter(props: Props) {
     const onGoTo = (p: number) => props.onPageChange(clamp(p, 1, totalPages));
 
     return (
-        <div
-            className="card-footer d-flex justify-content-between align-items-center flex-wrap"
-            style={{ gap: 12 }}
-        >
+        <div className="card-footer d-flex justify-content-between align-items-center flex-wrap" style={{ gap: 12 }}>
             <div className="text-muted small">
-                {props.total === 0
-                    ? "Нет данных"
-                    : `Показано ${fromRow}–${toRow} из ${props.total}`}
+                {props.total === 0 ? 'Нет данных' : `Показано ${fromRow}–${toRow} из ${props.total}`}
             </div>
 
             <ul className="pagination pagination-sm m-0">
-                <li className={`page-item ${props.page <= 1 ? "disabled" : ""}`}>
-                    <button
-                        type="button"
-                        className="page-link"
-                        onClick={onPrev}
-                        disabled={props.page <= 1}
-                    >
+                <li className={`page-item ${props.page <= 1 ? 'disabled' : ''}`}>
+                    <button type="button" className="page-link" onClick={onPrev} disabled={props.page <= 1}>
                         «
                     </button>
                 </li>
 
                 {visiblePages.map((p) => (
-                    <li key={p} className={`page-item ${p === props.page ? "active" : ""}`}>
+                    <li key={p} className={`page-item ${p === props.page ? 'active' : ''}`}>
                         <button type="button" className="page-link" onClick={() => onGoTo(p)}>
                             {p}
                         </button>
                     </li>
                 ))}
 
-                <li className={`page-item ${props.page >= totalPages ? "disabled" : ""}`}>
-                    <button
-                        type="button"
-                        className="page-link"
-                        onClick={onNext}
-                        disabled={props.page >= totalPages}
-                    >
+                <li className={`page-item ${props.page >= totalPages ? 'disabled' : ''}`}>
+                    <button type="button" className="page-link" onClick={onNext} disabled={props.page >= totalPages}>
                         »
                     </button>
                 </li>
