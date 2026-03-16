@@ -271,6 +271,7 @@ export default function DictionariesPage() {
 
                         <div style={{ maxWidth: 400 }}>
                             <InputAutocomplete
+                                referenceTypeMap={{}}
                                 placeholder="Пиши текст..."
                                 value={text}
                                 options={options}
