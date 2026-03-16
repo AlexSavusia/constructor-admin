@@ -1,4 +1,4 @@
-import {type ObjPath, useEditorContext} from '../../../pages/Programs/editor/EditorContext.tsx';
+import { type ObjPath, useEditorContext } from '../../../pages/Programs/editor/EditorContext.tsx';
 import type { ActionExpression, SetFieldErrorActionExpression, SetFieldPropertyActionExpression } from '../types.ts';
 import Input from '../../ui/fieldsUIAdmin/Input/Input.tsx';
 
@@ -40,7 +40,7 @@ export default function ActionRow({ action, path }: ActionRowProps) {
                 value={action.type}
                 onChange={(e) => {
                     switch (e.target.value as ActionType) {
-                        case "setFieldProperty":{
+                        case 'setFieldProperty': {
                             updateEditingRule(path, {
                                 ...action,
                                 type: e.target.value as ActionType,
@@ -51,7 +51,7 @@ export default function ActionRow({ action, path }: ActionRowProps) {
                         default: {
                             updateEditingRule(path, {
                                 ...action,
-                                type: e.target.value as ActionType
+                                type: e.target.value as ActionType,
                             } as ActionExpression);
                         }
                     }

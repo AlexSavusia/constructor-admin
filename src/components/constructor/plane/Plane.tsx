@@ -1,5 +1,5 @@
 import * as React from 'react';
-import {useMemo} from 'react';
+import { useMemo } from 'react';
 import classNames from 'classnames';
 import { ReactGridLayout, useContainerWidth, verticalCompactor } from 'react-grid-layout';
 import type { PaletteItemDescriptor, PaletteItemSettingsValues, ValueTypeAlias } from '../type.ts';
@@ -8,7 +8,7 @@ import RightSidebar from '../../RightSidebar.tsx';
 import SettingsSidebar from '../SettingsSidebar.tsx';
 import type { FieldDefinition } from '../../../logic/field.ts';
 import RuleEditor from '../../logic/components/RuleEditor.tsx';
-import {useEditorContext} from '../../../pages/Programs/editor/EditorContext.tsx';
+import { useEditorContext } from '../../../pages/Programs/editor/EditorContext.tsx';
 
 export type PlaneProps = {
     className?: string;
@@ -99,7 +99,7 @@ export default function Plane({ className, items }: PlaneProps) {
                         condition: {
                             id: crypto.randomUUID(),
                             type: 'noop',
-                            items: []
+                            items: [],
                         },
                         actions: [],
                     },
@@ -110,7 +110,7 @@ export default function Plane({ className, items }: PlaneProps) {
                         condition: {
                             id: crypto.randomUUID(),
                             type: 'noop',
-                            items: []
+                            items: [],
                         },
                         actions: [],
                     },
@@ -121,7 +121,7 @@ export default function Plane({ className, items }: PlaneProps) {
                         condition: {
                             id: crypto.randomUUID(),
                             type: 'noop',
-                            items: []
+                            items: [],
                         },
                         actions: [],
                     },

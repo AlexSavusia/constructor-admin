@@ -1,7 +1,7 @@
 import { type ChangeEvent, type InputHTMLAttributes, type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { parseValueExpression } from './parser.ts';
-import type {RefValueExpression, ValueExpression} from '../../../../logic/expression.ts';
+import type { RefValueExpression, ValueExpression } from '../../../../logic/expression.ts';
 
 export type OptionItem = {
     label: string;
@@ -37,8 +37,8 @@ function normalizeOptions(options: OptionsSource): OptionItem[] {
 }
 
 function matches(text: string, query: string, mode: MatchMode): boolean {
-    const source = text?.toLowerCase() ?? "";
-    const needle = query?.toLowerCase() ?? "";
+    const source = text?.toLowerCase() ?? '';
+    const needle = query?.toLowerCase() ?? '';
 
     if (!needle) return true;
 
@@ -87,7 +87,7 @@ export default function InputAutocomplete({
     onBlur,
     onClick,
     onKeyUp,
-                                              referenceTypeMap,
+    referenceTypeMap,
     ...props
 }: Props) {
     const inputValue = value ?? '';

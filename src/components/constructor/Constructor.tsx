@@ -5,8 +5,8 @@ import PALETTE_ITEMS from './palette/PaletteItems.ts';
 // import type {FormDefinition} from "../../logic/type.ts";
 // import {useEditorContext} from "../../pages/Programs/editor/EditorContext.tsx";
 import Modal from '../Modal.tsx';
-import {useContext, useState} from 'react';
-import {EditorContext, useEditorContext} from '../../pages/Programs/editor/EditorContext.tsx';
+import { useContext, useState } from 'react';
+import { EditorContext, useEditorContext } from '../../pages/Programs/editor/EditorContext.tsx';
 
 export type ConstructorProps = {
     className?: string;
@@ -94,10 +94,14 @@ export default function Constructor({ className }: ConstructorProps) {
                 <button type="button" className="btn btn-primary h-fit" onClick={() => setIsTransitionModalOpen(true)}>
                     Edit transition
                 </button>
-                <button type="button" className="btn btn-save h-fit" onClick={() => {
-                    const state = ctx!.getState()
-                    console.log(state.form)
-                }}>
+                <button
+                    type="button"
+                    className="btn btn-save h-fit"
+                    onClick={() => {
+                        const state = ctx!.getState();
+                        console.log(state.form);
+                    }}
+                >
                     Save
                 </button>
             </div>

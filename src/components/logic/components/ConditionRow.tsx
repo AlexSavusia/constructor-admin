@@ -3,10 +3,12 @@ import {
     type Boolean2OperandExpression,
     type BooleanExpression,
     isTwoOperandMode,
-    isTwoOperandModeType, type NoopBooleanExpression,
+    isTwoOperandModeType,
+    type NoopBooleanExpression,
     type NotEmptyExpression,
     type NotExpression,
-    type OrExpression, type RefValueExpression,
+    type OrExpression,
+    type RefValueExpression,
 } from '../../../logic/expression.ts';
 import { type ObjPath, useEditorContext } from '../../../pages/Programs/editor/EditorContext.tsx';
 import InputAutocomplete from '../../../components/ui/fieldsUIAdmin/InputSelect/InputSelect.tsx';
@@ -29,7 +31,7 @@ const OPERATORS_LABELS: Record<Exclude<BooleanExpression['type'], 'and' | 'or'>,
     notEmpty: 'nnot empty',
     not: 'not',
     in: 'in',
-    noop: 'select operator'
+    noop: 'select operator',
 };
 
 type StupidFuck = Exclude<
@@ -54,27 +56,26 @@ export default function ConditionRow({ rule, path }: ConditionRowProps) {
         ...contextVariablePaths.variables,
         ...contextVariablePaths.constants,
     };
-    const refTypeMap: Record<string, RefValueExpression['refType']> = {}
-    for(const fk of Object.keys(contextVariablePaths.fields)) {
-        refTypeMap[fk] = 'field'
+    const refTypeMap: Record<string, RefValueExpression['refType']> = {};
+    for (const fk of Object.keys(contextVariablePaths.fields)) {
+        refTypeMap[fk] = 'field';
     }
-    for(const vk of Object.keys(contextVariablePaths.variables)) {
-        refTypeMap[vk] = 'variable'
+    for (const vk of Object.keys(contextVariablePaths.variables)) {
+        refTypeMap[vk] = 'variable';
     }
-    for(const ck of Object.keys(contextVariablePaths.constants)) {
-        refTypeMap[ck] = 'const'
+    for (const ck of Object.keys(contextVariablePaths.constants)) {
+        refTypeMap[ck] = 'const';
     }
 
-    if (rule.type === "noop") {
+    if (rule.type === 'noop') {
         return (
             <div className="my-2 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm lg:flex-row lg:items-center">
                 <p className="min-h-[42px] w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 lg:w-[220px] lg:flex-none">
                     Ничего не делать
                 </p>
             </div>
-        )
+        );
     }
-
 
     return (
         <div className="my-2 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm lg:flex-row lg:items-center">

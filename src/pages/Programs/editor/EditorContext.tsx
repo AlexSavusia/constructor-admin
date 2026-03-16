@@ -184,19 +184,19 @@ export function createContextStore(initialState?: FormDefinition) {
             persistEditingField: () =>
                 set((state) => {
                     if (!state.editingField) return {} as Partial<EditorState>;
-                    const oldField = findByPath<FieldDefinition>(state.form, state.editingField.path.slice(1))!
+                    const oldField = findByPath<FieldDefinition>(state.form, state.editingField.path.slice(1))!;
 
                     const mergedDraft: FieldDefinition = {
                         ...state.editingField.draft,
                         logic: oldField.logic,
-                    }
+                    };
 
-                    const newForm = setByPath(state.form, state.editingField.path.slice(1), mergedDraft)
+                    const newForm = setByPath(state.form, state.editingField.path.slice(1), mergedDraft);
 
                     return {
                         form: newForm,
                         editingField: undefined,
-                        editingRule: undefined
+                        editingRule: undefined,
                     } as Partial<EditorState>;
                 }),
 
@@ -204,12 +204,12 @@ export function createContextStore(initialState?: FormDefinition) {
                 set(() => ({
                     editingField: undefined,
                 })),
-            persistEditingRule: () =>{
+            persistEditingRule: () => {
                 set((state) => {
                     const updatedState = setByPath(state, state.editingRule!.path, state.editingRule!.rule);
                     updatedState.editingRule = undefined;
-                    return updatedState// TODO this is bad cuz whole context is being reset
-                })
+                    return updatedState; // TODO this is bad cuz whole context is being reset
+                });
             },
             updateEditingRule: (path, expr) =>
                 set((state) => {
@@ -499,38 +499,40 @@ export function createContextStore(initialState?: FormDefinition) {
         return {
             ...EDITOR_ACTIONS,
             stepKey: null,
-            form: initialState ? initialState : {
-                firstStepKey: 'start',
-                steps: {
-                    start: {
-                        key: 'start',
-                        title: 'First step',
-                        fields: {},
-                        transition: {
-                            rules: [],
-                        },
-                    },
-                },
-                lookups: {},
-                constants: {
-                    name: {
-                        __typ: 'constant',
-                        key: 'name',
-                        label: 'Form name',
-                        valueType: 'string',
-                        value: 'simple name',
-                    },
-                    enabled: {
-                        __typ: 'constant',
-                        key: 'enabled',
-                        label: 'Form enabled',
-                        valueType: 'boolean',
-                        value: true,
-                    },
-                },
-                variables: {},
-                interactions: [],
-            },
+            form: initialState
+                ? initialState
+                : {
+                      firstStepKey: 'start',
+                      steps: {
+                          start: {
+                              key: 'start',
+                              title: 'First step',
+                              fields: {},
+                              transition: {
+                                  rules: [],
+                              },
+                          },
+                      },
+                      lookups: {},
+                      constants: {
+                          name: {
+                              __typ: 'constant',
+                              key: 'name',
+                              label: 'Form name',
+                              valueType: 'string',
+                              value: 'simple name',
+                          },
+                          enabled: {
+                              __typ: 'constant',
+                              key: 'enabled',
+                              label: 'Form enabled',
+                              valueType: 'boolean',
+                              value: true,
+                          },
+                      },
+                      variables: {},
+                      interactions: [],
+                  },
             scope: null,
         } as EditorState;
     });

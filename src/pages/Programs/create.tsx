@@ -1,7 +1,7 @@
 import FormEditor from './editor';
 import type { FormDefinition } from '../../logic/type.ts';
 import { EditorProvider } from './editor/EditorProvider.tsx';
-import {TEST} from "../HomePage.tsx";
+import { TEST } from '../HomePage.tsx';
 
 export default function CreateProgramsPage() {
     const onSave = (form: FormDefinition) => {
@@ -9,7 +9,7 @@ export default function CreateProgramsPage() {
     };
 
     return (
-        <EditorProvider initialState={TEST} >
+        <EditorProvider initialState={TEST}>
             <FormEditor onSave={onSave} />
         </EditorProvider>
     );
