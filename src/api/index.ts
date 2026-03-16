@@ -103,16 +103,58 @@ export const createDictionary = async (
     rq: CreateDictionarySchema,
     signal?: AbortSignal,
 ): Promise<DictionarySchema> => (await api.put<DictionarySchema>("/dictionary-schema", rq, { signal })).data;
-
+const mockDictionaries: DictionarySchema[] = [
+    {
+        id: "countries",
+        name: "Страны",
+        description: "Справочник стран",
+        schema: [],
+        groupId: null,
+    },
+    {
+        id: "cities",
+        name: "Города",
+        description: "Справочник городов",
+        schema: [],
+        groupId: null,
+    },
+    {
+        id: "genders",
+        name: "Пол",
+        description: "Справочник пола",
+        schema: [],
+        groupId: null,
+    },
+    {
+        id: "documentTypes",
+        name: "Типы документов",
+        description: "Справочник документов",
+        schema: [],
+        groupId: null,
+    },
+];
 export const getDictionaries = async (
     rq: PageableRq,
     signal?: AbortSignal,
-): Promise<PageableRs<DictionarySchema>> =>
-    (
-        await api.get<PageableRs<DictionarySchema>>(`/dictionary-schema${toQueryString(rq)}`, {
-            signal,
-        })
-    ).data;
+): Promise<PageableRs<DictionarySchema>> => {
+    try {
+        return (
+            await api.get<PageableRs<DictionarySchema>>(
+                `/dictionary-schema${toQueryString(rq)}`,
+                { signal },
+            )
+        ).data;
+    } catch (error) {
+        console.error("getDictionaries failed, using mock dictionaries", error);
+
+        return {
+            page: rq.page ?? 0,
+            size: rq.size ?? mockDictionaries.length,
+            total: mockDictionaries.length,
+            data: mockDictionaries,
+        };
+    }
+};
 
 export const getDictionary = async (id: string, signal?: AbortSignal): Promise<DictionarySchema> =>
     (await api.get<DictionarySchema>(`/dictionary-schema/${id}`, { signal })).data;

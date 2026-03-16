@@ -204,7 +204,7 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
 function PaletteItemFieldPreview({ className }: PaletteItemPreviewProps) {
     return (
         <div className={classNames("mb-0", className)}>
-            <InputPreview placeholder="placeholder" />
+            <InputPreview placeholder="placeholder" readOnly/>
         </div>
     );
 }

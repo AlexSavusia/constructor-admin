@@ -5,7 +5,11 @@ import type {
     ValueTypeAlias,
 } from "./type.ts";
 import {useEditorContext} from "../../pages/Programs/editor/EditorContext.tsx";
-
+import {
+    getDictionaries
+} from "../../api";
+import type {  DictionarySchema, } from "../../api/types.ts";
+import {useEffect, useState} from "react";
 type OptionItem = {
     label: string;
     value: string;
@@ -44,11 +48,40 @@ export default function SettingsSidebar({items}: SettingsSidebarProps) {
     const field = useEditorContext((s) => s.editingField?.draft);
     const editingField = useEditorContext((s) => s.editingField);
     const updateEditingFieldSettings = useEditorContext((s) => s.updateEditingFieldSettings);
+    console.log('field', field);
 
+    const persistEditingField = useEditorContext((s) => s.persistEditingField);
+    const resetEditingField = useEditorContext((s) => s.resetEditingField);
+    const setEditingRule = useEditorContext((s) => s.setEditingRule);
 
-    const persistEditingField = useEditorContext(s => s.persistEditingField);
-    const resetEditingField = useEditorContext(s => s.resetEditingField);
-    const setEditingRule = useEditorContext(s=>s.setEditingRule)
+    const [dictionaries, setDictionaries] = useState<DictionarySchema[]>([]);
+    const [dictionariesLoading, setDictionariesLoading] = useState(false);
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        const loadDictionaries = async () => {
+            try {
+                setDictionariesLoading(true);
+
+                const res = await getDictionaries(
+                    { page: 0, size: 1000 },
+                    controller.signal,
+                );
+
+                setDictionaries(Array.isArray(res?.data) ? res.data : []);
+            } catch (error) {
+                console.error("Failed to load dictionaries", error);
+            } finally {
+                setDictionariesLoading(false);
+            }
+        };
+
+        void loadDictionaries();
+
+        return () => controller.abort();
+    }, []);
+
     if (!field || !editingField) return null;
 
     // debugger
@@ -199,7 +232,30 @@ export default function SettingsSidebar({items}: SettingsSidebarProps) {
                             </div>
                         );
                     }
+                    if (setting.key === "dictId") {
+                        return (
+                            <div key={setting.key}>
+                                <label className="form-label">{setting.title}</label>
 
+                                <select
+                                    className="form-select"
+                                    value={String(value ?? "")}
+                                    onChange={(e) => handleChange(setting.key, e.target.value)}
+                                    disabled={dictionariesLoading}
+                                >
+                                    <option value="">
+                                        {dictionariesLoading ? "Загрузка справочников..." : "Выберите справочник"}
+                                    </option>
+
+                                    {(dictionaries ?? []).map((dictionary) => (
+                                        <option key={dictionary.id} value={String(dictionary.id)}>
+                                            {dictionary.name}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                        );
+                    }
                     if (setting.key === "options") {
                         const options = Array.isArray(value)
                             ? (value as OptionItem[])
