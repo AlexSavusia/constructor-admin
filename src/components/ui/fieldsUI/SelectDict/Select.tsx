@@ -1,4 +1,4 @@
-import "./Select.css";
+import './Select.css';
 
 type Option = {
     value: string | number;
@@ -12,22 +12,11 @@ type Props = React.SelectHTMLAttributes<HTMLSelectElement> & {
     options: Option[];
 };
 
-export default function SelectUI({
-                                     label,
-                                     error,
-                                     required,
-                                     options,
-                                     ...props
-                                 }: Props) {
+export default function SelectUI({ label, error, required, options, ...props }: Props) {
     return (
         <div className="field">
-            <div className={`inputWrapper ${error ? "error" : ""}`}>
-                <select
-                    className="input"
-                    defaultValue=""
-                    required={required}
-                    {...props}
-                >
+            <div className={`inputWrapper ${error ? 'error' : ''}`}>
+                <select className="input" defaultValue="" required={required} {...props}>
                     <option value="" disabled hidden></option>
 
                     {options.map((opt) => (

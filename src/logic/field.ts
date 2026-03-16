@@ -3,7 +3,7 @@ import type { BooleanPropertyLogicDefinition, FieldOnUpdateRule, ValueLogicDefin
 import type { PaletteItemSettingsValues } from '../components/constructor/type.ts';
 import type { LayoutItem } from 'react-grid-layout';
 import type { BooleanExpression } from './expression.ts';
-import type {Rule} from "../components/logic/types.ts";
+import type { Rule } from '../components/logic/types.ts';
 
 export type FieldType = 'input' | 'output';
 

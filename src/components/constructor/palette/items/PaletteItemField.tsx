@@ -165,8 +165,8 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
 
 function PaletteItemFieldPreview({ className }: PaletteItemPreviewProps) {
     return (
-        <div className={classNames("mb-0", className)}>
-            <InputPreview placeholder="placeholder" readOnly/>
+        <div className={classNames('mb-0', className)}>
+            <InputPreview placeholder="placeholder" readOnly />
         </div>
     );
 }
@@ -212,15 +212,8 @@ const FieldDescriptor: PaletteItemDescriptor = {
             valType: 'boolean',
             defaultValue: false,
             visibleWhen: {
-                key: "fieldType",
-                equals: [ "input",
-                    "textarea",
-                    "checkbox",
-                    "radio",
-                    "switch",
-                    "date",
-                    "select",
-                    "file",],
+                key: 'fieldType',
+                equals: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'date', 'select', 'file'],
             },
         },
         {
@@ -229,15 +222,8 @@ const FieldDescriptor: PaletteItemDescriptor = {
             valType: 'boolean',
             defaultValue: false,
             visibleWhen: {
-                key: "fieldType",
-                equals: [ "input",
-                    "textarea",
-                    "checkbox",
-                    "radio",
-                    "switch",
-                    "date",
-                    "select",
-                    "file",],
+                key: 'fieldType',
+                equals: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'date', 'select', 'file'],
             },
         },
         {

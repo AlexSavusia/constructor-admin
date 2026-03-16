@@ -3,7 +3,7 @@ import {
     type AndExpression,
     type NoopBooleanExpression,
     type NotEmptyExpression,
-    type OrExpression
+    type OrExpression,
 } from '../../../logic/expression.ts';
 import { findByPath, type ObjPath, useEditorContext } from '../../../pages/Programs/editor/EditorContext.tsx';
 import type { BooleanPropertyLogicDefinition } from '../../../logic/logic.ts';
@@ -35,7 +35,7 @@ export default function GroupEditor({ rule, path }: GroupEditorProps) {
             id: crypto.randomUUID(),
             type: 'notEmpty',
             item: {
-                __typ: "ref",
+                __typ: 'ref',
                 path: ['constants', 'name'],
                 refType: 'const',
             },
@@ -86,7 +86,8 @@ export default function GroupEditor({ rule, path }: GroupEditorProps) {
                             <option value="noop">Select condition</option>
                         </select>
                         <span className="hidden rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-500 sm:inline-flex">
-                            {rule.type != 'noop' ? rule?.items?.length : 0} item{(rule.type != 'noop'  && rule?.items?.length === 1) ? '' : 's'}
+                            {rule.type != 'noop' ? rule?.items?.length : 0} item
+                            {rule.type != 'noop' && rule?.items?.length === 1 ? '' : 's'}
                         </span>
                     </div>
                 </div>
@@ -96,23 +97,24 @@ export default function GroupEditor({ rule, path }: GroupEditorProps) {
                             No conditions yet. Add a condition or nested group.
                         </div>
                     )}
-                    {rule.type != 'noop' && rule.items.map((child, index) =>
-                        child.type !== 'and' && child.type !== 'or' ? (
-                            <div key={child.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
-                                <ConditionRow rule={child} path={[...path, 'items', index]} />
-                                <button onClick={() => deleteItem(index)}>Delete condition</button>
-                            </div>
-                        ) : (
-                            <div key={child.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
-                                <GroupEditor rule={child} path={[...path, 'items', index]} />
-                                <div className="mt-3 flex justify-end">
-                                    <button type="button" onClick={() => deleteItem(index)}>
-                                        Delete group
-                                    </button>
+                    {rule.type != 'noop' &&
+                        rule.items.map((child, index) =>
+                            child.type !== 'and' && child.type !== 'or' ? (
+                                <div key={child.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+                                    <ConditionRow rule={child} path={[...path, 'items', index]} />
+                                    <button onClick={() => deleteItem(index)}>Delete condition</button>
                                 </div>
-                            </div>
-                        )
-                    )}
+                            ) : (
+                                <div key={child.id} className="rounded-xl border border-slate-200 bg-slate-50/70 p-3">
+                                    <GroupEditor rule={child} path={[...path, 'items', index]} />
+                                    <div className="mt-3 flex justify-end">
+                                        <button type="button" onClick={() => deleteItem(index)}>
+                                            Delete group
+                                        </button>
+                                    </div>
+                                </div>
+                            )
+                        )}
                 </div>
                 <div className="mt-4 flex flex-wrap gap-2 border-t border-slate-200 pt-4">
                     <button

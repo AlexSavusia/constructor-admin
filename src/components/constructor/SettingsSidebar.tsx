@@ -1,27 +1,16 @@
-import type {
-    PaletteItemDescriptor,
-    PaletteItemSetting,
-    PaletteItemSettingsValues,
-    ValueTypeAlias,
-} from "./type.ts";
-import { useEditorContext } from "../../pages/Programs/editor/EditorContext.tsx";
-import { getDictionaries, getDictionaryRows } from "../../api";
-import type {
-    DictionarySchema,
-} from "../../api/types.ts";
-import { useEffect, useMemo, useState } from "react";
-import type {OptionItem} from "./type.ts";
-
+import type { PaletteItemDescriptor, PaletteItemSetting, PaletteItemSettingsValues, ValueTypeAlias } from './type.ts';
+import { useEditorContext } from '../../pages/Programs/editor/EditorContext.tsx';
+import { getDictionaries, getDictionaryRows } from '../../api';
+import type { DictionarySchema } from '../../api/types.ts';
+import { useEffect, useMemo, useState } from 'react';
+import type { OptionItem } from './type.ts';
 
 type SettingsSidebarProps = {
     items: PaletteItemDescriptor[];
     onChange: (key: string, value: ValueTypeAlias) => void;
 };
 
-function isSettingVisible(
-    setting: PaletteItemSetting,
-    values?: PaletteItemSettingsValues,
-) {
+function isSettingVisible(setting: PaletteItemSetting, values?: PaletteItemSettingsValues) {
     if (!setting.visibleWhen) return true;
 
     const currentValue = values?.[setting.visibleWhen.key];
@@ -57,13 +46,10 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
         const loadDictionaries = async () => {
             try {
                 setDictionariesLoading(true);
-                const res = await getDictionaries(
-                    { page: 0, size: 1000 },
-                    controller.signal,
-                );
+                const res = await getDictionaries({ page: 0, size: 1000 }, controller.signal);
                 setDictionaries(Array.isArray(res?.data) ? res.data : []);
             } catch (error) {
-                console.error("Failed to load dictionaries", error);
+                console.error('Failed to load dictionaries', error);
                 setDictionaries([]);
             } finally {
                 setDictionariesLoading(false);
@@ -75,23 +61,19 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
         return () => controller.abort();
     }, []);
 
-    const descriptorKey = field?.descriptorKey ?? "";
+    const descriptorKey = field?.descriptorKey ?? '';
     const settingsValues = field?.settingsValues;
 
     const visibleSettings =
-        getDescriptor(descriptorKey, items)?.settings.filter((setting) =>
-            isSettingVisible(setting, settingsValues),
-        ) ?? [];
+        getDescriptor(descriptorKey, items)?.settings.filter((setting) => isSettingVisible(setting, settingsValues)) ?? [];
 
-    const selectedDictId = String(settingsValues?.dictId ?? "");
+    const selectedDictId = String(settingsValues?.dictId ?? '');
 
     const selectedFieldIds: string[] = Array.isArray(settingsValues?.dictFieldIds)
         ? (settingsValues?.dictFieldIds as string[])
         : [];
 
-    const selectedOptions: OptionItem[] = Array.isArray(settingsValues?.options)
-        ? (settingsValues.options as OptionItem[])
-        : [];
+    const selectedOptions: OptionItem[] = Array.isArray(settingsValues?.options) ? (settingsValues.options as OptionItem[]) : [];
 
     const selectedDictionary = useMemo(() => {
         return dictionaries.find((x) => String(x.id) === selectedDictId) ?? null;
@@ -101,15 +83,9 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
         updateEditingFieldSettings({ [key]: value });
     };
 
-    const loadDictionaryRowsAndOpenModal = async (
-        dictionary: DictionarySchema,
-        nextSelectedFieldIds: string[],
-    ) => {
+    const loadDictionaryRowsAndOpenModal = async (dictionary: DictionarySchema, nextSelectedFieldIds: string[]) => {
         try {
-            const res = await getDictionaryRows(
-                { page: 0, size: 100 },
-                dictionary.id,
-            );
+            const res = await getDictionaryRows({ page: 0, size: 100 }, dictionary.id);
 
             openDictionaryPicker({
                 dictionary,
@@ -117,7 +93,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                 selectedFieldIds: nextSelectedFieldIds,
             });
         } catch (error) {
-            console.error("Failed to load dictionary rows", error);
+            console.error('Failed to load dictionary rows', error);
 
             openDictionaryPicker({
                 dictionary,
@@ -136,12 +112,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                     <button
                         type="button"
                         className="btn btn-light w-100"
-                        onClick={() =>
-                            setEditingRule(
-                                [...editingField.path, "logic", "validation"],
-                                "FIELD_SCOPE_DECISION",
-                            )
-                        }
+                        onClick={() => setEditingRule([...editingField.path, 'logic', 'validation'], 'FIELD_SCOPE_DECISION')}
                     >
                         Валидация
                     </button>
@@ -160,9 +131,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                             className="form-check-input"
                                             type="checkbox"
                                             checked={Boolean(value)}
-                                            onChange={(e) =>
-                                                handleChange(setting.key, e.target.checked)
-                                            }
+                                            onChange={(e) => handleChange(setting.key, e.target.checked)}
                                         />
                                         <label className="form-check-label" htmlFor={setting.key}>
                                             Видимость
@@ -172,10 +141,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                         type="button"
                                         className="btn btn-light btn-sm"
                                         onClick={() =>
-                                            setEditingRule(
-                                                [...editingField.path, "logic", "visibility"],
-                                                "FIELD_SCOPE_PROPERTY",
-                                            )
+                                            setEditingRule([...editingField.path, 'logic', 'visibility'], 'FIELD_SCOPE_PROPERTY')
                                         }
                                     >
                                         Условия
@@ -195,9 +161,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                             className="form-check-input"
                                             type="checkbox"
                                             checked={Boolean(value)}
-                                            onChange={(e) =>
-                                                handleChange(setting.key, e.target.checked)
-                                            }
+                                            onChange={(e) => handleChange(setting.key, e.target.checked)}
                                         />
                                         <label className="form-check-label" htmlFor={setting.key}>
                                             Включено
@@ -207,10 +171,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                         type="button"
                                         className="btn btn-light btn-sm"
                                         onClick={() =>
-                                            setEditingRule(
-                                                [...editingField.path, "logic", "enabled"],
-                                                "FIELD_SCOPE_PROPERTY",
-                                            )
+                                            setEditingRule([...editingField.path, 'logic', 'enabled'], 'FIELD_SCOPE_PROPERTY')
                                         }
                                     >
                                         Условия
@@ -230,9 +191,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                             className="form-check-input"
                                             type="checkbox"
                                             checked={Boolean(value)}
-                                            onChange={(e) =>
-                                                handleChange(setting.key, e.target.checked)
-                                            }
+                                            onChange={(e) => handleChange(setting.key, e.target.checked)}
                                         />
                                         <label className="form-check-label" htmlFor={setting.key}>
                                             {setting.title}
@@ -242,10 +201,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                         type="button"
                                         className="btn btn-sm btn-light"
                                         onClick={() =>
-                                            setEditingRule(
-                                                [...editingField.path, "logic", "required"],
-                                                "FIELD_SCOPE_PROPERTY",
-                                            )
+                                            setEditingRule([...editingField.path, 'logic', 'required'], 'FIELD_SCOPE_PROPERTY')
                                         }
                                     >
                                         Условие
@@ -270,41 +226,37 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                         );
                     }
 
-                    if (setting.key === "dictId") {
+                    if (setting.key === 'dictId') {
                         return (
                             <div key={setting.key} className="d-flex flex-column gap-2">
                                 <div>
                                     <label className="form-label">{setting.title}</label>
                                     <select
                                         className="form-select"
-                                        value={String(value ?? "")}
+                                        value={String(value ?? '')}
                                         onChange={async (e) => {
                                             const nextDictId = e.target.value;
 
                                             handleChange(setting.key, nextDictId);
-                                            handleChange("dictFieldIds", []);
+                                            handleChange('dictFieldIds', []);
 
-                                        if (!nextDictId) {
-                                            return;
-                                        }
+                                            if (!nextDictId) {
+                                                return;
+                                            }
 
-                                        const nextDictionary =
-                                            dictionaries.find(
-                                                (dictionary) =>
-                                                    String(dictionary.id) === String(nextDictId),
-                                            ) ?? null;
+                                            const nextDictionary =
+                                                dictionaries.find((dictionary) => String(dictionary.id) === String(nextDictId)) ??
+                                                null;
 
-                                        if (!nextDictionary) return;
+                                            if (!nextDictionary) return;
 
-                                        await loadDictionaryRowsAndOpenModal(nextDictionary, []);
-                                    }}
-                                    disabled={dictionariesLoading}
-                                >
-                                    <option value="">
-                                        {dictionariesLoading
-                                            ? "Загрузка справочников..."
-                                            : "Выберите справочник"}
-                                    </option>
+                                            await loadDictionaryRowsAndOpenModal(nextDictionary, []);
+                                        }}
+                                        disabled={dictionariesLoading}
+                                    >
+                                        <option value="">
+                                            {dictionariesLoading ? 'Загрузка справочников...' : 'Выберите справочник'}
+                                        </option>
 
                                         {dictionaries.map((dictionary) => (
                                             <option key={dictionary.id} value={dictionary.id}>
@@ -320,10 +272,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                             type="button"
                                             className="btn btn-outline-primary btn-sm"
                                             onClick={() =>
-                                                void loadDictionaryRowsAndOpenModal(
-                                                    selectedDictionary,
-                                                    selectedFieldIds,
-                                                )
+                                                void loadDictionaryRowsAndOpenModal(selectedDictionary, selectedFieldIds)
                                             }
                                         >
                                             Выбрать значения справочника
@@ -331,16 +280,13 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
 
                                         {selectedOptions.length > 0 ? (
                                             <div className="d-flex flex-column gap-2">
-                                                <div className="small text-muted">
-                                                    Выбрано значений: {selectedOptions.length}
-                                                </div>
+                                                <div className="small text-muted">Выбрано значений: {selectedOptions.length}</div>
 
                                                 <div className="d-flex flex-wrap gap-2">
                                                     {selectedOptions.map((option, index) => (
                                                         <span
                                                             key={`${option.value}-${index}`}
                                                             className="badge text-bg-light border"
-                                                            title={option.value}
                                                         >
                                                             {option.label}
                                                         </span>
@@ -348,9 +294,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                                 </div>
                                             </div>
                                         ) : (
-                                            <div className="small text-muted">
-                                                Значения не выбраны
-                                            </div>
+                                            <div className="small text-muted">Значения не выбраны</div>
                                         )}
                                     </>
                                 )}
@@ -358,13 +302,11 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                         );
                     }
 
-                    if (setting.key === "options") {
+                    if (setting.key === 'options') {
                         const options = Array.isArray(value) ? (value as OptionItem[]) : [];
 
                         const updateOption = (index: number, patch: Partial<OptionItem>) => {
-                            const next = options.map((item, i) =>
-                                i === index ? { ...item, ...patch } : item,
-                            );
+                            const next = options.map((item, i) => (i === index ? { ...item, ...patch } : item));
                             handleChange(setting.key, next);
                         };
 
@@ -397,9 +339,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                                 className="form-control"
                                                 type="text"
                                                 value={option.label}
-                                                onChange={(e) =>
-                                                    updateOption(index, { label: e.target.value })
-                                                }
+                                                onChange={(e) => updateOption(index, { label: e.target.value })}
                                             />
                                         </div>
 
@@ -409,9 +349,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                                 className="form-control"
                                                 type="text"
                                                 value={option.value}
-                                                onChange={(e) =>
-                                                    updateOption(index, { value: e.target.value })
-                                                }
+                                                onChange={(e) => updateOption(index, { value: e.target.value })}
                                             />
                                         </div>
 
@@ -455,7 +393,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                 <label className="form-label">{setting.title}</label>
                                 <select
                                     className="form-select"
-                                    value={String(value ?? "")}
+                                    value={String(value ?? '')}
                                     onChange={(e) => handleChange(setting.key, e.target.value)}
                                 >
                                     {setting.multiValVariants.map((variant) => (
@@ -499,11 +437,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                     <button type="button" className="btn btn-primary" onClick={persistEditingField}>
                         Сохранить
                     </button>
-                    <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={resetEditingField}
-                    >
+                    <button type="button" className="btn btn-secondary" onClick={resetEditingField}>
                         Отмена
                     </button>
                 </div>

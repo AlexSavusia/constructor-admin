@@ -13,7 +13,7 @@ export type AstValueExpression = {
 export type RefValueExpression = {
     __typ: 'ref';
     path: ObjPath;
-    refType: 'field' | 'variable' | 'const'
+    refType: 'field' | 'variable' | 'const';
 };
 
 export type ConstValueExpression = {
@@ -72,10 +72,10 @@ export type Boolean2OperandExpression =
     | InExpression;
 
 export type NoopBooleanExpression = {
-    id: string
-    type: "noop"
-    items: BooleanExpression[]
-}
+    id: string;
+    type: 'noop';
+    items: BooleanExpression[];
+};
 
 export type BooleanExpression =
     | NoopBooleanExpression

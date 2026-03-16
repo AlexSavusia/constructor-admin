@@ -1,15 +1,11 @@
-import type {
-    PaletteItemPreviewProps,
-    PaletteItemProps,
-    PaletteItemDescriptor,
-} from "../../type.ts";
-import classNames from "classnames";
-import { useEffect, useMemo, useState } from "react";
+import type { PaletteItemPreviewProps, PaletteItemProps, PaletteItemDescriptor } from '../../type.ts';
+import classNames from 'classnames';
+import { useEffect, useMemo, useState } from 'react';
 
-import SelectUI from "../../../ui/fieldsUI/Select/Select.tsx";
-import Input from "../../../ui/fieldsUIAdmin/Input/Input.tsx";
-import { getDictionaryRows } from "../../../../api";
-import type { DictionaryEntryValue, DictionaryRow } from "../../../../api/types.ts";
+import SelectUI from '../../../ui/fieldsUI/Select/Select.tsx';
+import Input from '../../../ui/fieldsUIAdmin/Input/Input.tsx';
+import { getDictionaryRows } from '../../../../api';
+import type { DictionaryEntryValue, DictionaryRow } from '../../../../api/types.ts';
 
 type SelectOption = {
     label: string;
@@ -17,20 +13,17 @@ type SelectOption = {
 };
 
 function getPrimitiveValue(value: DictionaryEntryValue | undefined): string | number {
-    if (!value) return "";
+    if (!value) return '';
 
-    if (value.type === "COMMON") {
-        if (
-            typeof value.value === "string" ||
-            typeof value.value === "number"
-        ) {
+    if (value.type === 'COMMON') {
+        if (typeof value.value === 'string' || typeof value.value === 'number') {
             return value.value;
         }
 
         return String(value.value);
     }
 
-    return "";
+    return '';
 }
 
 function mapDictionaryRowsToOptions(rows: DictionaryRow[]): SelectOption[] {
@@ -48,11 +41,11 @@ function mapDictionaryRowsToOptions(rows: DictionaryRow[]): SelectOption[] {
 }
 
 function PaletteItemInput({ className, settingsValues }: PaletteItemProps) {
-    const label = String(settingsValues?.label ?? "Название поля");
-    const name = String(settingsValues?.name ?? "field");
+    const label = String(settingsValues?.label ?? 'Название поля');
+    const name = String(settingsValues?.name ?? 'field');
     const required = Boolean(settingsValues?.required ?? false);
     const disabled = Boolean(settingsValues?.disabled ?? false);
-    const dictId = String(settingsValues?.dictId ?? "");
+    const dictId = String(settingsValues?.dictId ?? '');
 
     const [options, setOptions] = useState<SelectOption[]>([]);
     const [loading, setLoading] = useState(false);
@@ -69,15 +62,11 @@ function PaletteItemInput({ className, settingsValues }: PaletteItemProps) {
             try {
                 setLoading(true);
 
-                const res = await getDictionaryRows(
-                    { page: 0, size: 1000 },
-                    dictId,
-                    controller.signal,
-                );
+                const res = await getDictionaryRows({ page: 0, size: 1000 }, dictId, controller.signal);
 
                 setOptions(mapDictionaryRowsToOptions(res.data));
             } catch (error) {
-                console.error("Failed to load dictionary rows", error);
+                console.error('Failed to load dictionary rows', error);
                 setOptions([]);
             } finally {
                 setLoading(false);
@@ -93,8 +82,8 @@ function PaletteItemInput({ className, settingsValues }: PaletteItemProps) {
         if (options.length > 0) return options;
 
         return [
-            { label: "Вариант 1", value: "var1" },
-            { label: "Вариант 2", value: "var2" },
+            { label: 'Вариант 1', value: 'var1' },
+            { label: 'Вариант 2', value: 'var2' },
         ];
     }, [options]);
 
@@ -113,47 +102,47 @@ function PaletteItemInput({ className, settingsValues }: PaletteItemProps) {
 
 function PaletteItemInputPreview({ className }: PaletteItemPreviewProps) {
     return (
-        <div className={classNames("mb-0", className)}>
+        <div className={classNames('mb-0', className)}>
             <Input placeholder="placeholder" readOnly />
         </div>
     );
 }
 
 const SelectDictDescriptor: PaletteItemDescriptor = {
-    key: "selectDict",
-    title: "Выбор из справочника",
-    type: "input",
+    key: 'selectDict',
+    title: 'Выбор из справочника',
+    type: 'input',
     minWidth: 1,
     settings: [
         {
-            key: "label",
-            title: "Название",
-            valType: "string",
-            defaultValue: "Название поля",
+            key: 'label',
+            title: 'Название',
+            valType: 'string',
+            defaultValue: 'Название поля',
         },
         {
-            key: "required",
-            title: "Обязательное",
-            valType: "boolean",
+            key: 'required',
+            title: 'Обязательное',
+            valType: 'boolean',
             defaultValue: false,
         },
         {
-            key: "visible",
-            title: "Видимость",
-            valType: "boolean",
+            key: 'visible',
+            title: 'Видимость',
+            valType: 'boolean',
             defaultValue: false,
         },
         {
-            key: "disabled",
-            title: "Включено",
-            valType: "boolean",
+            key: 'disabled',
+            title: 'Включено',
+            valType: 'boolean',
             defaultValue: false,
         },
         {
-            key: "dictId",
-            title: "Справочник",
-            valType: "string",
-            defaultValue: "",
+            key: 'dictId',
+            title: 'Справочник',
+            valType: 'string',
+            defaultValue: '',
         },
     ],
     ElementPreview: PaletteItemInputPreview,

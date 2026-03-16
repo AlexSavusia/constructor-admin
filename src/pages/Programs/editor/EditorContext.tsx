@@ -1,28 +1,29 @@
-import { createContext, useContext } from "react";
-import { createStore, useStore } from "zustand";
+import { createContext, useContext } from 'react';
+import { createStore, useStore } from 'zustand';
 import type {
     ConstVariableDefinition,
     ExpressionScope,
-    FormDefinition, Key,
-    RuntimeVariableDefinition
-} from "../../../logic/type.ts";
-import type {StepDefinition} from "../../../logic/step.ts";
-import type {FieldDefinition} from "../../../logic/field.ts";
-import type {PaletteItemSettingsValues} from "../../../components/constructor/type.ts";
-import type {Layout} from "react-grid-layout";
-import type {ActionExpression, Rule} from "../../../components/logic/types.ts";
-import type {BooleanExpression} from "../../../logic/expression.ts";
-import type {BooleanPropertyLogicDefinition, StepTransitionRule} from "../../../logic/logic.ts";
-import type {DictionaryRow, DictionarySchema} from "../../../api/types.ts";
+    FormDefinition,
+    Key,
+    RuntimeVariableDefinition,
+} from '../../../logic/type.ts';
+import type { StepDefinition } from '../../../logic/step.ts';
+import type { FieldDefinition } from '../../../logic/field.ts';
+import type { PaletteItemSettingsValues } from '../../../components/constructor/type.ts';
+import type { Layout } from 'react-grid-layout';
+import type { ActionExpression, Rule } from '../../../components/logic/types.ts';
+import type { BooleanExpression } from '../../../logic/expression.ts';
+import type { BooleanPropertyLogicDefinition, StepTransitionRule } from '../../../logic/logic.ts';
+import type { DictionaryRow, DictionarySchema } from '../../../api/types.ts';
 
 export type EditorStateValue = {
-    stepKey: Key | null
-    form: FormDefinition
-    scope: ExpressionScope | null
-    editingRule?: LogicEditorContextValue
-    editingField?: FieldEditorContextValue
-    dictionaryPicker?: DictionaryPickerState | null
-}
+    stepKey: Key | null;
+    form: FormDefinition;
+    scope: ExpressionScope | null;
+    editingRule?: LogicEditorContextValue;
+    editingField?: FieldEditorContextValue;
+    dictionaryPicker?: DictionaryPickerState | null;
+};
 
 export type ObjPath = Array<string | number>;
 
@@ -43,21 +44,20 @@ export type FieldEditorContextValue = {
 };
 
 export type ContextFields = {
-    fields: Record<string, string>
-    variables: Record<string, string>
-    constants: Record<string, string>
-}
+    fields: Record<string, string>;
+    variables: Record<string, string>;
+    constants: Record<string, string>;
+};
 
 export type DictionaryPickerState = {
-    open: boolean
-    dictionary: DictionarySchema | null
-    rows: DictionaryRow[]
-    tempSelectedFieldIds: string[]
-}
+    open: boolean;
+    dictionary: DictionarySchema | null;
+    rows: DictionaryRow[];
+    tempSelectedFieldIds: string[];
+};
 export type EditingRuleMeta = {
     editingFieldProperty?: 'visibility' | 'enabled' | 'required' | 'validation';
 };
-
 
 export type EditorActions = {
     setStepKey: (stepKey: Key | null) => void;
@@ -86,19 +86,15 @@ export type EditorActions = {
     updateEditingFieldSettings: (settings: PaletteItemSettingsValues) => void;
     resetEditingField: () => void; // resets editing object (not field reset)
 
-    getAllContextVariables: (scope: ExpressionScope) => ContextFields
-    addStepTransitionRule: (stepKey: Key, transition: StepTransitionRule) => void
-    removeStepTransitionRule: (stepKey: Key, idx: number) => void
+    getAllContextVariables: (scope: ExpressionScope) => ContextFields;
+    addStepTransitionRule: (stepKey: Key, transition: StepTransitionRule) => void;
+    removeStepTransitionRule: (stepKey: Key, idx: number) => void;
 
-    openDictionaryPicker: (payload: {
-        dictionary: DictionarySchema;
-        rows: DictionaryRow[];
-        selectedFieldIds: string[];
-    }) => void;
+    openDictionaryPicker: (payload: { dictionary: DictionarySchema; rows: DictionaryRow[]; selectedFieldIds: string[] }) => void;
     closeDictionaryPicker: () => void;
     toggleDictionaryPickerField: (fieldId: string) => void;
     saveDictionaryPickerSelection: () => void;
-}
+};
 
 export type EditorState = EditorStateValue & EditorActions;
 
@@ -148,47 +144,46 @@ function setByPath<T, V>(object: T, path: ObjPath, value: V): T {
 export function createContextStore(initialState?: FormDefinition) {
     return createStore<EditorState>((set, get) => {
         const EDITOR_ACTIONS: EditorActions = {
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             getAllContextVariables: (_scope: ExpressionScope) => {
                 const { form } = get();
                 const { steps, variables, constants } = form;
 
                 return {
                     constants: Object.entries(constants)
-                        .map((v) => [objPathToString(['constants', v[0]]), v[1].label])
-                        .reduce((acc, item) => {
-                            // @ts-expect-error no error
+                        .map((v) => [objPathToString(['constants', v[0]]), v[1].label] as const)
+                        .reduce<Record<string, string>>((acc, item) => {
                             acc[item[0]] = item[1];
                             return acc;
                         }, {}),
                     variables: Object.entries(variables)
-                        .map((v) => [objPathToString(['variables', v[0]]), v[1].label])
-                        .reduce((acc, item) => {
-                            // @ts-expect-error no error
+                        .map((v) => [objPathToString(['variables', v[0]]), v[1].label] as const)
+                        .reduce<Record<string, string>>((acc, item) => {
                             acc[item[0]] = item[1];
                             return acc;
                         }, {}),
                     fields: Object.entries(steps)
-                        .map((st) =>
-                            Object.entries(st[1].fields).map((f) => [
-                                objPathToString([st[0], 'fields', f[0]]),
-                                f[1].settingsValues['name']!,
-                            ])
+                        .flatMap(([stepKey, step]) =>
+                            Object.entries(step.fields).map(
+                                ([fieldKey, field]) =>
+                                    [
+                                        objPathToString([stepKey, 'fields', fieldKey]),
+                                        String(field.settingsValues['name'] ?? ''),
+                                    ] as const
+                            )
                         )
-                        .flat()
-                        .reduce((acc, item) => {
-                            // @ts-expect-error no error
+                        .reduce<Record<string, string>>((acc, item) => {
                             acc[item[0]] = item[1];
                             return acc;
                         }, {}),
-                } as ContextFields;
+                };
             },
+
             setEditingField: (stepKey, fieldKey) =>
                 set((state) => {
                     const path: ObjPath = ['form', 'steps', stepKey, 'fields', fieldKey];
                     const field = state.form.steps[stepKey]?.fields[fieldKey];
 
-                    if (!field) return {} as Partial<EditorState>;
+                    if (!field) return {};
 
                     return {
                         editingField: {
@@ -196,76 +191,84 @@ export function createContextStore(initialState?: FormDefinition) {
                             key: fieldKey,
                             draft: structuredClone(field),
                         },
-                    } as Partial<EditorState>;
+                    };
                 }),
+
             persistEditingField: () =>
                 set((state) => {
-                    if (!state.editingField) return {} as Partial<EditorState>;
-                    const oldField = findByPath<FieldDefinition>(state.form, state.editingField.path.slice(1))!
+                    if (!state.editingField) return {};
+
+                    const oldField = findByPath<FieldDefinition>(state.form, state.editingField.path.slice(1));
+
+                    if (!oldField) return {};
 
                     const mergedDraft: FieldDefinition = {
                         ...state.editingField.draft,
                         logic: oldField.logic,
-                    }
+                    };
 
-                    const newForm = setByPath(state.form, state.editingField.path.slice(1), mergedDraft)
+                    const newForm = setByPath(state.form, state.editingField.path.slice(1), mergedDraft);
 
-                return {
-                    form: newForm,
-                    editingField: undefined,
-                    editingRule: undefined,
-                    dictionaryPicker: null,
-                } as Partial<EditorState>;
-            }),
+                    return {
+                        form: newForm,
+                        editingField: undefined,
+                        editingRule: undefined,
+                        dictionaryPicker: null,
+                    };
+                }),
 
             resetEditingField: () =>
                 set(() => ({
                     editingField: undefined,
-                    dictionaryPicker: null
+                    dictionaryPicker: null,
                 })),
 
             persistEditingRule: () =>
                 set((state) => {
-                    const updatedState = setByPath(state, state.editingRule!.path, state.editingRule!.rule);
+                    if (!state.editingRule) return {};
+
+                    const updatedState = setByPath(state, state.editingRule.path, state.editingRule.rule);
                     updatedState.editingRule = undefined;
-                    return updatedState// TODO this is bad cuz whole context is being reset
+                    return updatedState;
                 }),
 
             updateEditingRule: (path, expr) =>
                 set((state) => {
-                    const editingRule = state.editingRule!;
+                    const editingRule = state.editingRule;
+                    if (!editingRule) return {};
+
                     switch (editingRule.scope) {
-                        case "FIELD_SCOPE_DECISION": {
+                        case 'FIELD_SCOPE_DECISION': {
                             const r = setByPath(editingRule.rule as Rule, path, expr);
                             return {
                                 editingRule: {
-                                    ...state.editingRule,
+                                    ...editingRule,
                                     rule: r,
                                 },
-                            } as Partial<EditorState>;
+                            };
                         }
 
-                        case "FIELD_SCOPE_PROPERTY": {
+                        case 'FIELD_SCOPE_PROPERTY': {
                             const r = setByPath((editingRule.rule as BooleanPropertyLogicDefinition).rule, path, expr);
                             return {
                                 editingRule: {
-                                    ...state.editingRule,
+                                    ...editingRule,
                                     rule: {
                                         ...editingRule.rule,
                                         rule: r,
                                     },
                                 },
-                            } as Partial<EditorState>;
+                            };
                         }
 
-                        case "STEP_TRANSITION_SCOPE": {
+                        case 'STEP_TRANSITION_SCOPE': {
                             const r = setByPath(editingRule.rule as StepTransitionRule, path, expr);
                             return {
                                 editingRule: {
-                                    ...state.editingRule,
+                                    ...editingRule,
                                     rule: r,
                                 },
-                            } as Partial<EditorState>;
+                            };
                         }
 
                         default:
@@ -280,20 +283,21 @@ export function createContextStore(initialState?: FormDefinition) {
                         ruleObj = {
                             condition: {
                                 id: crypto.randomUUID(),
-                                type: "and",
+                                type: 'and',
                                 items: [],
                             },
                             actions: [],
                         };
                     }
+
                     return {
                         editingRule: {
                             rule: ruleObj,
-                            scope: scope,
-                            path: path,
+                            scope,
+                            path,
                             meta,
                         },
-                    } as Partial<EditorState>;
+                    };
                 }),
 
             resetEditingRule: () =>
@@ -316,7 +320,6 @@ export function createContextStore(initialState?: FormDefinition) {
 
             removeStep: (stepKey) =>
                 set((state) => {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const { [stepKey]: _, ...rest } = state.form.steps;
                     return {
                         form: {
@@ -339,7 +342,6 @@ export function createContextStore(initialState?: FormDefinition) {
 
             removeConst: (constKey: Key) =>
                 set((state) => {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const { [constKey]: _, ...rest } = state.form.constants;
                     return {
                         form: {
@@ -368,7 +370,7 @@ export function createContextStore(initialState?: FormDefinition) {
                             ...state.form.constants,
                             [constKey]: {
                                 ...state.form.constants[constKey],
-                                value: value,
+                                value,
                             },
                         },
                     },
@@ -377,12 +379,12 @@ export function createContextStore(initialState?: FormDefinition) {
             updateStepLayout: (stepKey: Key, layout: Layout) =>
                 set((state) => {
                     const { fields } = state.form.steps[stepKey];
-                    const updatedFields = Object.entries(fields).map((v) => {
-                        const f = v[1];
-                        const fieldLayout = layout.find((fl) => fl.i == f.key)!;
+
+                    const updatedFields = Object.entries(fields).map(([, f]) => {
+                        const fieldLayout = layout.find((fl) => fl.i === f.key);
                         return {
                             ...f,
-                            layout: fieldLayout,
+                            layout: fieldLayout ?? f.layout,
                         } as FieldDefinition;
                     });
 
@@ -422,7 +424,6 @@ export function createContextStore(initialState?: FormDefinition) {
 
             removeField: (stepKey, fieldKey) =>
                 set((state) => {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const { [fieldKey]: _, ...rest } = state.form.steps[stepKey].fields;
                     return {
                         form: {
@@ -463,7 +464,7 @@ export function createContextStore(initialState?: FormDefinition) {
 
             updateEditingFieldSettings: (settings) =>
                 set((state) => {
-                    if (!state.editingField) return {} as Partial<EditorState>;
+                    if (!state.editingField) return {};
 
                     return {
                         editingField: {
@@ -476,7 +477,7 @@ export function createContextStore(initialState?: FormDefinition) {
                                 },
                             },
                         },
-                    } as Partial<EditorState>;
+                    };
                 }),
 
             addVariable: (variable) =>
@@ -492,7 +493,6 @@ export function createContextStore(initialState?: FormDefinition) {
 
             removeVariable: (variableKey) =>
                 set((state) => {
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     const { [variableKey]: _, ...rest } = state.form.variables;
                     return {
                         form: {
@@ -512,10 +512,7 @@ export function createContextStore(initialState?: FormDefinition) {
                                 ...state.form.steps[stepKey],
                                 transition: {
                                     ...state.form.steps[stepKey].transition,
-                                    rules: [
-                                        ...state.form.steps[stepKey].transition.rules,
-                                        rule,
-                                    ],
+                                    rules: [...state.form.steps[stepKey].transition.rules, rule],
                                 },
                             },
                         },
@@ -532,7 +529,7 @@ export function createContextStore(initialState?: FormDefinition) {
                                 ...state.form.steps[stepKey],
                                 transition: {
                                     ...state.form.steps[stepKey].transition,
-                                    rules: [...[...state.form.steps[stepKey].transition.rules].filter((_, i) => i !== idx)],
+                                    rules: state.form.steps[stepKey].transition.rules.filter((_, i) => i !== idx),
                                 },
                             },
                         },
@@ -557,7 +554,7 @@ export function createContextStore(initialState?: FormDefinition) {
             toggleDictionaryPickerField: (fieldId: string) =>
                 set((state) => {
                     const picker = state.dictionaryPicker;
-                    if (!picker) return {} as Partial<EditorState>;
+                    if (!picker) return {};
 
                     const exists = picker.tempSelectedFieldIds.includes(fieldId);
 
@@ -568,7 +565,7 @@ export function createContextStore(initialState?: FormDefinition) {
                                 ? picker.tempSelectedFieldIds.filter((x) => x !== fieldId)
                                 : [...picker.tempSelectedFieldIds, fieldId],
                         },
-                    } as Partial<EditorState>;
+                    };
                 }),
 
             saveDictionaryPickerSelection: () =>
@@ -576,7 +573,7 @@ export function createContextStore(initialState?: FormDefinition) {
                     const picker = state.dictionaryPicker;
                     const editingField = state.editingField;
 
-                    if (!picker || !editingField) return {} as Partial<EditorState>;
+                    if (!picker || !editingField) return {};
 
                     return {
                         editingField: {
@@ -590,56 +587,54 @@ export function createContextStore(initialState?: FormDefinition) {
                             },
                         },
                         dictionaryPicker: null,
-                    } as Partial<EditorState>;
+                    };
                 }),
         };
 
-        if (initialState) {
-            return {
-                ...initialState,
-                dictionaryPicker: null,
-                ...EDITOR_ACTIONS,
-            };
-        }
-
-        return {
-            ...EDITOR_ACTIONS,
-            stepKey: null,
-            form: initialState ? initialState : {
-                firstStepKey: 'start',
-                steps: {
-                    start: {
-                        key: 'start',
-                        title: 'First step',
-                        fields: {},
-                        transition: {
-                            rules: [],
-                        },
+        const defaultForm: FormDefinition = {
+            firstStepKey: 'start',
+            steps: {
+                start: {
+                    key: 'start',
+                    title: 'First step',
+                    fields: {},
+                    transition: {
+                        rules: [],
                     },
                 },
-                lookups: {},
-                constants: {
-                    name: {
-                        __typ: 'constant',
-                        key: 'name',
-                        label: 'Form name',
-                        valueType: 'string',
-                        value: 'simple name',
-                    },
-                    enabled: {
-                        __typ: 'constant',
-                        key: 'enabled',
-                        label: 'Form enabled',
-                        valueType: 'boolean',
-                        value: true,
-                    },
-                },
-                variables: {},
-                interactions: [],
             },
+            lookups: {},
+            constants: {
+                name: {
+                    __typ: 'constant',
+                    key: 'name',
+                    label: 'Form name',
+                    valueType: 'string',
+                    value: 'simple name',
+                },
+                enabled: {
+                    __typ: 'constant',
+                    key: 'enabled',
+                    label: 'Form enabled',
+                    valueType: 'boolean',
+                    value: true,
+                },
+            },
+            variables: {},
+            interactions: [],
+        };
+
+        const state: EditorState = {
+            stepKey: null,
+            form: initialState ?? defaultForm,
             scope: null,
+            editingRule: undefined,
+            editingField: undefined,
             dictionaryPicker: null,
-        } as EditorState;
+            ...EDITOR_ACTIONS,
+        };
+
+        return state;
     });
 }
 
