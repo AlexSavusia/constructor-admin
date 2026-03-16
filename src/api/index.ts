@@ -75,8 +75,8 @@ const mockDictionaryRowsMap: Record<string, DictionaryRow[]> = {
             dictId: "countries",
             order: 1,
             data: {
-                "countries-name": { type: "COMMON", value: "Кыргызстан" },
-                "countries-code": { type: "COMMON", value: "KG" },
+                "countries-name": { type: "COMMON", value: "Москва" },
+                "countries-code": { type: "COMMON", value: "MS" },
                 "countries-active": { type: "COMMON", value: true },
             },
         },
@@ -97,7 +97,7 @@ const mockDictionaryRowsMap: Record<string, DictionaryRow[]> = {
             dictId: "cities",
             order: 1,
             data: {
-                "cities-name": { type: "COMMON", value: "Бишкек" },
+                "cities-name": { type: "COMMON", value: "Россия" },
                 "cities-population": { type: "COMMON", value: 1200000 },
                 "cities-capital": { type: "COMMON", value: true },
             },
@@ -107,7 +107,7 @@ const mockDictionaryRowsMap: Record<string, DictionaryRow[]> = {
             dictId: "cities",
             order: 2,
             data: {
-                "cities-name": { type: "COMMON", value: "Ош" },
+                "cities-name": { type: "COMMON", value: "Новосибирск" },
                 "cities-population": { type: "COMMON", value: 350000 },
                 "cities-capital": { type: "COMMON", value: false },
             },
