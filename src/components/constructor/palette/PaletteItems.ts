@@ -3,7 +3,8 @@ import FieldDescriptor from './items/PaletteItemField.tsx';
 import RadioDescriptor from './items/PaletteItemRadio.tsx';
 import DescriptionDescriptor from './items/PaletteItemTitle.tsx';
 import AgreeDescriptor from './items/PaletteItemAgree.tsx';
+import SelectDictDescriptor from "./items/PaletteItemSelectDict.tsx";
 
-const PALETTE_ITEMS: PaletteItemDescriptor[] = [FieldDescriptor, RadioDescriptor, DescriptionDescriptor, AgreeDescriptor];
+const PALETTE_ITEMS: PaletteItemDescriptor[] = [FieldDescriptor, RadioDescriptor, DescriptionDescriptor, AgreeDescriptor,  SelectDictDescriptor];
 
 export default PALETTE_ITEMS;

@@ -1,17 +1,27 @@
-import type { PaletteItemDescriptor, PaletteItemSetting, PaletteItemSettingsValues, ValueTypeAlias } from './type.ts';
-import { useEditorContext } from '../../pages/Programs/editor/EditorContext.tsx';
+import type {
+    PaletteItemDescriptor,
+    PaletteItemSetting,
+    PaletteItemSettingsValues,
+    ValueTypeAlias,
+} from "./type.ts";
+import { useEditorContext } from "../../pages/Programs/editor/EditorContext.tsx";
+import { getDictionaries, getDictionaryRows } from "../../api";
+import type {
+    DictionarySchema,
+} from "../../api/types.ts";
+import { useEffect, useMemo, useState } from "react";
+import type {OptionItem} from "./type.ts";
 
-type OptionItem = {
-    label: string;
-    value: string;
-};
 
 type SettingsSidebarProps = {
     items: PaletteItemDescriptor[];
     onChange: (key: string, value: ValueTypeAlias) => void;
 };
 
-function isSettingVisible(setting: PaletteItemSetting, values: PaletteItemSettingsValues) {
+function isSettingVisible(
+    setting: PaletteItemSetting,
+    values?: PaletteItemSettingsValues,
+) {
     if (!setting.visibleWhen) return true;
 
     const currentValue = values?.[setting.visibleWhen.key];
@@ -36,18 +46,88 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
     const persistEditingField = useEditorContext((s) => s.persistEditingField);
     const resetEditingField = useEditorContext((s) => s.resetEditingField);
     const setEditingRule = useEditorContext((s) => s.setEditingRule);
-    if (!field || !editingField) return null;
+    const openDictionaryPicker = useEditorContext((s) => s.openDictionaryPicker);
 
-    // debugger
-    const visibleSettings = getDescriptor(field.descriptorKey, items)!.settings.filter((setting) =>
-        isSettingVisible(setting, field.settingsValues)
-    );
+    const [dictionaries, setDictionaries] = useState<DictionarySchema[]>([]);
+    const [dictionariesLoading, setDictionariesLoading] = useState(false);
+
+    useEffect(() => {
+        const controller = new AbortController();
+
+        const loadDictionaries = async () => {
+            try {
+                setDictionariesLoading(true);
+                const res = await getDictionaries(
+                    { page: 0, size: 1000 },
+                    controller.signal,
+                );
+                setDictionaries(Array.isArray(res?.data) ? res.data : []);
+            } catch (error) {
+                console.error("Failed to load dictionaries", error);
+                setDictionaries([]);
+            } finally {
+                setDictionariesLoading(false);
+            }
+        };
+
+        void loadDictionaries();
+
+        return () => controller.abort();
+    }, []);
+
+    const descriptorKey = field?.descriptorKey ?? "";
+    const settingsValues = field?.settingsValues;
+
+    const visibleSettings =
+        getDescriptor(descriptorKey, items)?.settings.filter((setting) =>
+            isSettingVisible(setting, settingsValues),
+        ) ?? [];
+
+    const selectedDictId = String(settingsValues?.dictId ?? "");
+
+    const selectedFieldIds: string[] = Array.isArray(settingsValues?.dictFieldIds)
+        ? (settingsValues?.dictFieldIds as string[])
+        : [];
+
+    const selectedOptions: OptionItem[] = Array.isArray(settingsValues?.options)
+        ? (settingsValues.options as OptionItem[])
+        : [];
+
+    const selectedDictionary = useMemo(() => {
+        return dictionaries.find((x) => String(x.id) === selectedDictId) ?? null;
+    }, [dictionaries, selectedDictId]);
 
     const handleChange = (key: string, value: ValueTypeAlias) => {
         updateEditingFieldSettings({ [key]: value });
     };
-    // const resetEditingField = useEditorContext(s=>s.resetEditingField)
-    // const persistEditingField = useEditorContext(s=>s.persistEditingField)
+
+    const loadDictionaryRowsAndOpenModal = async (
+        dictionary: DictionarySchema,
+        nextSelectedFieldIds: string[],
+    ) => {
+        try {
+            const res = await getDictionaryRows(
+                { page: 0, size: 100 },
+                dictionary.id,
+            );
+
+            openDictionaryPicker({
+                dictionary,
+                rows: Array.isArray(res?.data) ? res.data : [],
+                selectedFieldIds: nextSelectedFieldIds,
+            });
+        } catch (error) {
+            console.error("Failed to load dictionary rows", error);
+
+            openDictionaryPicker({
+                dictionary,
+                rows: [],
+                selectedFieldIds: nextSelectedFieldIds,
+            });
+        }
+    };
+
+    if (!field || !editingField) return null;
 
     return (
         <>
@@ -57,24 +137,15 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                         type="button"
                         className="btn btn-light w-100"
                         onClick={() =>
-                            setEditingRule([...editingField!.path, 'logic', 'validation'], 'FIELD_SCOPE_DECISION', {
-                                editingFieldProperty: 'validation',
-                            })
+                            setEditingRule(
+                                [...editingField.path, "logic", "validation"],
+                                "FIELD_SCOPE_DECISION",
+                            )
                         }
                     >
                         Валидация
                     </button>
                 </div>
-
-                {/*<div>*/}
-                {/*    <button*/}
-                {/*        type="button"*/}
-                {/*        className="btn btn-light w-100"*/}
-                {/*        onClick={onCalculateValueClick}*/}
-                {/*    >*/}
-                {/*        Рассчитать значение*/}
-                {/*    </button>*/}
-                {/*</div>*/}
 
                 {visibleSettings.map((setting) => {
                     const value = field.settingsValues?.[setting.key];
@@ -89,23 +160,21 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                             className="form-check-input"
                                             type="checkbox"
                                             checked={Boolean(value)}
-                                            onChange={(e) => handleChange(setting.key, e.target.checked)}
+                                            onChange={(e) =>
+                                                handleChange(setting.key, e.target.checked)
+                                            }
                                         />
                                         <label className="form-check-label" htmlFor={setting.key}>
                                             Видимость
                                         </label>
                                     </div>
-
                                     <button
                                         type="button"
                                         className="btn btn-light btn-sm"
                                         onClick={() =>
                                             setEditingRule(
-                                                [...editingField!.path, 'logic', 'visibility'],
-                                                'FIELD_SCOPE_PROPERTY',
-                                                {
-                                                    editingFieldProperty: 'visibility',
-                                                }
+                                                [...editingField.path, "logic", "visibility"],
+                                                "FIELD_SCOPE_PROPERTY",
                                             )
                                         }
                                     >
@@ -126,20 +195,22 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                             className="form-check-input"
                                             type="checkbox"
                                             checked={Boolean(value)}
-                                            onChange={(e) => handleChange(setting.key, e.target.checked)}
+                                            onChange={(e) =>
+                                                handleChange(setting.key, e.target.checked)
+                                            }
                                         />
                                         <label className="form-check-label" htmlFor={setting.key}>
                                             Включено
                                         </label>
                                     </div>
-
                                     <button
                                         type="button"
                                         className="btn btn-light btn-sm"
                                         onClick={() =>
-                                            setEditingRule([...editingField!.path, 'logic', 'enabled'], 'FIELD_SCOPE_PROPERTY', {
-                                                editingFieldProperty: 'enabled',
-                                            })
+                                            setEditingRule(
+                                                [...editingField.path, "logic", "enabled"],
+                                                "FIELD_SCOPE_PROPERTY",
+                                            )
                                         }
                                     >
                                         Условия
@@ -159,20 +230,22 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                             className="form-check-input"
                                             type="checkbox"
                                             checked={Boolean(value)}
-                                            onChange={(e) => handleChange(setting.key, e.target.checked)}
+                                            onChange={(e) =>
+                                                handleChange(setting.key, e.target.checked)
+                                            }
                                         />
                                         <label className="form-check-label" htmlFor={setting.key}>
                                             {setting.title}
                                         </label>
                                     </div>
-
                                     <button
                                         type="button"
                                         className="btn btn-sm btn-light"
                                         onClick={() =>
-                                            setEditingRule([...editingField!.path, 'logic', 'required'], 'FIELD_SCOPE_PROPERTY', {
-                                                editingFieldProperty: 'required',
-                                            })
+                                            setEditingRule(
+                                                [...editingField.path, "logic", "required"],
+                                                "FIELD_SCOPE_PROPERTY",
+                                            )
                                         }
                                     >
                                         Условие
@@ -197,11 +270,101 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                         );
                     }
 
-                    if (setting.key === 'options') {
+                    if (setting.key === "dictId") {
+                        return (
+                            <div key={setting.key} className="d-flex flex-column gap-2">
+                                <div>
+                                    <label className="form-label">{setting.title}</label>
+                                    <select
+                                        className="form-select"
+                                        value={String(value ?? "")}
+                                        onChange={async (e) => {
+                                            const nextDictId = e.target.value;
+
+                                            handleChange(setting.key, nextDictId);
+                                            handleChange("dictFieldIds", []);
+
+                                        if (!nextDictId) {
+                                            return;
+                                        }
+
+                                        const nextDictionary =
+                                            dictionaries.find(
+                                                (dictionary) =>
+                                                    String(dictionary.id) === String(nextDictId),
+                                            ) ?? null;
+
+                                        if (!nextDictionary) return;
+
+                                        await loadDictionaryRowsAndOpenModal(nextDictionary, []);
+                                    }}
+                                    disabled={dictionariesLoading}
+                                >
+                                    <option value="">
+                                        {dictionariesLoading
+                                            ? "Загрузка справочников..."
+                                            : "Выберите справочник"}
+                                    </option>
+
+                                        {dictionaries.map((dictionary) => (
+                                            <option key={dictionary.id} value={dictionary.id}>
+                                                {dictionary.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {selectedDictionary && (
+                                    <>
+                                        <button
+                                            type="button"
+                                            className="btn btn-outline-primary btn-sm"
+                                            onClick={() =>
+                                                void loadDictionaryRowsAndOpenModal(
+                                                    selectedDictionary,
+                                                    selectedFieldIds,
+                                                )
+                                            }
+                                        >
+                                            Выбрать значения справочника
+                                        </button>
+
+                                        {selectedOptions.length > 0 ? (
+                                            <div className="d-flex flex-column gap-2">
+                                                <div className="small text-muted">
+                                                    Выбрано значений: {selectedOptions.length}
+                                                </div>
+
+                                                <div className="d-flex flex-wrap gap-2">
+                                                    {selectedOptions.map((option, index) => (
+                                                        <span
+                                                            key={`${option.value}-${index}`}
+                                                            className="badge text-bg-light border"
+                                                            title={option.value}
+                                                        >
+                                                            {option.label}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="small text-muted">
+                                                Значения не выбраны
+                                            </div>
+                                        )}
+                                    </>
+                                )}
+                            </div>
+                        );
+                    }
+
+                    if (setting.key === "options") {
                         const options = Array.isArray(value) ? (value as OptionItem[]) : [];
 
                         const updateOption = (index: number, patch: Partial<OptionItem>) => {
-                            const next = options.map((item, i) => (i === index ? { ...item, ...patch } : item));
+                            const next = options.map((item, i) =>
+                                i === index ? { ...item, ...patch } : item,
+                            );
                             handleChange(setting.key, next);
                         };
 
@@ -235,9 +398,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                                 type="text"
                                                 value={option.label}
                                                 onChange={(e) =>
-                                                    updateOption(index, {
-                                                        label: e.target.value,
-                                                    })
+                                                    updateOption(index, { label: e.target.value })
                                                 }
                                             />
                                         </div>
@@ -249,9 +410,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                                 type="text"
                                                 value={option.value}
                                                 onChange={(e) =>
-                                                    updateOption(index, {
-                                                        value: e.target.value,
-                                                    })
+                                                    updateOption(index, { value: e.target.value })
                                                 }
                                             />
                                         </div>
@@ -296,7 +455,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                 <label className="form-label">{setting.title}</label>
                                 <select
                                     className="form-select"
-                                    value={String(value ?? '')}
+                                    value={String(value ?? "")}
                                     onChange={(e) => handleChange(setting.key, e.target.value)}
                                 >
                                     {setting.multiValVariants.map((variant) => (
@@ -340,8 +499,11 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                     <button type="button" className="btn btn-primary" onClick={persistEditingField}>
                         Сохранить
                     </button>
-
-                    <button type="button" className="btn btn-secondary" onClick={resetEditingField}>
+                    <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={resetEditingField}
+                    >
                         Отмена
                     </button>
                 </div>

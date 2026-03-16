@@ -1,27 +1,28 @@
-import { createContext, useContext } from 'react';
-import { createStore, useStore } from 'zustand';
+import { createContext, useContext } from "react";
+import { createStore, useStore } from "zustand";
 import type {
     ConstVariableDefinition,
     ExpressionScope,
-    FormDefinition,
-    Key,
-    RuntimeVariableDefinition,
-} from '../../../logic/type.ts';
-import type { StepDefinition } from '../../../logic/step.ts';
-import type { FieldDefinition } from '../../../logic/field.ts';
-import type { PaletteItemSettingsValues } from '../../../components/constructor/type.ts';
-import type { Layout } from 'react-grid-layout';
-import type { ActionExpression, Rule } from '../../../components/logic/types.ts';
-import type { BooleanExpression } from '../../../logic/expression.ts';
-import type { BooleanPropertyLogicDefinition, StepTransitionRule } from '../../../logic/logic.ts';
+    FormDefinition, Key,
+    RuntimeVariableDefinition
+} from "../../../logic/type.ts";
+import type {StepDefinition} from "../../../logic/step.ts";
+import type {FieldDefinition} from "../../../logic/field.ts";
+import type {PaletteItemSettingsValues} from "../../../components/constructor/type.ts";
+import type {Layout} from "react-grid-layout";
+import type {ActionExpression, Rule} from "../../../components/logic/types.ts";
+import type {BooleanExpression} from "../../../logic/expression.ts";
+import type {BooleanPropertyLogicDefinition, StepTransitionRule} from "../../../logic/logic.ts";
+import type {DictionaryRow, DictionarySchema} from "../../../api/types.ts";
 
 export type EditorStateValue = {
-    stepKey: Key | null;
-    form: FormDefinition;
-    scope: ExpressionScope | null;
-    editingRule?: LogicEditorContextValue;
-    editingField?: FieldEditorContextValue;
-};
+    stepKey: Key | null
+    form: FormDefinition
+    scope: ExpressionScope | null
+    editingRule?: LogicEditorContextValue
+    editingField?: FieldEditorContextValue
+    dictionaryPicker?: DictionaryPickerState | null
+}
 
 export type ObjPath = Array<string | number>;
 
@@ -42,14 +43,21 @@ export type FieldEditorContextValue = {
 };
 
 export type ContextFields = {
-    fields: Record<string, string>;
-    variables: Record<string, string>;
-    constants: Record<string, string>;
-};
+    fields: Record<string, string>
+    variables: Record<string, string>
+    constants: Record<string, string>
+}
 
+export type DictionaryPickerState = {
+    open: boolean
+    dictionary: DictionarySchema | null
+    rows: DictionaryRow[]
+    tempSelectedFieldIds: string[]
+}
 export type EditingRuleMeta = {
     editingFieldProperty?: 'visibility' | 'enabled' | 'required' | 'validation';
 };
+
 
 export type EditorActions = {
     setStepKey: (stepKey: Key | null) => void;
@@ -78,10 +86,19 @@ export type EditorActions = {
     updateEditingFieldSettings: (settings: PaletteItemSettingsValues) => void;
     resetEditingField: () => void; // resets editing object (not field reset)
 
-    getAllContextVariables: (scope: ExpressionScope) => ContextFields;
-    addStepTransitionRule: (stepKey: Key, transition: StepTransitionRule) => void;
-    removeStepTransitionRule: (stepKey: Key, idx: number) => void;
-};
+    getAllContextVariables: (scope: ExpressionScope) => ContextFields
+    addStepTransitionRule: (stepKey: Key, transition: StepTransitionRule) => void
+    removeStepTransitionRule: (stepKey: Key, idx: number) => void
+
+    openDictionaryPicker: (payload: {
+        dictionary: DictionarySchema;
+        rows: DictionaryRow[];
+        selectedFieldIds: string[];
+    }) => void;
+    closeDictionaryPicker: () => void;
+    toggleDictionaryPickerField: (fieldId: string) => void;
+    saveDictionaryPickerSelection: () => void;
+}
 
 export type EditorState = EditorStateValue & EditorActions;
 
@@ -193,29 +210,32 @@ export function createContextStore(initialState?: FormDefinition) {
 
                     const newForm = setByPath(state.form, state.editingField.path.slice(1), mergedDraft)
 
-                    return {
-                        form: newForm,
-                        editingField: undefined,
-                        editingRule: undefined
-                    } as Partial<EditorState>;
-                }),
+                return {
+                    form: newForm,
+                    editingField: undefined,
+                    editingRule: undefined,
+                    dictionaryPicker: null,
+                } as Partial<EditorState>;
+            }),
 
             resetEditingField: () =>
                 set(() => ({
                     editingField: undefined,
+                    dictionaryPicker: null
                 })),
-            persistEditingRule: () =>{
+
+            persistEditingRule: () =>
                 set((state) => {
                     const updatedState = setByPath(state, state.editingRule!.path, state.editingRule!.rule);
                     updatedState.editingRule = undefined;
                     return updatedState// TODO this is bad cuz whole context is being reset
-                })
-            },
+                }),
+
             updateEditingRule: (path, expr) =>
                 set((state) => {
                     const editingRule = state.editingRule!;
                     switch (editingRule.scope) {
-                        case 'FIELD_SCOPE_DECISION': {
+                        case "FIELD_SCOPE_DECISION": {
                             const r = setByPath(editingRule.rule as Rule, path, expr);
                             return {
                                 editingRule: {
@@ -224,7 +244,8 @@ export function createContextStore(initialState?: FormDefinition) {
                                 },
                             } as Partial<EditorState>;
                         }
-                        case 'FIELD_SCOPE_PROPERTY': {
+
+                        case "FIELD_SCOPE_PROPERTY": {
                             const r = setByPath((editingRule.rule as BooleanPropertyLogicDefinition).rule, path, expr);
                             return {
                                 editingRule: {
@@ -236,7 +257,8 @@ export function createContextStore(initialState?: FormDefinition) {
                                 },
                             } as Partial<EditorState>;
                         }
-                        case 'STEP_TRANSITION_SCOPE': {
+
+                        case "STEP_TRANSITION_SCOPE": {
                             const r = setByPath(editingRule.rule as StepTransitionRule, path, expr);
                             return {
                                 editingRule: {
@@ -245,10 +267,12 @@ export function createContextStore(initialState?: FormDefinition) {
                                 },
                             } as Partial<EditorState>;
                         }
+
                         default:
                             throw new Error(`Unknown scope ${editingRule.scope}`);
                     }
                 }),
+
             setEditingRule: (path: ObjPath, scope: ExpressionScope, meta) =>
                 set((state) => {
                     let ruleObj = findByPath<Rule>(state, path);
@@ -256,7 +280,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         ruleObj = {
                             condition: {
                                 id: crypto.randomUUID(),
-                                type: 'and',
+                                type: "and",
                                 items: [],
                             },
                             actions: [],
@@ -271,11 +295,14 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     } as Partial<EditorState>;
                 }),
+
             resetEditingRule: () =>
                 set(() => ({
                     editingRule: undefined,
                 })),
+
             setStepKey: (stepKey) => set({ stepKey }),
+
             addStep: (step) =>
                 set((state) => ({
                     form: {
@@ -286,6 +313,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     },
                 })),
+
             removeStep: (stepKey) =>
                 set((state) => {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -297,6 +325,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     };
                 }),
+
             addConst: (constDef) =>
                 set((state) => ({
                     form: {
@@ -307,6 +336,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     },
                 })),
+
             removeConst: (constKey: Key) =>
                 set((state) => {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -318,6 +348,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     };
                 }),
+
             updateConst: (constDef) =>
                 set((state) => ({
                     form: {
@@ -328,6 +359,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     },
                 })),
+
             updateConstValue: (constKey, value) =>
                 set((state) => ({
                     form: {
@@ -341,6 +373,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     },
                 })),
+
             updateStepLayout: (stepKey: Key, layout: Layout) =>
                 set((state) => {
                     const { fields } = state.form.steps[stepKey];
@@ -352,6 +385,7 @@ export function createContextStore(initialState?: FormDefinition) {
                             layout: fieldLayout,
                         } as FieldDefinition;
                     });
+
                     return {
                         form: {
                             ...state.form,
@@ -368,6 +402,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     };
                 }),
+
             addField: (stepKey, field) =>
                 set((state) => ({
                     form: {
@@ -384,6 +419,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     },
                 })),
+
             removeField: (stepKey, fieldKey) =>
                 set((state) => {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -401,6 +437,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     };
                 }),
+
             updateFieldSettings: (stepKey, fieldKey, settings) =>
                 set((state) => ({
                     form: {
@@ -423,6 +460,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     },
                 })),
+
             updateEditingFieldSettings: (settings) =>
                 set((state) => {
                     if (!state.editingField) return {} as Partial<EditorState>;
@@ -440,6 +478,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     } as Partial<EditorState>;
                 }),
+
             addVariable: (variable) =>
                 set((state) => ({
                     form: {
@@ -450,6 +489,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     },
                 })),
+
             removeVariable: (variableKey) =>
                 set((state) => {
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -461,6 +501,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     };
                 }),
+
             addStepTransitionRule: (stepKey, rule) =>
                 set((state) => ({
                     form: {
@@ -471,12 +512,16 @@ export function createContextStore(initialState?: FormDefinition) {
                                 ...state.form.steps[stepKey],
                                 transition: {
                                     ...state.form.steps[stepKey].transition,
-                                    rules: [...state.form.steps[stepKey].transition.rules, rule],
+                                    rules: [
+                                        ...state.form.steps[stepKey].transition.rules,
+                                        rule,
+                                    ],
                                 },
                             },
                         },
                     },
                 })),
+
             removeStepTransitionRule: (stepKey, idx) =>
                 set((state) => ({
                     form: {
@@ -493,9 +538,70 @@ export function createContextStore(initialState?: FormDefinition) {
                         },
                     },
                 })),
+
+            openDictionaryPicker: ({ dictionary, rows, selectedFieldIds }) =>
+                set(() => ({
+                    dictionaryPicker: {
+                        open: true,
+                        dictionary,
+                        rows,
+                        tempSelectedFieldIds: [...selectedFieldIds],
+                    },
+                })),
+
+            closeDictionaryPicker: () =>
+                set(() => ({
+                    dictionaryPicker: null,
+                })),
+
+            toggleDictionaryPickerField: (fieldId: string) =>
+                set((state) => {
+                    const picker = state.dictionaryPicker;
+                    if (!picker) return {} as Partial<EditorState>;
+
+                    const exists = picker.tempSelectedFieldIds.includes(fieldId);
+
+                    return {
+                        dictionaryPicker: {
+                            ...picker,
+                            tempSelectedFieldIds: exists
+                                ? picker.tempSelectedFieldIds.filter((x) => x !== fieldId)
+                                : [...picker.tempSelectedFieldIds, fieldId],
+                        },
+                    } as Partial<EditorState>;
+                }),
+
+            saveDictionaryPickerSelection: () =>
+                set((state) => {
+                    const picker = state.dictionaryPicker;
+                    const editingField = state.editingField;
+
+                    if (!picker || !editingField) return {} as Partial<EditorState>;
+
+                    return {
+                        editingField: {
+                            ...editingField,
+                            draft: {
+                                ...editingField.draft,
+                                settingsValues: {
+                                    ...editingField.draft.settingsValues,
+                                    dictFieldIds: picker.tempSelectedFieldIds,
+                                },
+                            },
+                        },
+                        dictionaryPicker: null,
+                    } as Partial<EditorState>;
+                }),
         };
 
-        //if (initialState) return { ...initialState, ...EDITOR_ACTIONS };
+        if (initialState) {
+            return {
+                ...initialState,
+                dictionaryPicker: null,
+                ...EDITOR_ACTIONS,
+            };
+        }
+
         return {
             ...EDITOR_ACTIONS,
             stepKey: null,
@@ -532,6 +638,7 @@ export function createContextStore(initialState?: FormDefinition) {
                 interactions: [],
             },
             scope: null,
+            dictionaryPicker: null,
         } as EditorState;
     });
 }
