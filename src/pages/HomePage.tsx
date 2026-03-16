@@ -103,6 +103,7 @@ type FormContextValue = {
     evalAction: (action: ActionExpression, fieldKey: Key) => void;
     clearFieldErrors: (fieldKey: Key) => void;
     fieldRequired: Record<string, boolean>;
+    submit: boolean;
     fieldEnabled: Record<string, boolean>;
     setFieldRequired: (fieldKey: Key, value: boolean) => void;
     setFieldEnabled: (fieldKey: Key, value: boolean) => void;
@@ -338,6 +339,7 @@ const createFormContext = (initialState: FormDefinition): StoreApi<FormContextVa
             }, {});
     };
     return createStore<FormContextValue>((set, get) => ({
+        submit: false,
         fieldRequired: fieldsRequired,
         fieldEnabled: fieldsEnabled,
         setFieldEnabled: (key, value) =>
@@ -437,10 +439,14 @@ const createFormContext = (initialState: FormDefinition): StoreApi<FormContextVa
                 return {
                     currentStep: nextStepTarget.targetStep,
                 }
-            } else {
-                return {
-                    currentStep: transition.defaultStep,
-                }
+            }
+            // else {
+            //     return {
+            //         currentStep: transition.defaultStep,
+            //     }
+            // }
+            return {
+                submit: true
             }
         })
     }));
@@ -654,10 +660,15 @@ function FormRenderer() {
     const fieldsLayout = useMemo(() => fields.map((f) => f.layout), [fields]);
     const fieldsValues = useFormContext((s) => s.fieldsValues);
     const nextStep = useFormContext(s=>s.nextStep)
-
+    const shouldSubmit = useFormContext(s=>s.submit)
     useEffect(() => {
-        // debugger
-    }, []);
+        if(!shouldSubmit) return;
+
+    }, [shouldSubmit]);
+
+    if(shouldSubmit) {
+        return <p>form submitted</p>
+    }
 
     return (
         <div ref={containerRef} className="card-body w-100">
