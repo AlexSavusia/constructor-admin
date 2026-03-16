@@ -73,6 +73,16 @@ const RadioDescriptor: PaletteItemDescriptor = {
             defaultValue: 'Выберите вариант',
         },
         {
+            key: 'fieldType',
+            title: 'Тип поля',
+            valType: 'string',
+            defaultValue: 'radio',
+            visibleWhen: {
+                key: 'fieldType',
+                equals: [],
+            },
+        },
+        {
             key: 'name',
             title: 'Name',
             valType: 'string',

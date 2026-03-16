@@ -23,7 +23,7 @@ function PaletteItemDescriptionPreview({ className }: PaletteItemPreviewProps) {
 const AgreeDescriptor: PaletteItemDescriptor = {
     key: 'agree',
     title: 'Заголовок / раздел',
-    type: 'description',
+    type: 'agree',
     minWidth: 1,
 
     settings: [
@@ -32,6 +32,16 @@ const AgreeDescriptor: PaletteItemDescriptor = {
             title: 'Текст',
             valType: 'string',
             defaultValue: 'Соглашение',
+        },
+        {
+            key: 'fieldType',
+            title: 'Тип поля',
+            valType: 'string',
+            defaultValue: 'agree',
+            visibleWhen: {
+                key: 'fieldType',
+                equals: [],
+            },
         },
     ],
 

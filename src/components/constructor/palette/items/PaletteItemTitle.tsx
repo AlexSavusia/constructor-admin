@@ -33,6 +33,16 @@ const DescriptionDescriptor: PaletteItemDescriptor = {
             valType: 'string',
             defaultValue: 'Заголовок раздела',
         },
+        {
+            key: 'fieldType',
+            title: 'Тип поля',
+            valType: 'string',
+            defaultValue: 'description',
+            visibleWhen: {
+                key: 'fieldType',
+                equals: [],
+            },
+        },
     ],
 
     ElementPreview: PaletteItemDescriptionPreview,
