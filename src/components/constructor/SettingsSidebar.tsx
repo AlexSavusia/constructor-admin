@@ -33,7 +33,6 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
     const field = useEditorContext((s) => s.editingField?.draft);
     const editingField = useEditorContext((s) => s.editingField);
     const updateEditingFieldSettings = useEditorContext((s) => s.updateEditingFieldSettings);
-    console.log('field', field);
     const persistEditingField = useEditorContext((s) => s.persistEditingField);
     const resetEditingField = useEditorContext((s) => s.resetEditingField);
     const setEditingRule = useEditorContext((s) => s.setEditingRule);
