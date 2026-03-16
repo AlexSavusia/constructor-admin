@@ -7,18 +7,11 @@ import type {
 import { useEditorContext } from "../../pages/Programs/editor/EditorContext.tsx";
 import { getDictionaries, getDictionaryRows } from "../../api";
 import type {
-    DictionaryRow,
     DictionarySchema,
-    DictionarySchemaEntry,
 } from "../../api/types.ts";
 import { useEffect, useMemo, useState } from "react";
-import Modal from "../Modal.tsx";
-import { VALUE_TYPE_OPTS_MAP } from "../../api/types.ts";
+import type {OptionItem} from "./type.ts";
 
-type OptionItem = {
-    label: string;
-    value: string;
-};
 
 type SettingsSidebarProps = {
     items: PaletteItemDescriptor[];
@@ -48,25 +41,6 @@ function getDescriptor(
     return descriptors.find((x) => x.key === key) ?? null;
 }
 
-function getDictionaryPreviewValue(
-    rows: DictionaryRow[],
-    fieldId?: string,
-): string {
-    if (!fieldId) return "—";
-
-    const row = rows.find((r) => r.data?.[fieldId] !== undefined);
-    if (!row) return "—";
-
-    const cell = row.data[fieldId];
-    if (!cell) return "—";
-
-    if (cell.type === "COMMON") {
-        return String(cell.value);
-    }
-
-    return "LINK";
-}
-
 export default function SettingsSidebar({ items }: SettingsSidebarProps) {
     const field = useEditorContext((s) => s.editingField?.draft);
     const editingField = useEditorContext((s) => s.editingField);
@@ -74,15 +48,10 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
     const persistEditingField = useEditorContext((s) => s.persistEditingField);
     const resetEditingField = useEditorContext((s) => s.resetEditingField);
     const setEditingRule = useEditorContext((s) => s.setEditingRule);
+    const openDictionaryPicker = useEditorContext((s) => s.openDictionaryPicker);
 
     const [dictionaries, setDictionaries] = useState<DictionarySchema[]>([]);
     const [dictionariesLoading, setDictionariesLoading] = useState(false);
-
-    const [dictionaryRows, setDictionaryRows] = useState<DictionaryRow[]>([]);
-    const [dictionaryRowsLoading, setDictionaryRowsLoading] = useState(false);
-
-    const [dictionaryModalOpen, setDictionaryModalOpen] = useState(false);
-    const [tempSelectedFieldIds, setTempSelectedFieldIds] = useState<string[]>([]);
 
     useEffect(() => {
         const controller = new AbortController();
@@ -108,7 +77,6 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
         return () => controller.abort();
     }, []);
 
-    // Все derived values считаем ДО early return
     const descriptorKey = field?.descriptorKey ?? "";
     const settingsValues = field?.settingsValues;
 
@@ -131,39 +99,30 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
         updateEditingFieldSettings({ [key]: value });
     };
 
-    const loadDictionaryRowsAndOpenModal = async (dictId: string) => {
+    const loadDictionaryRowsAndOpenModal = async (
+        dictionary: DictionarySchema,
+        nextSelectedFieldIds: string[],
+    ) => {
         try {
-            setDictionaryRowsLoading(true);
-
             const res = await getDictionaryRows(
                 { page: 0, size: 100 },
-                dictId,
+                dictionary.id,
             );
 
-            setDictionaryRows(Array.isArray(res?.data) ? res.data : []);
-            setTempSelectedFieldIds(selectedFieldIds);
-            setDictionaryModalOpen(true);
+            openDictionaryPicker({
+                dictionary,
+                rows: Array.isArray(res?.data) ? res.data : [],
+                selectedFieldIds: nextSelectedFieldIds,
+            });
         } catch (error) {
             console.error("Failed to load dictionary rows", error);
-            setDictionaryRows([]);
-            setTempSelectedFieldIds(selectedFieldIds);
-            setDictionaryModalOpen(true);
-        } finally {
-            setDictionaryRowsLoading(false);
+
+            openDictionaryPicker({
+                dictionary,
+                rows: [],
+                selectedFieldIds: nextSelectedFieldIds,
+            });
         }
-    };
-
-    const handleToggleDictionaryField = (fieldId: string) => {
-        setTempSelectedFieldIds((prev) =>
-            prev.includes(fieldId)
-                ? prev.filter((x) => x !== fieldId)
-                : [...prev, fieldId],
-        );
-    };
-
-    const handleSaveDictionaryFields = () => {
-        handleChange("dictFieldIds", tempSelectedFieldIds);
-        setDictionaryModalOpen(false);
     };
 
     if (!field || !editingField) return null;
@@ -323,20 +282,27 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                             handleChange(setting.key, nextDictId);
                                             handleChange("dictFieldIds", []);
 
-                                            if (!nextDictId) {
-                                                setDictionaryRows([]);
-                                                return;
-                                            }
+                                        if (!nextDictId) {
+                                            return;
+                                        }
 
-                                            await loadDictionaryRowsAndOpenModal(nextDictId);
-                                        }}
-                                        disabled={dictionariesLoading}
-                                    >
-                                        <option value="">
-                                            {dictionariesLoading
-                                                ? "Загрузка справочников..."
-                                                : "Выберите справочник"}
-                                        </option>
+                                        const nextDictionary =
+                                            dictionaries.find(
+                                                (dictionary) =>
+                                                    String(dictionary.id) === String(nextDictId),
+                                            ) ?? null;
+
+                                        if (!nextDictionary) return;
+
+                                        await loadDictionaryRowsAndOpenModal(nextDictionary, []);
+                                    }}
+                                    disabled={dictionariesLoading}
+                                >
+                                    <option value="">
+                                        {dictionariesLoading
+                                            ? "Загрузка справочников..."
+                                            : "Выберите справочник"}
+                                    </option>
 
                                         {dictionaries.map((dictionary) => (
                                             <option key={dictionary.id} value={dictionary.id}>
@@ -352,32 +318,36 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                             type="button"
                                             className="btn btn-outline-primary btn-sm"
                                             onClick={() =>
-                                                void loadDictionaryRowsAndOpenModal(selectedDictionary.id)
+                                                void loadDictionaryRowsAndOpenModal(
+                                                    selectedDictionary,
+                                                    selectedFieldIds,
+                                                )
                                             }
                                         >
-                                            Выбрать поля справочника
+                                            Выбрать значения справочника
                                         </button>
 
-                                        <div className="small text-muted">
-                                            Выбрано полей: {selectedFieldIds.length}
-                                        </div>
+                                        {Array.isArray(field.settingsValues?.options) &&
+                                        (field.settingsValues.options as OptionItem[]).length > 0 ? (
+                                            <div className="d-flex flex-column gap-2">
+                                                <div className="small text-muted">
+                                                    Выбрано значений: {(field.settingsValues.options as OptionItem[]).length}
+                                                </div>
 
-                                        {selectedFieldIds.length > 0 && (
-                                            <div className="d-flex flex-wrap gap-2">
-                                                {selectedFieldIds.map((fieldId) => {
-                                                    const schemaEntry = selectedDictionary.schema.find(
-                                                        (x) => x.id === fieldId,
-                                                    );
-
-                                                    return (
+                                                <div className="d-flex flex-wrap gap-2">
+                                                    {(field.settingsValues.options as OptionItem[]).map((option, index) => (
                                                         <span
-                                                            key={fieldId}
+                                                            key={`${option.value}-${index}`}
                                                             className="badge text-bg-light border"
                                                         >
-                                                            {schemaEntry?.name ?? fieldId}
-                                                        </span>
-                                                    );
-                                                })}
+                            {option.value}
+                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="small text-muted">
+                                                Значения не выбраны
                                             </div>
                                         )}
                                     </>
@@ -549,83 +519,6 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                     </button>
                 </div>
             </div>
-
-            <Modal
-                title={
-                    selectedDictionary
-                        ? `Поля справочника: ${selectedDictionary.name}`
-                        : "Поля справочника"
-                }
-                open={dictionaryModalOpen}
-                onClose={() => setDictionaryModalOpen(false)}
-                onSave={handleSaveDictionaryFields}
-            >
-                {!selectedDictionary ? (
-                    <div className="text-muted">Справочник не выбран</div>
-                ) : dictionaryRowsLoading ? (
-                    <div>Загрузка строк справочника...</div>
-                ) : (
-                    <div className="table-responsive">
-                        <table className="table table-bordered table-hover align-middle">
-                            <thead>
-                            <tr>
-                                <th style={{ width: 60 }}>#</th>
-                                <th style={{ width: 80 }}>Выбрать</th>
-                                <th>Название поля</th>
-                                <th>Тип</th>
-                                <th>Пример значения</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {selectedDictionary.schema.length === 0 ? (
-                                <tr>
-                                    <td colSpan={5} className="text-center text-muted">
-                                        У справочника нет схемы полей
-                                    </td>
-                                </tr>
-                            ) : (
-                                selectedDictionary.schema.map(
-                                    (schemaEntry: DictionarySchemaEntry, index) => {
-                                        const schemaEntryId = schemaEntry.id;
-                                        const checked = schemaEntryId
-                                            ? tempSelectedFieldIds.includes(String(schemaEntryId))
-                                            : false;
-
-                                        return (
-                                            <tr key={schemaEntryId ?? `${schemaEntry.name}-${index}`}>
-                                                <td>{index + 1}</td>
-                                                <td>
-                                                    <input
-                                                        type="checkbox"
-                                                        className="form-check-input"
-                                                        checked={checked}
-                                                        disabled={!schemaEntryId}
-                                                        onChange={() => {
-                                                            if (!schemaEntryId) return;
-                                                            handleToggleDictionaryField(String(schemaEntryId));
-                                                        }}
-                                                    />
-                                                </td>
-                                                <td>{schemaEntry.name}</td>
-                                                <td>
-                                                    {VALUE_TYPE_OPTS_MAP[schemaEntry.fieldType]}
-                                                </td>
-                                                <td>
-                                                    {getDictionaryPreviewValue(
-                                                        dictionaryRows,
-                                                        schemaEntryId,
-                                                    )}
-                                                </td>
-                                            </tr>
-                                        );
-                                    },
-                                )
-                            )}
-                            </tbody>
-                        </table>
-                    </div>
-                )}
-            </Modal>
         </>
     );
 }
