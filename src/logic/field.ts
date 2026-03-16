@@ -3,6 +3,7 @@ import type { BooleanPropertyLogicDefinition, FieldOnUpdateRule, ValueLogicDefin
 import type { PaletteItemSettingsValues } from '../components/constructor/type.ts';
 import type { LayoutItem } from 'react-grid-layout';
 import type { BooleanExpression } from './expression.ts';
+import type {Rule} from "../components/logic/types.ts";
 
 export type FieldType = 'input' | 'output';
 
@@ -61,7 +62,7 @@ export type LookupRowAvailabilityDefinition = {
 };
 export type FieldLogicDefinition = {
     visibility?: BooleanPropertyLogicDefinition;
-    validation?: BooleanExpression;
+    validation?: Rule;
     enabled?: BooleanPropertyLogicDefinition;
     required?: BooleanPropertyLogicDefinition;
     value?: ValueLogicDefinition; //this will have higher priority then onUpdate if both are set (or just do not allow setting both?)

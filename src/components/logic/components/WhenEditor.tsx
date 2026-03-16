@@ -32,7 +32,7 @@ export default function WhenEditor() {
             break;
     }
 
-    if (rule.condition.type !== 'and' && rule.condition.type !== 'or') {
+    if (rule.condition.type !== 'and' && rule.condition.type !== 'or' && rule.condition.type !== 'noop') {
         throw new Error(`Invalid group rule`);
     }
 

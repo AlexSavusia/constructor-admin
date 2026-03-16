@@ -1,4 +1,4 @@
-import type { AstValueExpression, ValueExpression } from '../../../../logic/expression.ts';
+import type {AstValueExpression, RefValueExpression, ValueExpression} from '../../../../logic/expression.ts';
 import { type ObjPath, objPathFromString } from '../../../../pages/Programs/editor/EditorContext.tsx';
 
 type Token =
@@ -13,7 +13,7 @@ type Token =
     | { type: 'lparen' }
     | { type: 'rparen' };
 
-export function parseValueExpression(input: string): ValueExpression {
+export function parseValueExpression(input: string, referenceTypeMap: Record<string, RefValueExpression['refType']>): ValueExpression {
     const tokens = tokenize(input);
     if (tokens.length === 0) {
         throw new Error('Expression is empty');
@@ -57,6 +57,7 @@ export function parseValueExpression(input: string): ValueExpression {
                 return {
                     __typ: 'ref',
                     path: objPathFromString(token.path),
+                    refType: referenceTypeMap[token.path]
                 };
 
             case 'func':

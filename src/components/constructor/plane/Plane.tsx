@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useMemo } from 'react';
+import {useMemo} from 'react';
 import classNames from 'classnames';
 import { ReactGridLayout, useContainerWidth, verticalCompactor } from 'react-grid-layout';
 import type { PaletteItemDescriptor, PaletteItemSettingsValues, ValueTypeAlias } from '../type.ts';
@@ -8,7 +8,7 @@ import RightSidebar from '../../RightSidebar.tsx';
 import SettingsSidebar from '../SettingsSidebar.tsx';
 import type { FieldDefinition } from '../../../logic/field.ts';
 import RuleEditor from '../../logic/components/RuleEditor.tsx';
-import { useEditorContext } from '../../../pages/Programs/editor/EditorContext.tsx';
+import {useEditorContext} from '../../../pages/Programs/editor/EditorContext.tsx';
 
 export type PlaneProps = {
     className?: string;
@@ -55,27 +55,12 @@ export default function Plane({ className, items }: PlaneProps) {
     const resetEditingField = useEditorContext((s) => s.resetEditingField);
     const setEditingField = useEditorContext((s) => s.setEditingField);
     const layoutItems = useMemo(() => Object.entries(currentStep.fields).map((v) => v[1]), [currentStep]);
-    //const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
 
     const { width, containerRef, mounted } = useContainerWidth();
-    //const [editingRule, setEditingRule] = useState<EditorEditingRule & {scope: ExpressionScope, path: NodePath} | null>(null);
 
     const stepLayout = useMemo(() => [...Object.entries(currentStep.fields).map((v) => v[1].layout)], [currentStep]);
 
     const colW = width / cols;
-
-    // const selectedItem = useMemo(
-    //     () => layoutItems.find((x) => x.key === selectedItemId) ?? null,
-    //     [layoutItems, selectedItemId],
-    // );
-    //
-    // const selectedDescriptor = useMemo(
-    //     () =>
-    //         selectedItem
-    //             ? getDescriptor(selectedItem.descriptorKey, items)
-    //             : null,
-    //     [selectedItem, items],
-    // );
 
     const onDrop = (e: React.DragEvent) => {
         e.preventDefault();
@@ -97,7 +82,6 @@ export default function Plane({ className, items }: PlaneProps) {
         const id = crypto.randomUUID();
         // debugger
         const newItem: FieldDefinition = {
-            //TODO all of this have to be configured here properly
             capabilities: {
                 canBeVisible: false,
                 canBeEnabled: false,
@@ -114,8 +98,8 @@ export default function Plane({ className, items }: PlaneProps) {
                     rule: {
                         condition: {
                             id: crypto.randomUUID(),
-                            type: 'and',
-                            items: [],
+                            type: 'noop',
+                            items: []
                         },
                         actions: [],
                     },
@@ -125,8 +109,8 @@ export default function Plane({ className, items }: PlaneProps) {
                     rule: {
                         condition: {
                             id: crypto.randomUUID(),
-                            type: 'and',
-                            items: [],
+                            type: 'noop',
+                            items: []
                         },
                         actions: [],
                     },
@@ -136,8 +120,8 @@ export default function Plane({ className, items }: PlaneProps) {
                     rule: {
                         condition: {
                             id: crypto.randomUUID(),
-                            type: 'and',
-                            items: [],
+                            type: 'noop',
+                            items: []
                         },
                         actions: [],
                     },
@@ -176,7 +160,6 @@ export default function Plane({ className, items }: PlaneProps) {
             resetEditingField();
         }
     };
-
     return (
         <>
             <div className={classNames(className, 'card card-outline card-secondary h-100 mb-0')}>
@@ -185,7 +168,7 @@ export default function Plane({ className, items }: PlaneProps) {
                     <div className="card-tools d-flex align-items-center gap-2">
                         {/*<button type="button" className="btn btn-success btn-sm" onClick={()=>{*/}
                         {/*    const {form} = ctx!.getState()*/}
-                        {/*    onSave(form)*/}
+                        {/*    console.log(form);*/}
                         {/*}}>*/}
                         {/*    <i className="fas fa-save me-1" />*/}
                         {/*    Сохранить*/}

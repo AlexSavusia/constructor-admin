@@ -1,7 +1,7 @@
 import { type ChangeEvent, type InputHTMLAttributes, type KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import classNames from 'classnames';
 import { parseValueExpression } from './parser.ts';
-import type { ValueExpression } from '../../../../logic/expression.ts';
+import type {RefValueExpression, ValueExpression} from '../../../../logic/expression.ts';
 
 export type OptionItem = {
     label: string;
@@ -24,6 +24,7 @@ type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange' | 
     //onOptionSelect?: (option: OptionItem, nextValue: string) => void;
     emptyText?: string;
     matchMode?: MatchMode;
+    referenceTypeMap: Record<string, RefValueExpression['refType']>;
 };
 
 function normalizeOptions(options: OptionsSource): OptionItem[] {
@@ -36,8 +37,8 @@ function normalizeOptions(options: OptionsSource): OptionItem[] {
 }
 
 function matches(text: string, query: string, mode: MatchMode): boolean {
-    const source = text.toLowerCase();
-    const needle = query.toLowerCase();
+    const source = text?.toLowerCase() ?? "";
+    const needle = query?.toLowerCase() ?? "";
 
     if (!needle) return true;
 
@@ -86,6 +87,7 @@ export default function InputAutocomplete({
     onBlur,
     onClick,
     onKeyUp,
+                                              referenceTypeMap,
     ...props
 }: Props) {
     const inputValue = value ?? '';
@@ -100,7 +102,7 @@ export default function InputAutocomplete({
     const onChange = (value: string) => {
         let parsed = null;
         try {
-            parsed = parseValueExpression(value);
+            parsed = parseValueExpression(value, referenceTypeMap);
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
         } catch (_) {
             /* empty */

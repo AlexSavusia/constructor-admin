@@ -1,4 +1,4 @@
-import { type ObjPath, useEditorContext } from '../../../pages/Programs/editor/EditorContext.tsx';
+import {type ObjPath, useEditorContext} from '../../../pages/Programs/editor/EditorContext.tsx';
 import type { ActionExpression, SetFieldErrorActionExpression, SetFieldPropertyActionExpression } from '../types.ts';
 import Input from '../../ui/fieldsUIAdmin/Input/Input.tsx';
 
@@ -39,7 +39,22 @@ export default function ActionRow({ action, path }: ActionRowProps) {
                 className="min-h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 lg:flex-1"
                 value={action.type}
                 onChange={(e) => {
-                    updateEditingRule(path, { ...action, type: e.target.value as ActionType } as ActionExpression);
+                    switch (e.target.value as ActionType) {
+                        case "setFieldProperty":{
+                            updateEditingRule(path, {
+                                ...action,
+                                type: e.target.value as ActionType,
+                                property: editingRule.meta!.editingFieldProperty,
+                            } as SetFieldPropertyActionExpression);
+                            break;
+                        }
+                        default: {
+                            updateEditingRule(path, {
+                                ...action,
+                                type: e.target.value as ActionType
+                            } as ActionExpression);
+                        }
+                    }
                 }}
             >
                 {Object.entries(actionTypes).map(([key, label]) => (

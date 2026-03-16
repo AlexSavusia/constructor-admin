@@ -128,7 +128,7 @@ function setByPath<T, V>(object: T, path: ObjPath, value: V): T {
     } as T;
 }
 
-export function createContextStore(initialState?: EditorStateValue) {
+export function createContextStore(initialState?: FormDefinition) {
     return createStore<EditorState>((set, get) => {
         const EDITOR_ACTIONS: EditorActions = {
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -184,10 +184,19 @@ export function createContextStore(initialState?: EditorStateValue) {
             persistEditingField: () =>
                 set((state) => {
                     if (!state.editingField) return {} as Partial<EditorState>;
+                    const oldField = findByPath<FieldDefinition>(state.form, state.editingField.path.slice(1))!
+
+                    const mergedDraft: FieldDefinition = {
+                        ...state.editingField.draft,
+                        logic: oldField.logic,
+                    }
+
+                    const newForm = setByPath(state.form, state.editingField.path.slice(1), mergedDraft)
 
                     return {
-                        form: setByPath(state.form, state.editingField.path.slice(1), state.editingField.draft),
+                        form: newForm,
                         editingField: undefined,
+                        editingRule: undefined
                     } as Partial<EditorState>;
                 }),
 
@@ -195,14 +204,13 @@ export function createContextStore(initialState?: EditorStateValue) {
                 set(() => ({
                     editingField: undefined,
                 })),
-            persistEditingRule: () =>
+            persistEditingRule: () =>{
                 set((state) => {
                     const updatedState = setByPath(state, state.editingRule!.path, state.editingRule!.rule);
-                    return {
-                        ...updatedState,
-                        editingRule: undefined,
-                    }; // TODO this is bad cuz whole context is being reset
-                }),
+                    updatedState.editingRule = undefined;
+                    return updatedState// TODO this is bad cuz whole context is being reset
+                })
+            },
             updateEditingRule: (path, expr) =>
                 set((state) => {
                     const editingRule = state.editingRule!;
@@ -487,11 +495,11 @@ export function createContextStore(initialState?: EditorStateValue) {
                 })),
         };
 
-        if (initialState) return { ...initialState, ...EDITOR_ACTIONS };
+        //if (initialState) return { ...initialState, ...EDITOR_ACTIONS };
         return {
             ...EDITOR_ACTIONS,
             stepKey: null,
-            form: {
+            form: initialState ? initialState : {
                 firstStepKey: 'start',
                 steps: {
                     start: {
