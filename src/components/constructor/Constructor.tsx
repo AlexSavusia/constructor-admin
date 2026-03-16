@@ -33,18 +33,42 @@ function getDictionaryCellValue(row: DictionaryRow, fieldId?: string): string {
 
     return "LINK";
 }
+function buildRowValue(
+    row: DictionaryRow,
+    schema: DictionarySchemaEntry[],
+): string {
+    const codeField = schema.find((item) =>
+        String(item.name).toLowerCase() === "code" ||
+        String(item.id).toLowerCase().includes("code")
+    );
+
+    if (!codeField) return "";
+
+    const value = getDictionaryCellValue(row, codeField.id);
+
+    if (value === "—") return "";
+
+    return value;
+}
 
 function buildRowLabel(
     row: DictionaryRow,
     schema: DictionarySchemaEntry[],
 ): string {
-    return schema
-        .map((schemaEntry) => getDictionaryCellValue(row, schemaEntry.id))
-        .filter((value) => value !== "" && value !== "—")
-        .join(" | ")
-        .trim();
-}
+    const nameField = schema.find((item) =>
+        String(item.name).toLowerCase() === "name" ||
+        String(item.name).toLowerCase() === "название" ||
+        String(item.id).toLowerCase().includes("name")
+    );
 
+    if (!nameField) return "";
+
+    const value = getDictionaryCellValue(row, nameField.id);
+
+    if (value === "—") return "";
+
+    return value;
+}
 function buildOptionsFromSelectedRows(
     rows: DictionaryRow[],
     selectedRowIds: string[],
@@ -56,11 +80,12 @@ function buildOptionsFromSelectedRows(
         .filter((row) => selectedRowIds.includes(String(row.id)))
         .map((row) => {
             const label = buildRowLabel(row, schema);
+            const value =  buildRowValue(row, schema);
 
             return {
                 rowId: String(row.id),
                 label,
-                value: label,
+                value,
             };
         })
         .filter((item) => item.label !== "");
@@ -115,23 +140,6 @@ export default function Constructor({className}: ConstructorProps) {
 
     const handleBackDictionaryStep = () => {
         setDictionaryModalStep(1);
-    };
-
-    const handleOptionChange = (
-        rowId: string,
-        key: keyof OptionItem,
-        nextValue: string,
-    ) => {
-        setOptionsDraft((prev) =>
-            prev.map((item) =>
-                item.rowId === rowId
-                    ? {
-                        ...item,
-                        [key]: nextValue,
-                    }
-                    : item,
-            ),
-        );
     };
 
     const handleSaveDictionarySelection = () => {
@@ -336,7 +344,7 @@ export default function Constructor({className}: ConstructorProps) {
                                         <thead>
                                         <tr>
                                             <th style={{ width: 70 }}>#</th>
-                                            <th>Исходное значение</th>
+                                            <th>Код</th>
                                             <th>Label</th>
                                             <th style={{ width: 160 }}>Действие</th>
                                         </tr>
@@ -355,8 +363,8 @@ export default function Constructor({className}: ConstructorProps) {
                                                     (row) => String(row.id) === option.rowId,
                                                 );
 
-                                                const originalLabel = selectedRow
-                                                    ? buildRowLabel(
+                                                const originalValue = selectedRow
+                                                    ? buildRowValue(
                                                         selectedRow,
                                                         selectedDictionary.schema,
                                                     )
@@ -365,31 +373,16 @@ export default function Constructor({className}: ConstructorProps) {
                                                 return (
                                                     <tr key={option.rowId}>
                                                         <td>{index + 1}</td>
-                                                        <td>{originalLabel}</td>
+                                                        <td>{originalValue}</td>
                                                         <td>
-                                                            <input
-                                                                className="form-control"
-                                                                type="text"
-                                                                value={option.label}
-                                                                onChange={(e) =>
-                                                                    handleOptionChange(
-                                                                        option.rowId,
-                                                                        "label",
-                                                                        e.target.value,
-                                                                    )
-                                                                }
-                                                            />
+                                                            {option.label}
                                                         </td>
                                                         <td>
                                                             <button
                                                                 type="button"
                                                                 className="btn btn-outline-secondary btn-sm"
                                                                 onClick={() =>
-                                                                    handleOptionChange(
-                                                                        option.rowId,
-                                                                        "label",
-                                                                        originalLabel,
-                                                                    )
+                                                                  console.log('click')
                                                                 }
                                                             >
                                                                 Изменить

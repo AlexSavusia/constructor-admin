@@ -91,6 +91,10 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
         ? (settingsValues?.dictFieldIds as string[])
         : [];
 
+    const selectedOptions: OptionItem[] = Array.isArray(settingsValues?.options)
+        ? (settingsValues.options as OptionItem[])
+        : [];
+
     const selectedDictionary = useMemo(() => {
         return dictionaries.find((x) => String(x.id) === selectedDictId) ?? null;
     }, [dictionaries, selectedDictId]);
@@ -327,21 +331,21 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                             Выбрать значения справочника
                                         </button>
 
-                                        {Array.isArray(field.settingsValues?.options) &&
-                                        (field.settingsValues.options as OptionItem[]).length > 0 ? (
+                                        {selectedOptions.length > 0 ? (
                                             <div className="d-flex flex-column gap-2">
                                                 <div className="small text-muted">
-                                                    Выбрано значений: {(field.settingsValues.options as OptionItem[]).length}
+                                                    Выбрано значений: {selectedOptions.length}
                                                 </div>
 
                                                 <div className="d-flex flex-wrap gap-2">
-                                                    {(field.settingsValues.options as OptionItem[]).map((option, index) => (
+                                                    {selectedOptions.map((option, index) => (
                                                         <span
                                                             key={`${option.value}-${index}`}
                                                             className="badge text-bg-light border"
+                                                            title={option.value}
                                                         >
-                            {option.value}
-                        </span>
+                                                            {option.label}
+                                                        </span>
                                                     ))}
                                                 </div>
                                             </div>
