@@ -509,6 +509,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
 
         if (logic) {
             if (logic.validation) {
+                // debugger
                 const evalRes = evalCondition(logic.validation);
                 if (evalRes) {
                     logic.validation.actions.forEach((action) => {
@@ -561,7 +562,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                                 onChange={(e) => handleFieldUpdate(e.target.value)}
                                 label={field.settingsValues['label'] as string}
                             />
-                            {selfError && !!selfValue && <p>{selfError}</p>}
+                            {selfError && <p>{selfError}</p>}
                         </div>
                     );
                 }

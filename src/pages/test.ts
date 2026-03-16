@@ -216,11 +216,71 @@ export const TEST: FormDefinition = {
                         "validation": {
                             "condition": {
                                 "id": "fdbf837e-1d57-4186-9bbe-e65af88b3e58",
-                                "type": "or",
+                                "type": "and",
                                 "items": [
                                     {
-                                        "id": "e55c5aab-b588-4242-9718-94b20a5d6e53",
-                                        "type": "isEmpty",
+                                        "id": "2fa3c3ef-be2b-492e-a171-006dcb7774c8",
+                                        "type": "or",
+                                        "items": [
+                                            {
+                                                "id": "0f7347be-967d-4f48-a2a7-ae9a064600d2",
+                                                "type": "eq",
+                                                "left": {
+                                                    "__typ": "ref",
+                                                    "path": [
+                                                        "start",
+                                                        "fields",
+                                                        "dddcaaaa-2c84-4812-a5ce-233b0f05f1ce"
+                                                    ],
+                                                    "refType": "field"
+                                                },
+                                                "right": {
+                                                    "__typ": "const",
+                                                    "value": 1,
+                                                    "valueType": "number"
+                                                }
+                                            },
+                                            {
+                                                "id": "9aaa5b3f-de0e-45da-bab4-3a41af6732f7",
+                                                "type": "lt",
+                                                "left": {
+                                                    "__typ": "ref",
+                                                    "path": [
+                                                        "start",
+                                                        "fields",
+                                                        "f1cf2101-9ef1-4dff-bfe8-8687884755e5"
+                                                    ],
+                                                    "refType": "field"
+                                                },
+                                                "right": {
+                                                    "__typ": "const",
+                                                    "value": 5,
+                                                    "valueType": "number"
+                                                }
+                                            },
+                                            {
+                                                "id": "5bef41a3-b727-4397-8339-56ae5f3149ad",
+                                                "type": "gt",
+                                                "left": {
+                                                    "__typ": "ref",
+                                                    "path": [
+                                                        "start",
+                                                        "fields",
+                                                        "f1cf2101-9ef1-4dff-bfe8-8687884755e5"
+                                                    ],
+                                                    "refType": "field"
+                                                },
+                                                "right": {
+                                                    "__typ": "const",
+                                                    "value": 40,
+                                                    "valueType": "number"
+                                                }
+                                            }
+                                        ]
+                                    },
+                                    {
+                                        "id": "335e7f85-f343-486f-9dc4-2552749186df",
+                                        "type": "notEmpty",
                                         "item": {
                                             "__typ": "ref",
                                             "path": [
@@ -229,11 +289,7 @@ export const TEST: FormDefinition = {
                                                 "f1cf2101-9ef1-4dff-bfe8-8687884755e5"
                                             ],
                                             "refType": "field"
-                                        }
-                                    },
-                                    {
-                                        "id": "e78ef8db-5d59-4456-a90f-2b4d7c4dbb33",
-                                        "type": "lt",
+                                        },
                                         "left": {
                                             "__typ": "ref",
                                             "path": [
@@ -242,47 +298,6 @@ export const TEST: FormDefinition = {
                                                 "f1cf2101-9ef1-4dff-bfe8-8687884755e5"
                                             ],
                                             "refType": "field"
-                                        },
-                                        "right": {
-                                            "__typ": "const",
-                                            "value": 5,
-                                            "valueType": "number"
-                                        }
-                                    },
-                                    {
-                                        "id": "21c833eb-e15d-4bfd-b13b-fa1a54d62f68",
-                                        "type": "gt",
-                                        "left": {
-                                            "__typ": "ref",
-                                            "path": [
-                                                "start",
-                                                "fields",
-                                                "f1cf2101-9ef1-4dff-bfe8-8687884755e5"
-                                            ],
-                                            "refType": "field"
-                                        },
-                                        "right": {
-                                            "__typ": "const",
-                                            "value": 40,
-                                            "valueType": "number"
-                                        }
-                                    },
-                                    {
-                                        "id": "11dabb3b-9932-4d2d-8d4d-0fd928b3d86e",
-                                        "type": "eq",
-                                        "left": {
-                                            "__typ": "ref",
-                                            "path": [
-                                                "start",
-                                                "fields",
-                                                "dddcaaaa-2c84-4812-a5ce-233b0f05f1ce"
-                                            ],
-                                            "refType": "field"
-                                        },
-                                        "right": {
-                                            "__typ": "const",
-                                            "value": 1,
-                                            "valueType": "number"
                                         }
                                     }
                                 ]
@@ -290,7 +305,7 @@ export const TEST: FormDefinition = {
                             "actions": [
                                 {
                                     "type": "setFieldError",
-                                    "text": "Диапазон 5 40"
+                                    "text": "Диапазон 5 40s"
                                 }
                             ]
                         }
