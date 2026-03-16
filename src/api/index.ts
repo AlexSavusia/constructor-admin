@@ -20,6 +20,143 @@ import {
      type UpdateProgram,
 } from "./types.ts";
 
+
+
+const mockDictionaries: DictionarySchema[] = [
+    {
+        id: "countries",
+        name: "Страны",
+        description: "Справочник стран",
+        groupId: null,
+        schema: [
+            { id: "countries-name", name: "Название", fieldType: "Text" },
+            { id: "countries-code", name: "Код", fieldType: "Text" },
+            { id: "countries-active", name: "Активна", fieldType: "Boolean" },
+        ],
+    },
+    {
+        id: "cities",
+        name: "Города",
+        description: "Справочник городов",
+        groupId: null,
+        schema: [
+            { id: "cities-name", name: "Название", fieldType: "Text" },
+            { id: "cities-population", name: "Население", fieldType: "Number" },
+            { id: "cities-capital", name: "Столица", fieldType: "Boolean" },
+        ],
+    },
+    {
+        id: "genders",
+        name: "Пол",
+        description: "Справочник пола",
+        groupId: null,
+        schema: [
+            { id: "genders-name", name: "Название", fieldType: "Text" },
+            { id: "genders-code", name: "Код", fieldType: "Text" },
+        ],
+    },
+    {
+        id: "documentTypes",
+        name: "Типы документов",
+        description: "Справочник документов",
+        groupId: null,
+        schema: [
+            { id: "documentTypes-name", name: "Название", fieldType: "Text" },
+            { id: "documentTypes-seriesRequired", name: "Нужна серия", fieldType: "Boolean" },
+            { id: "documentTypes-createdAt", name: "Дата создания", fieldType: "Datetime" },
+        ],
+    },
+];
+
+const mockDictionaryRowsMap: Record<string, DictionaryRow[]> = {
+    countries: [
+        {
+            id: "country-1",
+            dictId: "countries",
+            order: 1,
+            data: {
+                "countries-name": { type: "COMMON", value: "Кыргызстан" },
+                "countries-code": { type: "COMMON", value: "KG" },
+                "countries-active": { type: "COMMON", value: true },
+            },
+        },
+        {
+            id: "country-2",
+            dictId: "countries",
+            order: 2,
+            data: {
+                "countries-name": { type: "COMMON", value: "Казахстан" },
+                "countries-code": { type: "COMMON", value: "KZ" },
+                "countries-active": { type: "COMMON", value: true },
+            },
+        },
+    ],
+    cities: [
+        {
+            id: "city-1",
+            dictId: "cities",
+            order: 1,
+            data: {
+                "cities-name": { type: "COMMON", value: "Бишкек" },
+                "cities-population": { type: "COMMON", value: 1200000 },
+                "cities-capital": { type: "COMMON", value: true },
+            },
+        },
+        {
+            id: "city-2",
+            dictId: "cities",
+            order: 2,
+            data: {
+                "cities-name": { type: "COMMON", value: "Ош" },
+                "cities-population": { type: "COMMON", value: 350000 },
+                "cities-capital": { type: "COMMON", value: false },
+            },
+        },
+    ],
+    genders: [
+        {
+            id: "gender-1",
+            dictId: "genders",
+            order: 1,
+            data: {
+                "genders-name": { type: "COMMON", value: "Мужской" },
+                "genders-code": { type: "COMMON", value: "male" },
+            },
+        },
+        {
+            id: "gender-2",
+            dictId: "genders",
+            order: 2,
+            data: {
+                "genders-name": { type: "COMMON", value: "Женский" },
+                "genders-code": { type: "COMMON", value: "female" },
+            },
+        },
+    ],
+    documentTypes: [
+        {
+            id: "doc-1",
+            dictId: "documentTypes",
+            order: 1,
+            data: {
+                "documentTypes-name": { type: "COMMON", value: "Паспорт" },
+                "documentTypes-seriesRequired": { type: "COMMON", value: true },
+                "documentTypes-createdAt": { type: "COMMON", value: "2026-01-01T10:00:00" },
+            },
+        },
+        {
+            id: "doc-2",
+            dictId: "documentTypes",
+            order: 2,
+            data: {
+                "documentTypes-name": { type: "COMMON", value: "ID карта" },
+                "documentTypes-seriesRequired": { type: "COMMON", value: false },
+                "documentTypes-createdAt": { type: "COMMON", value: "2026-01-03T12:30:00" },
+            },
+        },
+    ],
+};
+
 export const toApiError = (err: unknown): ApiError => {
     if (axios.isAxiosError(err)) {
         const ax = err as AxiosError<unknown>;
@@ -69,12 +206,27 @@ export const getDictionaryRows = async (
     rq: PageableRq,
     dictId: string,
     signal?: AbortSignal,
-): Promise<PageableRs<DictionaryRow>> =>
-    (
-        await api.get<PageableRs<DictionaryRow>>(`/dictionary/${dictId}${toQueryString(rq)}`, {
-            signal,
-        })
-    ).data;
+): Promise<PageableRs<DictionaryRow>> => {
+    try {
+        return (
+            await api.get<PageableRs<DictionaryRow>>(
+                `/dictionary/${dictId}${toQueryString(rq)}`,
+                { signal },
+            )
+        ).data;
+    } catch (error) {
+        console.error("getDictionaryRows failed, using mock dictionary rows", error);
+
+        const rows = mockDictionaryRowsMap[dictId] ?? [];
+
+        return {
+            page: rq.page ?? 0,
+            size: rq.size ?? rows.length,
+            total: rows.length,
+            data: rows,
+        };
+    }
+};
 
 export const addDictionaryRow = async (
     dictId: string,
@@ -103,36 +255,7 @@ export const createDictionary = async (
     rq: CreateDictionarySchema,
     signal?: AbortSignal,
 ): Promise<DictionarySchema> => (await api.put<DictionarySchema>("/dictionary-schema", rq, { signal })).data;
-const mockDictionaries: DictionarySchema[] = [
-    {
-        id: "countries",
-        name: "Страны",
-        description: "Справочник стран",
-        schema: [],
-        groupId: null,
-    },
-    {
-        id: "cities",
-        name: "Города",
-        description: "Справочник городов",
-        schema: [],
-        groupId: null,
-    },
-    {
-        id: "genders",
-        name: "Пол",
-        description: "Справочник пола",
-        schema: [],
-        groupId: null,
-    },
-    {
-        id: "documentTypes",
-        name: "Типы документов",
-        description: "Справочник документов",
-        schema: [],
-        groupId: null,
-    },
-];
+
 export const getDictionaries = async (
     rq: PageableRq,
     signal?: AbortSignal,
