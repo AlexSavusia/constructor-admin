@@ -196,6 +196,7 @@ export function createContextStore(initialState?: FormDefinition) {
 
             persistEditingField: () =>
                 set((state) => {
+                    // debugger
                     if (!state.editingField) return {};
 
                     const oldField = findByPath<FieldDefinition>(state.form, state.editingField.path.slice(1));
@@ -245,6 +246,9 @@ export function createContextStore(initialState?: FormDefinition) {
                                     ...editingRule,
                                     rule: r,
                                 },
+                                editingField: {
+                                    ...state.editingField,
+                                }
                             };
                         }
 
@@ -262,6 +266,7 @@ export function createContextStore(initialState?: FormDefinition) {
                         }
 
                         case 'STEP_TRANSITION_SCOPE': {
+                            // debugger
                             const r = setByPath(editingRule.rule as StepTransitionRule, path, expr);
                             return {
                                 editingRule: {

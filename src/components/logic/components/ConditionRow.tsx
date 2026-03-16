@@ -100,6 +100,7 @@ export default function ConditionRow({ rule, path }: ConditionRowProps) {
                 className="min-h-[42px] w-full rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 lg:w-[220px] lg:flex-none"
                 value={rule.type}
                 onChange={(e) => {
+
                     if (twoOperand) {
                         // @ts-expect-error no error
                         if (isTwoOperandModeType(e.target.value)) {
@@ -120,8 +121,13 @@ export default function ConditionRow({ rule, path }: ConditionRowProps) {
                     } else {
                         // @ts-expect-error no error
                         if (!isTwoOperandModeType(e.target.value)) {
-                            // @ts-expect-error no error
-                            updateEditingRule(path, { ...rule, type: e.target.value });
+                            updateEditingRule(path, {
+                                ...rule,
+                                // @ts-expect-error no error
+                                type: e.target.value,
+                                // @ts-expect-error no error
+                                item: rule.left
+                            });
                         } else {
                             const nr = {
                                 ...rule,

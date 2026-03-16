@@ -10,7 +10,8 @@ export type ActionExpression =
     | SetValueActionExpression
     | ClearValueActionExpression
     | SetFieldPropertyActionExpression
-    | SetFieldErrorActionExpression;
+    | SetFieldErrorActionExpression
+    | SetTargetStep;
 
 export type NoOpActionExpression = {
     type: 'noop';
@@ -35,3 +36,8 @@ export type SetFieldErrorActionExpression = {
     type: 'setFieldError';
     text: string;
 };
+
+export type SetTargetStep = {
+    type: 'setTargetStep';
+    targetStep: string
+}

@@ -11,6 +11,8 @@ import { useShallow } from 'zustand/react/shallow';
 import RadioButtons, { type RadioItem } from '../components/ui/fieldsUI/RadioButtons/RadioButtons.tsx';
 import SelectUI, { type Option } from '../components/ui/fieldsUI/Select/Select.tsx';
 import InputDate from '../components/ui/fieldsUI/InputDate/InputDate.tsx';
+import type {StepTransitionRule} from "../logic/logic.ts";
+import {TEST} from "./test.ts";
 
 const getValueExpressionDependentPaths = (valExpr: ValueExpression): ObjPath => {
     switch (valExpr.__typ) {
@@ -88,6 +90,7 @@ type InputValuePropType = string | number | readonly string[] | undefined;
 
 type FormContextValue = {
     currentStep: Key;
+    nextStep: () => void
     form: FormDefinition;
     useByPath: <T = unknown>(path: ObjPath) => T | null;
     useByPaths: (paths: ObjPath[]) => unknown[] | null;
@@ -143,7 +146,8 @@ function evalValue<T = unknown>(value: ValueExpression, context: FormContextValu
         }
         case 'ref': {
             if (value.path[0] === 'constants') {
-                return context.form.constants[objPathToString(value.path)].value as T;
+                const p = value.path.includes("constants") ? value.path.slice(1, value.path.length) : value.path;
+                return context.form.constants[objPathToString(p)].value as T;
             }
             if (value.path[0] === 'variables') {
                 throw new Error('unimplemented');
@@ -420,6 +424,25 @@ const createFormContext = (initialState: FormDefinition): StoreApi<FormContextVa
                     fieldsErrors: rest,
                 };
             }),
+        nextStep: () => set((state) => {
+            // debugger
+            const {transition} = state.form.steps[state.currentStep]
+            const nextStepTarget = transition.rules
+                .reduce<StepTransitionRule | undefined>((acc, item) => {
+                    if (acc) return acc;
+                    const evalRes = evalCondition(item.when, state)
+                    if(evalRes) return item;
+                }, undefined);
+            if(nextStepTarget) {
+                return {
+                    currentStep: nextStepTarget.targetStep,
+                }
+            } else {
+                return {
+                    currentStep: transition.defaultStep,
+                }
+            }
+        })
     }));
 };
 
@@ -520,6 +543,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                     | 'date'
                     | 'select'
                     | 'file'
+                    | 'agree'
             ) {
                 case 'input': {
                     return (
@@ -577,6 +601,12 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                             />
                         </div>
                     );
+                case "agree":
+                    return (
+                        <div>
+                            <p>all screen text</p>
+                        </div>
+                    )
                 case 'textarea':
                 case 'checkbox':
                 case 'switch':
@@ -619,891 +649,57 @@ function FormRenderer() {
     const currentStepKey = useFormContext((s) => s.currentStep);
     const currentStep = useFormContext((s) => s.form.steps[currentStepKey]);
     const { width, containerRef, mounted } = useContainerWidth();
+    // /const s = useFormContext(s=>s)
     const fields = useMemo(() => Object.entries(currentStep.fields).map((v) => v[1]), [currentStep]);
     const fieldsLayout = useMemo(() => fields.map((f) => f.layout), [fields]);
+    const fieldsValues = useFormContext((s) => s.fieldsValues);
+    const nextStep = useFormContext(s=>s.nextStep)
+
+    useEffect(() => {
+        // debugger
+    }, []);
 
     return (
         <div ref={containerRef} className="card-body w-100">
             {mounted && (
-                <div className="position-relative rounded">
-                    <ReactGridLayout
-                        width={width}
-                        gridConfig={{ cols, rowHeight }}
-                        dragConfig={{ enabled: false }}
-                        // compactor={verticalCompactor}
-                        layout={fieldsLayout}
-                    >
-                        {fields.map((item) => (
-                            <div key={item.key}>
-                                {item.fieldType == 'input' ? (
-                                    <InputFieldRenderer
-                                        key={item.key}
-                                        field={item}
-                                        path={['steps', currentStepKey, 'fields', item.key]}
-                                    />
-                                ) : (
-                                    <OutputFieldRenderer
-                                        key={item.key}
-                                        field={item}
-                                        path={['steps', currentStepKey, 'fields', item.key]}
-                                    />
-                                )}
-                            </div>
-                        ))}
-                    </ReactGridLayout>
-                </div>
+                <form onSubmit={e => {
+                    e.preventDefault()
+                    nextStep()
+                }}>
+                    <div className="position-relative rounded">
+                        <ReactGridLayout
+                            width={width}
+                            gridConfig={{ cols, rowHeight }}
+                            dragConfig={{ enabled: false }}
+                            // compactor={verticalCompactor}
+                            layout={fieldsLayout}
+                        >
+                            {fields.map((item) => (
+                                <div key={item.key}>
+                                    {item.fieldType == 'input' ? (
+                                        <InputFieldRenderer
+                                            key={item.key}
+                                            field={item}
+                                            path={['steps', currentStepKey, 'fields', item.key]}
+                                        />
+                                    ) : (
+                                        <OutputFieldRenderer
+                                            key={item.key}
+                                            field={item}
+                                            path={['steps', currentStepKey, 'fields', item.key]}
+                                        />
+                                    )}
+                                </div>
+                            ))}
+                        </ReactGridLayout>
+                        <button type="submit" className="btn btn-primary">Next</button>
+                    </div>
+                </form>
             )}
         </div>
     );
 }
-export const TEST: FormDefinition = {
-    firstStepKey: 'start',
-    steps: {
-        start: {
-            key: 'start',
-            title: 'First step',
-            fields: {
-                '15c5848e-3d4f-4c34-be8b-3436578234fc': {
-                    capabilities: {
-                        canBeVisible: false,
-                        canBeEnabled: false,
-                        canBeRequired: false,
-                        canBeSetValue: false,
-                    },
-                    control: 'input',
-                    fieldType: 'input',
-                    valueType: 'unknown',
-                    logic: {
-                        visibility: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '49f15f84-bd2b-4219-8168-186ee8d9fa60',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        enabled: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '6a3bd1f5-72ae-4e40-866c-bbd03f97a1d1',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        required: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '7691cfb7-0605-4675-950f-ccff32265f3e',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                    },
-                    __typ: 'field',
-                    key: '15c5848e-3d4f-4c34-be8b-3436578234fc',
-                    descriptorKey: 'radio',
-                    settingsValues: {
-                        label: 'Тип рассчеиа',
-                        fieldType: 'radio',
-                        name: 'calcType',
-                        required: false,
-                        visible: false,
-                        disabled: false,
-                        theme: 'param',
-                        options: [
-                            {
-                                label: 'По СС',
-                                value: 'sum',
-                            },
-                            {
-                                label: 'По премии',
-                                value: 'premium',
-                            },
-                        ],
-                    },
-                    layout: {
-                        i: '15c5848e-3d4f-4c34-be8b-3436578234fc',
-                        x: 0,
-                        y: 0,
-                        w: 2,
-                        h: 3,
-                        minW: 1,
-                        moved: false,
-                        static: false,
-                        resizeHandles: ['e', 'w'],
-                    },
-                },
-                'a671a831-1094-483c-b20f-8d7fbf86d80b': {
-                    capabilities: {
-                        canBeVisible: false,
-                        canBeEnabled: false,
-                        canBeRequired: false,
-                        canBeSetValue: false,
-                    },
-                    control: 'input',
-                    fieldType: 'input',
-                    valueType: 'unknown',
-                    logic: {
-                        visibility: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '3bbfbced-59f9-4018-b464-29a74b384a85',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        enabled: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '6146319a-6076-49c3-a0b5-597a91ecf01b',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        required: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '64a703a7-9867-417e-a432-dc1a4a996bd6',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                    },
-                    __typ: 'field',
-                    key: 'a671a831-1094-483c-b20f-8d7fbf86d80b',
-                    descriptorKey: 'radio',
-                    settingsValues: {
-                        label: 'Тип выплаты',
-                        fieldType: 'radio',
-                        name: 'paymentType',
-                        required: false,
-                        visible: false,
-                        disabled: false,
-                        theme: 'param',
-                        options: [
-                            {
-                                label: 'Отложенная',
-                                value: 'delayed',
-                            },
-                            {
-                                label: 'Немедленная',
-                                value: 'instant',
-                            },
-                        ],
-                    },
-                    layout: {
-                        i: 'a671a831-1094-483c-b20f-8d7fbf86d80b',
-                        x: 0,
-                        y: 3,
-                        w: 2,
-                        h: 3,
-                        minW: 1,
-                        moved: false,
-                        static: false,
-                        resizeHandles: ['e', 'w'],
-                    },
-                },
-                'f1cf2101-9ef1-4dff-bfe8-8687884755e5': {
-                    capabilities: {
-                        canBeVisible: false,
-                        canBeEnabled: false,
-                        canBeRequired: false,
-                        canBeSetValue: false,
-                    },
-                    control: 'input',
-                    fieldType: 'input',
-                    valueType: 'unknown',
-                    logic: {
-                        visibility: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: 'daa483d5-0223-44a9-9ddb-dd797fb55513',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        enabled: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '28cc0744-22e9-4ff3-be9a-058d00f0b534',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        required: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '96e517a9-2903-419f-892a-33928397e3f4',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        validation: {
-                            condition: {
-                                id: 'fdbf837e-1d57-4186-9bbe-e65af88b3e58',
-                                type: 'or',
-                                items: [
-                                    {
-                                        id: 'e55c5aab-b588-4242-9718-94b20a5d6e53',
-                                        type: 'isEmpty',
-                                        item: {
-                                            __typ: 'ref',
-                                            path: ['start', 'fields', 'f1cf2101-9ef1-4dff-bfe8-8687884755e5'],
-                                            refType: 'field',
-                                        },
-                                    },
-                                    {
-                                        id: 'e78ef8db-5d59-4456-a90f-2b4d7c4dbb33',
-                                        type: 'lt',
-                                        left: {
-                                            __typ: 'ref',
-                                            path: ['start', 'fields', 'f1cf2101-9ef1-4dff-bfe8-8687884755e5'],
-                                            refType: 'field',
-                                        },
-                                        right: {
-                                            __typ: 'const',
-                                            value: 5,
-                                            valueType: 'number',
-                                        },
-                                    },
-                                    {
-                                        id: '21c833eb-e15d-4bfd-b13b-fa1a54d62f68',
-                                        type: 'gt',
-                                        left: {
-                                            __typ: 'ref',
-                                            path: ['start', 'fields', 'f1cf2101-9ef1-4dff-bfe8-8687884755e5'],
-                                            refType: 'field',
-                                        },
-                                        right: {
-                                            __typ: 'const',
-                                            value: 40,
-                                            valueType: 'number',
-                                        },
-                                    },
-                                    {
-                                        id: '11dabb3b-9932-4d2d-8d4d-0fd928b3d86e',
-                                        type: 'eq',
-                                        left: {
-                                            __typ: 'ref',
-                                            path: ['start', 'fields', 'dddcaaaa-2c84-4812-a5ce-233b0f05f1ce'],
-                                            refType: 'field',
-                                        },
-                                        right: {
-                                            __typ: 'const',
-                                            value: 1,
-                                            valueType: 'number',
-                                        },
-                                    },
-                                ],
-                            },
-                            actions: [
-                                {
-                                    type: 'setFieldError',
-                                    text: 'Диапазон 5 40',
-                                },
-                            ],
-                        },
-                    },
-                    __typ: 'field',
-                    key: 'f1cf2101-9ef1-4dff-bfe8-8687884755e5',
-                    descriptorKey: 'field',
-                    settingsValues: {
-                        mask: '',
-                        fieldType: 'input',
-                        label: 'Срок действия, лет',
-                        name: 'years',
-                        required: true,
-                        visible: false,
-                        disabled: false,
-                        placeholder: '',
-                        inputType: 'text',
-                        checked: false,
-                        options: [
-                            {
-                                label: 'Вариант 1',
-                                value: 'var1',
-                            },
-                            {
-                                label: 'Вариант 2',
-                                value: 'var2',
-                            },
-                        ],
-                        multiple: true,
-                        accept: 'jpg,jpeg,heic,png,pdf',
-                        maxFileSizeMb: '20',
-                    },
-                    layout: {
-                        i: 'f1cf2101-9ef1-4dff-bfe8-8687884755e5',
-                        x: 0,
-                        y: 6,
-                        w: 1,
-                        h: 3,
-                        minW: 1,
-                        moved: false,
-                        static: false,
-                        resizeHandles: ['e', 'w'],
-                    },
-                },
-                'dddcaaaa-2c84-4812-a5ce-233b0f05f1ce': {
-                    capabilities: {
-                        canBeVisible: false,
-                        canBeEnabled: false,
-                        canBeRequired: false,
-                        canBeSetValue: false,
-                    },
-                    control: 'input',
-                    fieldType: 'input',
-                    valueType: 'unknown',
-                    logic: {
-                        visibility: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: 'ab9c3342-7a31-43e2-9453-5e5ca2e3fc78',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        enabled: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '586c772d-a251-4377-bfbf-834a7bd6dd90',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        required: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '61756689-c1c5-45ce-80ab-e96af4158614',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                    },
-                    __typ: 'field',
-                    key: 'dddcaaaa-2c84-4812-a5ce-233b0f05f1ce',
-                    descriptorKey: 'field',
-                    settingsValues: {
-                        mask: '',
-                        fieldType: 'input',
-                        label: 'Срок уплаты взносов',
-                        name: 'paymentPeriod',
-                        required: true,
-                        visible: false,
-                        disabled: false,
-                        placeholder: '',
-                        inputType: 'text',
-                        checked: false,
-                        options: [
-                            {
-                                label: 'Вариант 1',
-                                value: 'var1',
-                            },
-                            {
-                                label: 'Вариант 2',
-                                value: 'var2',
-                            },
-                        ],
-                        multiple: true,
-                        accept: 'jpg,jpeg,heic,png,pdf',
-                        maxFileSizeMb: '20',
-                    },
-                    layout: {
-                        i: 'dddcaaaa-2c84-4812-a5ce-233b0f05f1ce',
-                        x: 1,
-                        y: 6,
-                        w: 1,
-                        h: 3,
-                        minW: 1,
-                        moved: false,
-                        static: false,
-                        resizeHandles: ['e', 'w'],
-                    },
-                },
-                '7abf3482-cb8e-4542-909a-00c0b5597b8e': {
-                    capabilities: {
-                        canBeVisible: false,
-                        canBeEnabled: false,
-                        canBeRequired: false,
-                        canBeSetValue: false,
-                    },
-                    control: 'input',
-                    fieldType: 'input',
-                    valueType: 'unknown',
-                    logic: {
-                        visibility: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '5e8762de-9326-4911-ab6c-6074d14c318a',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        enabled: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '9b0b78af-1337-4fca-9813-ff3c450dc3aa',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        required: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '8858000d-61cd-48b0-a642-cc35f6d76310',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        validation: {
-                            condition: {
-                                id: '4859376d-9f34-498b-9fbc-125fd4fc481e',
-                                type: 'and',
-                                items: [
-                                    {
-                                        id: 'f0903dda-fb50-48d6-9a2e-c9fc13e76c96',
-                                        type: 'lte',
-                                        left: {
-                                            __typ: 'ref',
-                                            path: ['start', 'fields', '7abf3482-cb8e-4542-909a-00c0b5597b8e'],
-                                            refType: 'field',
-                                        },
-                                        right: {
-                                            __typ: 'const',
-                                            value: 100,
-                                            valueType: 'number',
-                                        },
-                                    },
-                                ],
-                            },
-                            actions: [
-                                {
-                                    type: 'setFieldError',
-                                    text: 'must be greater than 100',
-                                },
-                            ],
-                        },
-                    },
-                    __typ: 'field',
-                    key: '7abf3482-cb8e-4542-909a-00c0b5597b8e',
-                    descriptorKey: 'field',
-                    settingsValues: {
-                        mask: '',
-                        fieldType: 'input',
-                        label: 'Страховая сумма',
-                        name: 'ins_sum',
-                        required: true,
-                        visible: false,
-                        disabled: false,
-                        placeholder: '',
-                        inputType: 'text',
-                        checked: false,
-                        options: [
-                            {
-                                label: 'Вариант 1',
-                                value: 'var1',
-                            },
-                            {
-                                label: 'Вариант 2',
-                                value: 'var2',
-                            },
-                        ],
-                        multiple: true,
-                        accept: 'jpg,jpeg,heic,png,pdf',
-                        maxFileSizeMb: '20',
-                    },
-                    layout: {
-                        i: '7abf3482-cb8e-4542-909a-00c0b5597b8e',
-                        x: 0,
-                        y: 9,
-                        w: 2,
-                        h: 3,
-                        minW: 1,
-                        moved: false,
-                        static: false,
-                        resizeHandles: ['e', 'w'],
-                    },
-                },
-                'e295cf27-925a-47ef-821d-e1afd21207b9': {
-                    capabilities: {
-                        canBeVisible: false,
-                        canBeEnabled: false,
-                        canBeRequired: false,
-                        canBeSetValue: false,
-                    },
-                    control: 'input',
-                    fieldType: 'input',
-                    valueType: 'unknown',
-                    logic: {
-                        visibility: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: 'f9c9cdf3-9023-4dc0-b1dc-cd032ede5767',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        enabled: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '90cff997-935a-46ed-b66b-8ba89ac3c8f9',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        required: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '1f5525c4-9bc9-4c61-9293-1f9b35dff76a',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                    },
-                    __typ: 'field',
-                    key: 'e295cf27-925a-47ef-821d-e1afd21207b9',
-                    descriptorKey: 'field',
-                    settingsValues: {
-                        mask: '',
-                        fieldType: 'select',
-                        label: 'Периодичность уплаты',
-                        name: 'period',
-                        required: true,
-                        visible: false,
-                        disabled: false,
-                        placeholder: '',
-                        inputType: 'text',
-                        checked: false,
-                        options: [
-                            {
-                                label: 'Ежегодно',
-                                value: '12',
-                            },
-                        ],
-                        multiple: true,
-                        accept: 'jpg,jpeg,heic,png,pdf',
-                        maxFileSizeMb: '20',
-                    },
-                    layout: {
-                        i: 'e295cf27-925a-47ef-821d-e1afd21207b9',
-                        x: 0,
-                        y: 12,
-                        w: 2,
-                        h: 3,
-                        minW: 1,
-                        moved: false,
-                        static: false,
-                        resizeHandles: ['e', 'w'],
-                    },
-                },
-                'a5d9549b-489c-4e09-9cf8-e560283a98af': {
-                    capabilities: {
-                        canBeVisible: false,
-                        canBeEnabled: false,
-                        canBeRequired: false,
-                        canBeSetValue: false,
-                    },
-                    control: 'input',
-                    fieldType: 'input',
-                    valueType: 'unknown',
-                    logic: {
-                        visibility: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '544cef93-36f4-48ec-929f-a63c6a208235',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        enabled: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: 'c035bd6f-4c38-4f50-93d6-e5cf42a24ab4',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        required: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '4437eb73-e28d-4dd3-abad-26465b965f30',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                    },
-                    __typ: 'field',
-                    key: 'a5d9549b-489c-4e09-9cf8-e560283a98af',
-                    descriptorKey: 'description',
-                    settingsValues: {
-                        text: 'Застрахованный',
-                        fieldType: 'description',
-                    },
-                    layout: {
-                        i: 'a5d9549b-489c-4e09-9cf8-e560283a98af',
-                        x: 0,
-                        y: 15,
-                        w: 3,
-                        h: 3,
-                        minW: 1,
-                        moved: false,
-                        static: false,
-                        resizeHandles: ['e', 'w'],
-                    },
-                },
-                '139d147d-19d9-4e39-af43-4e150469d388': {
-                    capabilities: {
-                        canBeVisible: false,
-                        canBeEnabled: false,
-                        canBeRequired: false,
-                        canBeSetValue: false,
-                    },
-                    control: 'input',
-                    fieldType: 'input',
-                    valueType: 'unknown',
-                    logic: {
-                        visibility: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '417c2932-7a76-44e0-9cfe-da942342a3dd',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        enabled: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '8a07bf58-c50c-43d6-807d-055cf4cb261b',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        required: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '9a07fbd3-bd5e-42db-b147-411948d58248',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                    },
-                    __typ: 'field',
-                    key: '139d147d-19d9-4e39-af43-4e150469d388',
-                    descriptorKey: 'field',
-                    settingsValues: {
-                        mask: '',
-                        fieldType: 'date',
-                        label: 'Дата рождения',
-                        name: 'birthdate',
-                        required: true,
-                        visible: false,
-                        disabled: true,
-                        placeholder: '',
-                        inputType: 'text',
-                        checked: false,
-                        options: [
-                            {
-                                label: 'Вариант 1',
-                                value: 'var1',
-                            },
-                            {
-                                label: 'Вариант 2',
-                                value: 'var2',
-                            },
-                        ],
-                        multiple: true,
-                        accept: 'jpg,jpeg,heic,png,pdf',
-                        maxFileSizeMb: '20',
-                    },
-                    layout: {
-                        i: '139d147d-19d9-4e39-af43-4e150469d388',
-                        x: 0,
-                        y: 18,
-                        w: 1,
-                        h: 3,
-                        minW: 1,
-                        moved: false,
-                        static: false,
-                        resizeHandles: ['e', 'w'],
-                    },
-                },
-                '6a224b46-b6bd-431d-8b2e-ddb533c1e7f9': {
-                    capabilities: {
-                        canBeVisible: false,
-                        canBeEnabled: false,
-                        canBeRequired: false,
-                        canBeSetValue: false,
-                    },
-                    control: 'input',
-                    fieldType: 'input',
-                    valueType: 'unknown',
-                    logic: {
-                        visibility: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: '15886bcb-99ba-4347-87bd-956f0ae658ca',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        enabled: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: 'e4137d3d-7d77-437c-9a1f-e8f0bae7729a',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                        required: {
-                            defaultValue: true,
-                            rule: {
-                                condition: {
-                                    id: 'c2356999-9403-41c6-8339-eb82f241e836',
-                                    type: 'noop',
-                                    items: [],
-                                },
-                                actions: [],
-                            },
-                        },
-                    },
-                    __typ: 'field',
-                    key: '6a224b46-b6bd-431d-8b2e-ddb533c1e7f9',
-                    descriptorKey: 'radio',
-                    settingsValues: {
-                        label: 'Пол',
-                        fieldType: 'radio',
-                        name: 'gender',
-                        required: true,
-                        visible: false,
-                        disabled: false,
-                        theme: 'param',
-                        options: [
-                            {
-                                label: 'Мужчина',
-                                value: 'male',
-                            },
-                            {
-                                label: 'Женщина',
-                                value: 'female',
-                            },
-                        ],
-                    },
-                    layout: {
-                        i: '6a224b46-b6bd-431d-8b2e-ddb533c1e7f9',
-                        x: 1,
-                        y: 18,
-                        w: 1,
-                        h: 3,
-                        minW: 1,
-                        moved: false,
-                        static: false,
-                        resizeHandles: ['e', 'w'],
-                    },
-                },
-            },
-            transition: {
-                rules: [],
-            },
-        },
-    },
-    lookups: {},
-    constants: {
-        name: {
-            __typ: 'constant',
-            key: 'name',
-            label: 'Form name',
-            valueType: 'string',
-            value: 'simple name',
-        },
-        enabled: {
-            __typ: 'constant',
-            key: 'enabled',
-            label: 'Form enabled',
-            valueType: 'boolean',
-            value: true,
-        },
-    },
-    variables: {},
-    interactions: [],
-};
+
 export default function HomePage() {
     return (
         <FormProvider initialState={TEST}>

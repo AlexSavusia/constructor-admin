@@ -1,5 +1,9 @@
 import { type ObjPath, useEditorContext } from '../../../pages/Programs/editor/EditorContext.tsx';
-import type { ActionExpression, SetFieldErrorActionExpression, SetFieldPropertyActionExpression } from '../types.ts';
+import type {
+    ActionExpression,
+    SetFieldErrorActionExpression,
+    SetFieldPropertyActionExpression,
+} from '../types.ts';
 import Input from '../../ui/fieldsUIAdmin/Input/Input.tsx';
 
 export type ActionRowProps = {
@@ -12,6 +16,7 @@ type ActionType = ActionExpression['type'];
 export default function ActionRow({ action, path }: ActionRowProps) {
     const editingRule = useEditorContext((s) => s.editingRule)!;
     const updateEditingRule = useEditorContext((s) => s.updateEditingRule);
+    //const selfValue = useEditorContext(s=>s.form.steps[s.stepKey].transition)
     let actionTypes: Partial<Record<ActionType, string>> = {
         noop: 'Ничего не делать',
     };
@@ -28,6 +33,12 @@ export default function ActionRow({ action, path }: ActionRowProps) {
             actionTypes = {
                 ...actionTypes,
                 setFieldError: `Вывести ошибку`,
+            };
+            break;
+        case 'STEP_TRANSITION_SCOPE':
+            actionTypes = {
+                ...actionTypes,
+                setTargetStep: "Перейти на шаг"
             };
             break;
         default:

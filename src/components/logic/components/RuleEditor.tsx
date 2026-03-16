@@ -7,7 +7,7 @@ export default function RuleEditor() {
     const editingRule = useEditorContext((s) => s.editingRule);
     const resetEditingRule = useEditorContext((s) => s.resetEditingRule);
     const persistEditingRule = useEditorContext((s) => s.persistEditingRule);
-    const hasThenEditor = editingRule?.scope != 'STEP_TRANSITION_SCOPE';
+    const hasThenEditor = true //editingRule?.scope != 'STEP_TRANSITION_SCOPE';
     if (!editingRule) {
         return null;
     }
