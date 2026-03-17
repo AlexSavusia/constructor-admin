@@ -6,7 +6,7 @@ function PaletteItemDescription({ className, settingsValues }: PaletteItemProps)
     const text = String(settingsValues?.text ?? 'Заголовок раздела');
 
     return (
-        <div className={classNames('mb-0', className)}>
+        <div className={classNames('mb-0 max-w-0.5' , className)}>
             <strong>{text}</strong>
         </div>
     );
@@ -14,7 +14,7 @@ function PaletteItemDescription({ className, settingsValues }: PaletteItemProps)
 
 function PaletteItemDescriptionPreview({ className }: PaletteItemPreviewProps) {
     return (
-        <div className={classNames('mb-0 text-center', className)}>
+        <div className={classNames('mb-0 text-center max-w-0.5', className)}>
             <strong>Соглашение</strong>
         </div>
     );
@@ -25,6 +25,7 @@ const AgreeDescriptor: PaletteItemDescriptor = {
     title: 'Заголовок / раздел',
     type: 'agree',
     minWidth: 1,
+    maxWidth: 1,
 
     settings: [
         {

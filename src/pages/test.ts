@@ -701,9 +701,10 @@ export const TEST: FormDefinition = {
                         "i": "a5d9549b-489c-4e09-9cf8-e560283a98af",
                         "x": 0,
                         "y": 15,
-                        "w": 3,
-                        "h": 3,
+                        "w": 2,
+                        "h": 2,
                         "minW": 1,
+                        "maxW": 1,
                         "moved": false,
                         "static": false,
                         "resizeHandles": [

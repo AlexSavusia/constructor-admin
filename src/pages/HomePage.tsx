@@ -554,41 +554,42 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
             ) {
                 case 'input': {
                     return (
-                        <div>
-                            <p>{field.key as string}</p>
+                      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
                             <InputUI
                                 required={selfRequired}
                                 value={selfValue as InputValuePropType}
                                 onChange={(e) => handleFieldUpdate(e.target.value)}
                                 label={field.settingsValues['label'] as string}
                             />
-                            {selfError && <p>{selfError}</p>}
+                            {selfError && !!selfValue &&<p className="mt-1 text-sm leading-4 text-red-500 break-words">
+                                {selfError}
+                            </p>}
                         </div>
                     );
                 }
                 case 'description':
                     return (
-                        <div>
-                            <p>{field.key as string}</p>
-                            <p>{field.settingsValues['text'] as string}</p>
+                      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+                          <p className="text-sm leading-5 text-gray-600 break-words">{field.settingsValues['text'] as string}</p>
                         </div>
                     );
                 case 'radio':
                     return (
-                        <div>
-                            <p>{field.key as string}</p>
+                     <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+
                             <RadioButtons
                                 currentValue={selfValue as string | number | undefined}
                                 name={field.settingsValues['name'] as string}
                                 data={field.settingsValues['options'] as RadioItem[]}
                                 onChange={(e) => handleFieldUpdate(e)}
+                                title={field.settingsValues['label'] as string}
                             />
                         </div>
                     );
                 case 'select':
                     return (
-                        <div>
-                            <p>{field.key as string}</p>
+                      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+
                             <SelectUI
                                 label={field.settingsValues['label'] as string}
                                 options={field.settingsValues['options'] as Option[]}
@@ -599,8 +600,8 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                     );
                 case 'date':
                     return (
-                        <div>
-                            <p>{field.key as string}</p>
+                      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+
                             <InputDate
                                 label={field.settingsValues['label'] as string}
                                 value={selfValue as string}
@@ -610,8 +611,8 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                     );
                 case "agree":
                     return (
-                        <div>
-                            <p>all screen text</p>
+                      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+                            <p className="text-gray-700 text-sm leading-relaxed">all screen text</p>
                         </div>
                     )
                 case 'textarea':
@@ -634,7 +635,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
     }
 
     return (
-        <div>
+      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
             <p>{field.key}</p>
             <p>{path.join('.')}</p>
         </div>
@@ -643,7 +644,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
 
 function OutputFieldRenderer({ field, path }: FieldRendererProps) {
     return (
-        <div>
+      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
             <p>{field.key}</p>
             <p>{path.join('.')}</p>
         </div>
@@ -672,22 +673,25 @@ function FormRenderer() {
     }
 
     return (
-        <div ref={containerRef} className="card-body w-100">
+        <div ref={containerRef} className="w-full max-w-7xl mx-auto px-4 py-6">
             {mounted && (
-                <form onSubmit={e => {
+                <form
+                    className="w-full"
+                    onSubmit={e => {
                     e.preventDefault()
                     nextStep()
                 }}>
-                    <div className="position-relative rounded">
+                    <div className="relative w-full bg-white rounded-2xl border border-gray-200 shadow-sm p-4 md:p-6 overflow-hidden">
                         <ReactGridLayout
                             width={width}
                             gridConfig={{ cols, rowHeight }}
                             dragConfig={{ enabled: false }}
+                            resizeConfig={{ enabled: false }}
                             // compactor={verticalCompactor}
                             layout={fieldsLayout}
                         >
                             {fields.map((item) => (
-                                <div key={item.key}>
+                                <div key={item.key} className="h-full min-w-0">
                                     {item.fieldType == 'input' ? (
                                         <InputFieldRenderer
                                             key={item.key}
@@ -704,7 +708,12 @@ function FormRenderer() {
                                 </div>
                             ))}
                         </ReactGridLayout>
-                        <button type="submit" className="btn btn-primary">Next</button>
+                        <button
+                            type="submit"
+                            className="mt-6 inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700"
+                        >
+                            Next
+                        </button>
                     </div>
                 </form>
             )}
