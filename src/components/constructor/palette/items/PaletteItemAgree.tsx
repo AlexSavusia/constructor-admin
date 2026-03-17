@@ -4,17 +4,19 @@ import classNames from 'classnames';
 
 function PaletteItemDescription({ className, settingsValues }: PaletteItemProps) {
     const text = String(settingsValues?.text ?? 'Заголовок раздела');
+    const description = String(settingsValues?.description ?? 'описание');
 
     return (
-        <div className={classNames('mb-0 max-w-0.5' , className)}>
-            <strong>{text}</strong>
+        <div className={classNames('mb-0 d-flex flex-wrap flex-col p-2' , className)}>
+           <p className={'text-3xl text-center'}><strong>{text}</strong></p>
+            <p><strong>{description}</strong></p>
         </div>
     );
 }
 
 function PaletteItemDescriptionPreview({ className }: PaletteItemPreviewProps) {
     return (
-        <div className={classNames('mb-0 text-center max-w-0.5', className)}>
+        <div className={classNames('mb-0 text-center', className)}>
             <strong>Соглашение</strong>
         </div>
     );
@@ -33,6 +35,12 @@ const AgreeDescriptor: PaletteItemDescriptor = {
             title: 'Текст',
             valType: 'string',
             defaultValue: 'Соглашение',
+        },
+        {
+            key: 'description',
+            title: 'Описание',
+            valType: 'string',
+            defaultValue: 'Описание',
         },
         {
             key: 'fieldType',

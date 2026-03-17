@@ -6,8 +6,8 @@ function PaletteItemDescription({ className, settingsValues }: PaletteItemProps)
     const text = String(settingsValues?.text ?? 'Заголовок раздела');
 
     return (
-        <div className={classNames('mb-0', className)}>
-            <strong>{text}</strong>
+        <div className={classNames('mb-0 d-flex flex-wrap flex-col p-2' , className)}>
+            <p className={'text-3xl text-center'}><strong>{text}</strong></p>
         </div>
     );
 }
