@@ -43,6 +43,12 @@ const AgreeDescriptor: PaletteItemDescriptor = {
             defaultValue: 'Описание',
         },
         {
+            key: 'name',
+            title: 'Name',
+            valType: 'string',
+            defaultValue: 'field',
+        },
+        {
             key: 'fieldType',
             title: 'Тип поля',
             valType: 'string',
