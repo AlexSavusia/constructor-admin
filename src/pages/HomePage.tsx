@@ -584,7 +584,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                 case 'description':
                     return (
                       <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
-                          <p className="text-sm leading-5 text-gray-600 break-words">{field.settingsValues['text'] as string}</p>
+                          <p className="text-3xl leading-5 text-gray-600 break-words">{field.settingsValues['text'] as string}</p>
                         </div>
                     );
                 case 'radio':
@@ -626,8 +626,9 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                     );
                 case "agree":
                     return (
-                      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
-                            <p className="text-gray-700 text-sm leading-relaxed">all screen text</p>
+                      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden d-flex flex-col">
+                            <p className="text-gray-700 text-3xl leading-relaxed text-center">  {field.settingsValues['text'] as string}</p>
+                            <p className="text-gray-700 text-sm leading-relaxed">  {field.settingsValues['description'] as string}</p>
                         </div>
                     )
                 case 'textarea':

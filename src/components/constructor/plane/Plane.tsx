@@ -142,7 +142,7 @@ export default function Plane({ className, items }: PlaneProps) {
                 h: 3,
                 minW: descriptor.minWidth,
                 maxW: descriptor.maxWidth,
-                resizeHandles: ['e', 'w'],
+                resizeHandles: ['n', 's', 'w', 'e'],
             },
         };
         addField(currentStepKey, newItem);
@@ -211,6 +211,10 @@ export default function Plane({ className, items }: PlaneProps) {
                                         enabled: true,
                                         handle: '.handle',
                                         cancel: '.react-resizable-handle, input, textarea, select, button, [contenteditable=true]',
+                                    }}
+                                    resizeConfig={{
+                                        enabled: true,
+                                        handles: ['n', 's', 'w', 'e']
                                     }}
                                     compactor={verticalCompactor}
                                     layout={stepLayout}
