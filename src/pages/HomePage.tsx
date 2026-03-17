@@ -583,6 +583,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                                 data={field.settingsValues['options'] as RadioItem[]}
                                 onChange={(e) => handleFieldUpdate(e)}
                                 title={field.settingsValues['label'] as string}
+                                theme={"param"}
                             />
                         </div>
                     );
@@ -653,7 +654,7 @@ function OutputFieldRenderer({ field, path }: FieldRendererProps) {
 
 function FormRenderer() {
     const cols = 3;
-    const rowHeight = 25; // 11.5;
+    const rowHeight = 26; // 11.5;
     const currentStepKey = useFormContext((s) => s.currentStep);
     const currentStep = useFormContext((s) => s.form.steps[currentStepKey]);
     const { width, containerRef, mounted } = useContainerWidth();
