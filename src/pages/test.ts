@@ -1,3 +1,5 @@
+import type {FormDefinition} from "../logic/type.ts";
+
 export const TEST: FormDefinition = {
     "firstStepKey": "start",
     "steps": {
@@ -1007,5 +1009,16 @@ export const TEST: FormDefinition = {
         }
     },
     "variables": {},
-    "interactions": []
+    "interactions": {
+        "some": {
+            key: "some",
+            title: "some",
+            dependentFields: [
+                ["constants", "name"]
+            ],
+            execute: async (abort, fields) => {
+                debugger
+            }
+        }
+    }
 }
