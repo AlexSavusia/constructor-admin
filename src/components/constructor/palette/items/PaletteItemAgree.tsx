@@ -27,7 +27,6 @@ const AgreeDescriptor: PaletteItemDescriptor = {
     title: 'Заголовок / раздел',
     type: 'agree',
     minWidth: 1,
-    maxWidth: 1,
 
     settings: [
         {
