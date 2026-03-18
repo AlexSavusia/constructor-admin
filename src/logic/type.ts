@@ -1,5 +1,6 @@
 import type { StepDefinition } from './step.ts';
 import type { LookupDefinition } from './lookup.ts';
+import type {ObjPath} from "../pages/Programs/editor/EditorContext.tsx";
 
 export type Key = string;
 
@@ -11,7 +12,7 @@ export type FormDefinition = {
     lookups: Record<Key, LookupDefinition>;
     constants: Record<Key, ConstVariableDefinition>;
     variables: Record<Key, RuntimeVariableDefinition>;
-    interactions: unknown[];
+    interactions: Record<Key, InteractionDefinition>;
 };
 
 export type ConstVariableDefinition = {
@@ -36,3 +37,39 @@ export type ExpressionScope =
     | 'FIELD_ON_UPDATE_SCOPE' //
     | 'LOOKUP_ROW_SCOPE' // условие доступности строки справочника для выбора
     | 'STEP_TRANSITION_SCOPE'; // переход на следующий шаг
+
+
+export type InteractionDefinition<T = unknown> = {
+    key: Key
+    title: string
+    dependentFields: ObjPath[]
+    execute: (abort: AbortSignal, contextVariables: Record<string, unknown>) => Promise<T>
+}
+
+type CalculateRs = {
+
+}
+
+const CalculateInteraction: InteractionDefinition<CalculateRs> = {
+    key: "calculate",
+    title: "Рассчет",
+    execute: async (as, contextVariables) => {
+        debugger
+        return {};
+    }
+}
+
+type ContractRs = {
+    "contract": string
+}
+
+const ContractNumberInteraction: InteractionDefinition<ContractRs> = {
+    key: "contractNumber",
+    title: "Номер договора",
+    execute: async (as, contextVariables) => {
+        debugger
+        return {
+            contract: "q"
+        };
+    }
+}

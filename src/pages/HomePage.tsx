@@ -1,7 +1,7 @@
 import { type ObjPath, objPathFromString, objPathToString } from './Programs/editor/EditorContext.tsx';
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
-import { createStore, type StoreApi, useStore } from 'zustand';
-import type { FormDefinition, Key } from '../logic/type.ts';
+import {create, createStore, type StateCreator, type StoreApi, useStore} from 'zustand';
+import type {FormDefinition, InteractionDefinition, Key} from '../logic/type.ts';
 import { ReactGridLayout, useContainerWidth } from 'react-grid-layout';
 import type { FieldDefinition } from '../logic/field.ts';
 import InputUI from '../components/ui/fieldsUI/Input/Input.tsx';
@@ -13,7 +13,7 @@ import SelectUI, { type Option } from '../components/ui/fieldsUI/Select/Select.t
 import InputDate from '../components/ui/fieldsUI/InputDate/InputDate.tsx';
 import type {StepTransitionRule} from "../logic/logic.ts";
 import {TEST} from "./test.ts";
-import SliderUI from "../components/ui/fieldsUI/Slider/SliderField.tsx";
+import {subscribeWithSelector} from "zustand/middleware";
 
 const getValueExpressionDependentPaths = (valExpr: ValueExpression): ObjPath => {
     switch (valExpr.__typ) {
@@ -97,6 +97,7 @@ type FormContextValue = {
     useByPaths: (paths: ObjPath[]) => unknown[] | null;
     getDeps: (path: ObjPath) => ObjPath[];
     fieldsValues: Record<string, unknown>;
+    variableValues: Record<string, unknown>;
     fieldsErrors: Record<string, string>;
     updateFieldValue: (path: ObjPath, value: unknown) => void;
     fieldsDeps: Record<string, ObjPath[]>;
@@ -110,7 +111,7 @@ type FormContextValue = {
     setFieldEnabled: (fieldKey: Key, value: boolean) => void;
 };
 
-function getByPath<T = unknown>(obj: unknown, path: ObjPath): T {
+function getByPath<T>(obj: unknown, path: ObjPath): T {
     let current: unknown = obj;
 
     for (const key of path) {
@@ -255,7 +256,7 @@ function evalActionExpression(
     }
 }
 
-const createFormContext = (initialState: FormDefinition): StoreApi<FormContextValue> => {
+const createFormContext = (initialState: FormDefinition) => {
     const fieldsValues = Object.entries(initialState.steps)
         .map((st) => Object.entries(st[1].fields).map((f) => [objPathToString(['steps', st[0], 'fields', f[0]]), undefined]))
         .flat()
@@ -339,7 +340,14 @@ const createFormContext = (initialState: FormDefinition): StoreApi<FormContextVa
                 return acc;
             }, {});
     };
-    return createStore<FormContextValue>((set, get) => ({
+
+    const selector: StateCreator<
+        FormContextValue,
+        [["zustand/subscribeWithSelector", never]],
+        [],
+        FormContextValue
+    > = (set, get) => ({
+        variableValues: {},
         submit: false,
         fieldRequired: fieldsRequired,
         fieldEnabled: fieldsEnabled,
@@ -362,7 +370,7 @@ const createFormContext = (initialState: FormDefinition): StoreApi<FormContextVa
         form: initialState,
         fieldsValues: fieldsValues,
         fieldsDeps: fieldsDeps(),
-        useByPath: function <T>(path: ObjPath) {
+        useByPath: function <T = unknown>(path: ObjPath) {
             return getByPath<T>(get(), path);
         },
         useByPaths: (paths) => {
@@ -414,7 +422,8 @@ const createFormContext = (initialState: FormDefinition): StoreApi<FormContextVa
                             fieldsValues: rest,
                         };
                     },
-                    (fieldKey, propertyKey) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    (_fieldKey, _propertyKey) => {
                         return {};
                     }
                 );
@@ -450,7 +459,11 @@ const createFormContext = (initialState: FormDefinition): StoreApi<FormContextVa
                 submit: true
             }
         })
-    }));
+    })
+
+    return create<FormContextValue>()(
+        subscribeWithSelector(selector)
+    );
 };
 
 const FormContext = createContext<ReturnType<typeof createFormContext> | null>(null);
@@ -552,7 +565,6 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                     | 'select'
                     | 'file'
                     | 'agree'
-                    | 'slider'
             ) {
                 case 'input': {
                     return (
@@ -684,6 +696,82 @@ function OutputFieldRenderer({ field, path }: FieldRendererProps) {
     );
 }
 
+export function useFormStoreApi() {
+    const store = useContext(FormContext)
+    if (!store) throw new Error("useFormStoreApi must be used inside FormProvider")
+    return store
+}
+
+function InteractionsHandler() {
+    const store = useFormStoreApi();
+    const interactions = useFormContext(s=>s.form.interactions)
+    const resolveDependentFields = () => {
+        const paths = Object.entries(interactions)
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            .map(([_key, interaction]) =>
+                Object.entries(interaction.dependentFields)
+                    .map(i=>i[1]))
+            .flat()
+        return paths;
+    }
+
+    const handleInteraction = async (as: AbortSignal, interaction: InteractionDefinition, fields: Record<string, unknown>) => {
+        const dfps = interaction.dependentFields.map(p=>objPathToString(p))
+        const vals = Object.entries(fields).filter((v) => dfps.includes(v[0]))
+            .reduce((acc, item) => {
+                // @ts-expect-error no error
+                acc[item[0]]=item[1];return acc}, {})
+        return await interaction.execute(as, vals)
+    }
+
+    const shouldFireUpdate = (interaction: InteractionDefinition, current: Record<string, unknown>, prev: Record<string, unknown>): boolean => {
+        const dfps = interaction.dependentFields.map(p=>objPathToString(p))
+        const prevVals = Object.entries(prev).filter((v) => dfps.includes(v[0]))
+            .reduce((acc, item) => {
+                // @ts-expect-error no error
+                acc[item[0]]=item[1];return acc}, {})
+        const currVals = Object.entries(current).filter((v) => dfps.includes(v[0]))
+
+        for(const [key, value] of currVals) {
+            if(prevVals[key] != value){
+                return true;
+            }
+        }
+        return false
+    }
+
+    useEffect(() => {
+        let controller: AbortController | null = null
+        const unsubscribe = store.subscribe(
+            (state) => ([state.fieldsValues, state.variableValues, state.form.constants]),
+            async (current, prev) => {
+                controller?.abort();
+                controller = new AbortController();
+                const signal = controller.signal;
+
+                const c = {...current[0], ...current[1], ...current[2]}
+                const p = {...prev[0], ...prev[1], ...prev[2]}
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                for(const [_, interaction] of Object.entries(interactions)) {
+                    if(shouldFireUpdate(interaction, c, p)) {
+                        handleInteraction(signal, interaction, c)
+                            .then(data=> {
+                                console.log(data)
+                                debugger
+                            });
+                    }
+                }
+            }
+        )
+        return () => {
+            controller?.abort();
+            unsubscribe();
+        };
+    }, [store, interactions]);
+
+    return <></>;
+}
+
 function FormRenderer() {
     const cols = 3;
     const rowHeight = 26; // 11.5;
@@ -696,6 +784,7 @@ function FormRenderer() {
     const fieldsValues = useFormContext((s) => s.fieldsValues);
     const nextStep = useFormContext(s=>s.nextStep)
     const shouldSubmit = useFormContext(s=>s.submit)
+
     useEffect(() => {
         if(!shouldSubmit) return;
 
@@ -750,9 +839,12 @@ function FormRenderer() {
                     </div>
                 </form>
             )}
+            <InteractionsHandler/>
         </div>
     );
 }
+
+
 
 export default function HomePage() {
     return (
