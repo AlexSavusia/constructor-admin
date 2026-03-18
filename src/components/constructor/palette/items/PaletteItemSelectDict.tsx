@@ -127,6 +127,16 @@ const SelectDictDescriptor: PaletteItemDescriptor = {
             defaultValue: 'field',
         },
         {
+            key: 'fieldType',
+            title: 'Тип поля',
+            valType: 'string',
+            defaultValue: 'dictSelect',
+            visibleWhen: {
+                key: 'fieldType',
+                equals: [],
+            },
+        },
+        {
             key: 'required',
             title: 'Обязательное',
             valType: 'boolean',
