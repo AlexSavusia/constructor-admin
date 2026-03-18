@@ -39,5 +39,5 @@ export type SetFieldErrorActionExpression = {
 
 export type SetTargetStep = {
     type: 'setTargetStep';
-    targetStep: string
-}
+    targetStep: string;
+};

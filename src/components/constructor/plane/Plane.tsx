@@ -214,7 +214,7 @@ export default function Plane({ className, items }: PlaneProps) {
                                     }}
                                     resizeConfig={{
                                         enabled: true,
-                                        handles: ['n', 's', 'w', 'e']
+                                        handles: ['n', 's', 'w', 'e'],
                                     }}
                                     compactor={verticalCompactor}
                                     layout={stepLayout}

@@ -57,6 +57,10 @@ export type DictionaryPickerState = {
 };
 export type EditingRuleMeta = {
     editingFieldProperty?: 'visibility' | 'enabled' | 'required' | 'validation';
+    dictionaryRowFilter?: {
+        dictId: Key;
+        rowId: Key;
+    };
 };
 
 export type EditorActions = {
@@ -248,7 +252,7 @@ export function createContextStore(initialState?: FormDefinition) {
                                 },
                                 editingField: {
                                     ...state.editingField,
-                                }
+                                },
                             };
                         }
 

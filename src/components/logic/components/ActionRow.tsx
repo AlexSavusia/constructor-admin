@@ -1,9 +1,5 @@
 import { type ObjPath, useEditorContext } from '../../../pages/Programs/editor/EditorContext.tsx';
-import type {
-    ActionExpression,
-    SetFieldErrorActionExpression,
-    SetFieldPropertyActionExpression,
-} from '../types.ts';
+import type { ActionExpression, SetFieldErrorActionExpression, SetFieldPropertyActionExpression } from '../types.ts';
 import Input from '../../ui/fieldsUIAdmin/Input/Input.tsx';
 
 export type ActionRowProps = {
@@ -38,7 +34,7 @@ export default function ActionRow({ action, path }: ActionRowProps) {
         case 'STEP_TRANSITION_SCOPE':
             actionTypes = {
                 ...actionTypes,
-                setTargetStep: "Перейти на шаг"
+                setTargetStep: 'Перейти на шаг',
             };
             break;
         default:

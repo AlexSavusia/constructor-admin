@@ -12,17 +12,17 @@ type Props = {
 };
 
 export default function Slider({
-                                   label,
-                                   required = false,
-                                   value,
-                                   min = 0,
-                                   max = 100,
-                                   step = 1,
-                                   showValue = true,
-                                   inputBox = false,
-                                   onChange,
-                                   disabled = false,
-                               }: Props) {
+    label,
+    required = false,
+    value,
+    min = 0,
+    max = 100,
+    step = 1,
+    showValue = true,
+    inputBox = false,
+    onChange,
+    disabled = false,
+}: Props) {
     const safeValue = Number.isNaN(value) ? min : value;
 
     return (

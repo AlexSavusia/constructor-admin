@@ -3,7 +3,7 @@ import type { BooleanExpression } from './expression.ts';
 
 export type LookupDefinition = {
     key: Key;
-    dictId: string;
+    rowId: Key;
     baseFilter?: LookupBaseFilterDefinition;
 };
 

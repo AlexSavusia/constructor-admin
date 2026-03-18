@@ -7,9 +7,13 @@ function PaletteItemDescription({ className, settingsValues }: PaletteItemProps)
     const description = String(settingsValues?.description ?? 'описание');
 
     return (
-        <div className={classNames('mb-0 d-flex flex-wrap flex-col p-2' , className)}>
-           <p className={'text-3xl text-center'}><strong>{text}</strong></p>
-            <p><strong>{description}</strong></p>
+        <div className={classNames('mb-0 d-flex flex-wrap flex-col p-2', className)}>
+            <p className={'text-3xl text-center'}>
+                <strong>{text}</strong>
+            </p>
+            <p>
+                <strong>{description}</strong>
+            </p>
         </div>
     );
 }
