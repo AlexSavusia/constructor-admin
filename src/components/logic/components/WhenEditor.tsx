@@ -2,6 +2,7 @@ import GroupEditor from './GroupEditor.tsx';
 import { type ObjPath, useEditorContext } from '../../../pages/Programs/editor/EditorContext.tsx';
 import type { BooleanPropertyLogicDefinition, StepTransitionRule } from '../../../logic/logic.ts';
 import type { Rule } from '../types.ts';
+import type {LookupDefinition} from "../../../logic/lookup.ts";
 
 export default function WhenEditor() {
     const editingRule = useEditorContext((s) => s.editingRule)!;
@@ -19,7 +20,7 @@ export default function WhenEditor() {
             actions: [],
         };
     } else if(editingRule.scope === 'LOOKUP_ROW_SCOPE') {
-        rule = editingRule.rule as Rule
+        rule = (editingRule.rule as unknown as LookupDefinition).baseFilter!
     } else {
         throw new Error(`Invalid scope "${editingRule.scope}"`);
     }

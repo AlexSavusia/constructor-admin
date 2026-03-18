@@ -1,5 +1,5 @@
 import { type ObjPath, objPathFromString, objPathToString } from './Programs/editor/EditorContext.tsx';
-import {createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState} from 'react';
+import {createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
 import { create, createStore, type StateCreator, type StoreApi, useStore } from 'zustand';
 import type { FormDefinition, InteractionDefinition, Key } from '../logic/type.ts';
 import { ReactGridLayout, useContainerWidth } from 'react-grid-layout';
@@ -526,32 +526,29 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
     const setFieldRequired = useFormContext((s) => s.setFieldRequired);
     const setFieldEnabled = useFormContext((s) => s.setFieldEnabled);
 
-    // const lookups = useFormContext(s=>s.form.lookups[field.settingsValues['dictId'] as string])
-    //
-    // const [selectDictOpts, setSelectDictOpts] = useState<DictionaryRow[] | null>(null)
-    //
-    // const fvs = useFormContext(s=>s.fieldsValues)
-    //
-    // useEffect(() => {
-    //     if(lookups && !selectDictOpts) {
-    //         const dictRowKeys = Object.keys(lookups);
-    //         getDictionaryRows({page: 0, size: 1000}, field.settingsValues['dictId'] as string)
-    //             .then(dictRows=>setSelectDictOpts(dictRows.data.filter(x=>dictRowKeys.includes(x.id))))
-    //     }
-    // }, []);
-    // type Opt = DictionaryRow & {label: string}
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
-    // const availableDictSelectOptions = useMemo(() => selectDictOpts?.filter(opt =>
-    //     {
-    //         debugger
-    //         console.log(depPaths, deps, fvs)
-    //         if(lookups[opt.id].baseFilter) {
-    //             const evalRes = evalCondition(lookups[opt.id]!.baseFilter!)
-    //             return evalRes
-    //         }
-    //         return true
-    //     }
-    // ).map(opt=>({...opt, label: lookups[opt.id]!.label}) as Opt), [selectDictOpts, lookups, evalCondition, deps]);
+    const lookups = useFormContext(s=>s.form.lookups[field.settingsValues['dictId'] as string])
+
+    const [selectDictOpts, setSelectDictOpts] = useState<DictionaryRow[] | null>(null)
+
+    useEffect(() => {
+        if(lookups && !selectDictOpts) {
+            const dictRowKeys = Object.keys(lookups);
+            getDictionaryRows({page: 0, size: 1000}, field.settingsValues['dictId'] as string)
+                .then(dictRows=>setSelectDictOpts(dictRows.data.filter(x=>dictRowKeys.includes(x.id))))
+        }
+    }, []);
+    type Opt = DictionaryRow & {label: string}
+    //eslint-disable-next-line react-hooks/preserve-manual-memoization
+    const availableDictSelectOptions = useCallback(() => selectDictOpts?.filter(opt =>
+        {
+            debugger
+            if(lookups[opt.id].baseFilter) {
+                const evalRes = evalCondition(lookups[opt.id]!.baseFilter!)
+                return evalRes
+            }
+            return true
+        }
+    ).map(opt=>({...opt, label: lookups[opt.id]!.label}) as Opt), [selectDictOpts, lookups, evalCondition, deps]);
 
     function handleFieldUpdate(value: unknown) {
         updateFieldValue(path, value);
@@ -705,12 +702,12 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                 case 'dictSelect':
                     return (
                         <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
-                            {/*<SelectUI*/}
-                            {/*    label={field.settingsValues['label'] as string}*/}
-                            {/*    options={!availableDictSelectOptions ? [] : availableDictSelectOptions.map(o=>({value: o.id, label: o.label}))}*/}
-                            {/*    value={selfValue as InputValuePropType}*/}
-                            {/*    onChange={(e) => handleFieldUpdate(e.target.value)}*/}
-                            {/*/>*/}
+                            <SelectUI
+                                label={field.settingsValues['label'] as string}
+                                options={availableDictSelectOptions()?.map(o=>({value: o.id, label: o.label})) ?? []}
+                                value={selfValue as InputValuePropType}
+                                onChange={(e) => handleFieldUpdate(e.target.value)}
+                            />
                         </div>
                     );
                 case 'textarea':

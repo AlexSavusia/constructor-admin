@@ -298,7 +298,7 @@ export function createContextStore(initialState?: FormDefinition) {
 
             setEditingRule: (path: ObjPath, scope: ExpressionScope, meta) =>
                 set((state) => {
-                    // debugger
+                    debugger
                     let ruleObj = scope == "LOOKUP_ROW_SCOPE" ? findByPath<Rule>(state, [...path, meta!.dictionaryRowFilter!.rowId])
                         : findByPath<Rule>(state, path)
                     if (ruleObj == null) {

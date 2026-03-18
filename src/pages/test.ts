@@ -2151,6 +2151,7 @@ export const TEST: FormDefinition = {
             execute: async (abort, fields) => {
                 return (state) => ({
                     fieldsValues: {
+                        ...state.fieldsValues,
                         foo: 'bar',
                     },
                 });
