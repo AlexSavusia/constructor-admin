@@ -10,6 +10,7 @@ import type { BooleanExpression, ValueExpression } from '../logic/expression.ts'
 import { useShallow } from 'zustand/react/shallow';
 import RadioButtons, { type RadioItem } from '../components/ui/fieldsUI/RadioButtons/RadioButtons.tsx';
 import SelectUI, { type Option } from '../components/ui/fieldsUI/Select/Select.tsx';
+import SliderUI from '../components/ui/fieldsUI/Slider/SliderField.tsx';
 import InputDate from '../components/ui/fieldsUI/InputDate/InputDate.tsx';
 import type {StepTransitionRule} from "../logic/logic.ts";
 import {TEST} from "./test.ts";
@@ -565,6 +566,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                     | 'select'
                     | 'file'
                     | 'agree'
+                    | 'slider'
             ) {
                 case 'input': {
                     return (
