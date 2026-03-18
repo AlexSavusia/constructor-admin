@@ -333,7 +333,18 @@ export default function Constructor({ className }: ConstructorProps) {
                                                                 <button
                                                                     type="button"
                                                                     className="btn btn-outline-secondary btn-sm"
-                                                                    onClick={() => console.log('click')}
+                                                                    onClick={() => {
+                                                                        setEditingRule(
+                                                                            ['lookups', selectedDictionary!.id, selectedRow!.id!],
+                                                                            'LOOKUP_ROW_SCOPE',
+                                                                            {
+                                                                                dictionaryRowFilter: {
+                                                                                    dictId: selectedDictionary!.id,
+                                                                                    rowId: selectedRow!.id!,
+                                                                                },
+                                                                            }
+                                                                        );
+                                                                    }}
                                                                 >
                                                                     Изменить
                                                                 </button>

@@ -128,13 +128,7 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
     if (fieldType === 'switch') {
         return (
             <div className={classNames(className)}>
-                <SwitchUI
-                    name={name}
-                    label={label}
-                    required={required}
-                    checked={switchEnabled}
-                    onChange={setSwitchEnabled}
-                />
+                <SwitchUI name={name} label={label} required={required} checked={switchEnabled} onChange={setSwitchEnabled} />
             </div>
         );
     }
@@ -150,13 +144,7 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
     if (fieldType === 'select') {
         return (
             <div className={classNames(className)}>
-                <SelectUI
-                    name={name}
-                    label={label}
-                    required={required}
-                    disabled={disabled}
-                    options={optionsData}
-                />
+                <SelectUI name={name} label={label} required={required} disabled={disabled} options={optionsData} />
             </div>
         );
     }
@@ -198,13 +186,7 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
 
     return (
         <div className={classNames(className)}>
-            <InputUI
-                label={label}
-                required={required}
-                type={inputType}
-                placeholder={placeholder}
-                disabled={disabled}
-            />
+            <InputUI label={label} required={required} type={inputType} placeholder={placeholder} disabled={disabled} />
         </div>
     );
 }

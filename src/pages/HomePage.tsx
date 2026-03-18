@@ -1,7 +1,7 @@
 import { type ObjPath, objPathFromString, objPathToString } from './Programs/editor/EditorContext.tsx';
 import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
-import {create, createStore, type StateCreator, type StoreApi, useStore} from 'zustand';
-import type {FormDefinition, InteractionDefinition, Key} from '../logic/type.ts';
+import { create, createStore, type StateCreator, type StoreApi, useStore } from 'zustand';
+import type { FormDefinition, InteractionDefinition, Key } from '../logic/type.ts';
 import { ReactGridLayout, useContainerWidth } from 'react-grid-layout';
 import type { FieldDefinition } from '../logic/field.ts';
 import InputUI from '../components/ui/fieldsUI/Input/Input.tsx';
@@ -12,9 +12,9 @@ import RadioButtons, { type RadioItem } from '../components/ui/fieldsUI/RadioBut
 import SelectUI, { type Option } from '../components/ui/fieldsUI/Select/Select.tsx';
 import SliderUI from '../components/ui/fieldsUI/Slider/SliderField.tsx';
 import InputDate from '../components/ui/fieldsUI/InputDate/InputDate.tsx';
-import type {StepTransitionRule} from "../logic/logic.ts";
-import {TEST} from "./test.ts";
-import {subscribeWithSelector} from "zustand/middleware";
+import type { StepTransitionRule } from '../logic/logic.ts';
+import { TEST } from './test.ts';
+import { subscribeWithSelector } from 'zustand/middleware';
 
 const getValueExpressionDependentPaths = (valExpr: ValueExpression): ObjPath => {
     switch (valExpr.__typ) {
@@ -90,9 +90,9 @@ const getRuleDependentPaths = (rule: Rule): ObjPath[] => {
 
 type InputValuePropType = string | number | readonly string[] | undefined;
 
-type FormContextValue = {
+export type FormContextValue = {
     currentStep: Key;
-    nextStep: () => void
+    nextStep: () => void;
     form: FormDefinition;
     useByPath: <T = unknown>(path: ObjPath) => T | null;
     useByPaths: (paths: ObjPath[]) => unknown[] | null;
@@ -150,7 +150,7 @@ function evalValue<T = unknown>(value: ValueExpression, context: FormContextValu
         }
         case 'ref': {
             if (value.path[0] === 'constants') {
-                const p = value.path.includes("constants") ? value.path.slice(1, value.path.length) : value.path;
+                const p = value.path.includes('constants') ? value.path.slice(1, value.path.length) : value.path;
                 return context.form.constants[objPathToString(p)].value as T;
             }
             if (value.path[0] === 'variables') {
@@ -342,12 +342,10 @@ const createFormContext = (initialState: FormDefinition) => {
             }, {});
     };
 
-    const selector: StateCreator<
-        FormContextValue,
-        [["zustand/subscribeWithSelector", never]],
-        [],
-        FormContextValue
-    > = (set, get) => ({
+    const selector: StateCreator<FormContextValue, [['zustand/subscribeWithSelector', never]], [], FormContextValue> = (
+        set,
+        get
+    ) => ({
         variableValues: {},
         submit: false,
         fieldRequired: fieldsRequired,
@@ -437,34 +435,32 @@ const createFormContext = (initialState: FormDefinition) => {
                     fieldsErrors: rest,
                 };
             }),
-        nextStep: () => set((state) => {
-            // debugger
-            const {transition} = state.form.steps[state.currentStep]
-            const nextStepTarget = transition.rules
-                .reduce<StepTransitionRule | undefined>((acc, item) => {
+        nextStep: () =>
+            set((state) => {
+                // debugger
+                const { transition } = state.form.steps[state.currentStep];
+                const nextStepTarget = transition.rules.reduce<StepTransitionRule | undefined>((acc, item) => {
                     if (acc) return acc;
-                    const evalRes = evalCondition(item.when, state)
-                    if(evalRes) return item;
+                    const evalRes = evalCondition(item.when, state);
+                    if (evalRes) return item;
                 }, undefined);
-            if(nextStepTarget) {
-                return {
-                    currentStep: nextStepTarget.targetStep,
+                if (nextStepTarget) {
+                    return {
+                        currentStep: nextStepTarget.targetStep,
+                    };
                 }
-            }
-            // else {
-            //     return {
-            //         currentStep: transition.defaultStep,
-            //     }
-            // }
-            return {
-                submit: true
-            }
-        })
-    })
+                // else {
+                //     return {
+                //         currentStep: transition.defaultStep,
+                //     }
+                // }
+                return {
+                    submit: true,
+                };
+            }),
+    });
 
-    return create<FormContextValue>()(
-        subscribeWithSelector(selector)
-    );
+    return create<FormContextValue>()(subscribeWithSelector(selector));
 };
 
 const FormContext = createContext<ReturnType<typeof createFormContext> | null>(null);
@@ -543,8 +539,6 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                 setFieldEnabled(field.key, evalRes);
             }
         }
-
-        console.log(pathString, deps);
     }, [deps, selfValue, pathString, field]);
 
     if (!selfEnabled) {
@@ -570,16 +564,16 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
             ) {
                 case 'input': {
                     return (
-                      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+                        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
                             <InputUI
                                 required={selfRequired}
                                 value={selfValue as InputValuePropType}
                                 onChange={(e) => handleFieldUpdate(e.target.value)}
                                 label={field.settingsValues['label'] as string}
                             />
-                            {selfError && !!selfValue &&<p className="mt-1 text-sm leading-4 text-red-500 break-words">
-                                {selfError}
-                            </p>}
+                            {selfError && !!selfValue && (
+                                <p className="mt-1 text-sm leading-4 text-red-500 break-words">{selfError}</p>
+                            )}
                         </div>
                     );
                 }
@@ -605,37 +599,35 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                                 disabled={!selfEnabled}
                             />
                             {selfError && selfValue !== undefined && (
-                                <p className="mt-1 text-sm leading-4 text-red-500 break-words">
-                                    {selfError}
-                                </p>
+                                <p className="mt-1 text-sm leading-4 text-red-500 break-words">{selfError}</p>
                             )}
                         </div>
                     );
                 }
                 case 'description':
                     return (
-                      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
-                          <p className="text-3xl leading-5 text-gray-600 break-words">{field.settingsValues['text'] as string}</p>
+                        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+                            <p className="text-3xl leading-5 text-gray-600 break-words">
+                                {field.settingsValues['text'] as string}
+                            </p>
                         </div>
                     );
                 case 'radio':
                     return (
-                     <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
-
+                        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
                             <RadioButtons
                                 currentValue={selfValue as string | number | undefined}
                                 name={field.settingsValues['name'] as string}
                                 data={field.settingsValues['options'] as RadioItem[]}
                                 onChange={(e) => handleFieldUpdate(e)}
                                 title={field.settingsValues['label'] as string}
-                                theme={"param"}
+                                theme={'param'}
                             />
                         </div>
                     );
                 case 'select':
                     return (
-                      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
-
+                        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
                             <SelectUI
                                 label={field.settingsValues['label'] as string}
                                 options={field.settingsValues['options'] as Option[]}
@@ -646,8 +638,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                     );
                 case 'date':
                     return (
-                      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
-
+                        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
                             <InputDate
                                 label={field.settingsValues['label'] as string}
                                 value={selfValue as string}
@@ -655,13 +646,19 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                             />
                         </div>
                     );
-                case "agree":
+                case 'agree':
                     return (
-                      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden d-flex flex-col">
-                            <p className="text-gray-700 text-3xl leading-relaxed text-center">  {field.settingsValues['text'] as string}</p>
-                            <p className="text-gray-700 text-sm leading-relaxed">  {field.settingsValues['description'] as string}</p>
+                        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden d-flex flex-col">
+                            <p className="text-gray-700 text-3xl leading-relaxed text-center">
+                                {' '}
+                                {field.settingsValues['text'] as string}
+                            </p>
+                            <p className="text-gray-700 text-sm leading-relaxed">
+                                {' '}
+                                {field.settingsValues['description'] as string}
+                            </p>
                         </div>
-                    )
+                    );
                 case 'textarea':
                 case 'checkbox':
                 case 'switch':
@@ -682,7 +679,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
     }
 
     return (
-      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
             <p>{field.key}</p>
             <p>{path.join('.')}</p>
         </div>
@@ -691,7 +688,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
 
 function OutputFieldRenderer({ field, path }: FieldRendererProps) {
     return (
-      <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
             <p>{field.key}</p>
             <p>{path.join('.')}</p>
         </div>
@@ -699,77 +696,106 @@ function OutputFieldRenderer({ field, path }: FieldRendererProps) {
 }
 
 export function useFormStoreApi() {
-    const store = useContext(FormContext)
-    if (!store) throw new Error("useFormStoreApi must be used inside FormProvider")
-    return store
+    const store = useContext(FormContext);
+    if (!store) throw new Error('useFormStoreApi must be used inside FormProvider');
+    return store;
 }
 
 function InteractionsHandler() {
     const store = useFormStoreApi();
-    const interactions = useFormContext(s=>s.form.interactions)
+    const interactions = useFormContext((s) => s.form.interactions);
     const resolveDependentFields = () => {
         const paths = Object.entries(interactions)
             // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            .map(([_key, interaction]) =>
-                Object.entries(interaction.dependentFields)
-                    .map(i=>i[1]))
-            .flat()
+            .map(([_key, interaction]) => Object.entries(interaction.dependentFields).map((i) => i[1]))
+            .flat();
         return paths;
-    }
+    };
 
     const handleInteraction = async (as: AbortSignal, interaction: InteractionDefinition, fields: Record<string, unknown>) => {
-        const dfps = interaction.dependentFields.map(p=>objPathToString(p))
-        const vals = Object.entries(fields).filter((v) => dfps.includes(v[0]))
+        const dfps = interaction.dependentFields.map((p) => objPathToString(p));
+        const vals = Object.entries(fields)
+            .filter((v) => dfps.includes(v[0]))
             .reduce((acc, item) => {
                 // @ts-expect-error no error
-                acc[item[0]]=item[1];return acc}, {})
-        return await interaction.execute(as, vals)
-    }
+                acc[item[0]] = item[1];
+                return acc;
+            }, {});
+        return await interaction.execute(as, vals);
+    };
 
-    const shouldFireUpdate = (interaction: InteractionDefinition, current: Record<string, unknown>, prev: Record<string, unknown>): boolean => {
-        const dfps = interaction.dependentFields.map(p=>objPathToString(p))
-        const prevVals = Object.entries(prev).filter((v) => dfps.includes(v[0]))
+    const shouldFireUpdate = (
+        interaction: InteractionDefinition,
+        current: Record<string, unknown>,
+        prev: Record<string, unknown>
+    ): boolean => {
+        const dfps = interaction.dependentFields.map((p) => objPathToString(p));
+        const prevVals = Object.entries(prev)
+            .filter((v) => dfps.includes(v[0]))
             .reduce((acc, item) => {
                 // @ts-expect-error no error
-                acc[item[0]]=item[1];return acc}, {})
-        const currVals = Object.entries(current).filter((v) => dfps.includes(v[0]))
+                acc[item[0]] = item[1];
+                return acc;
+            }, {});
+        const currVals = Object.entries(current).filter((v) => dfps.includes(v[0]));
 
-        for(const [key, value] of currVals) {
-            if(prevVals[key] != value){
+        for (const [key, value] of currVals) {
+            if (prevVals[key] != value) {
                 return true;
             }
         }
-        return false
-    }
+        return false;
+    };
 
     useEffect(() => {
-        let controller: AbortController | null = null
-        const unsubscribe = store.subscribe(
-            (state) => ([state.fieldsValues, state.variableValues, state.form.constants]),
-            async (current, prev) => {
-                controller?.abort();
-                controller = new AbortController();
-                const signal = controller.signal;
+        let controller: AbortController | null = null;
+        let timeoutId: ReturnType<typeof setTimeout> | null = null;
 
-                const c = {...current[0], ...current[1], ...current[2]}
-                const p = {...prev[0], ...prev[1], ...prev[2]}
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                for(const [_, interaction] of Object.entries(interactions)) {
-                    if(shouldFireUpdate(interaction, c, p)) {
-                        handleInteraction(signal, interaction, c)
-                            .then(data=> {
-                                console.log(data)
-                                debugger
-                            });
-                    }
+        let firstPrev: Record<string, unknown>[] | null = null;
+        let lastCurrent: Record<string, unknown>[] | null = null;
+
+        const unsubscribe = store.subscribe(
+            (state) => [state.fieldsValues, state.variableValues, state.form.constants],
+            async (current, prev) => {
+                if (!firstPrev) {
+                    firstPrev = prev;
                 }
+                lastCurrent = current;
+
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+                timeoutId = setTimeout(() => {
+                    if (!firstPrev || !lastCurrent) return;
+                    controller?.abort();
+                    controller = new AbortController();
+                    const signal = controller.signal;
+
+                    const c = { ...lastCurrent[0], ...lastCurrent[1], ...lastCurrent[2] };
+                    const p = { ...firstPrev[0], ...firstPrev[1], ...firstPrev[2] };
+
+                    firstPrev = null;
+                    lastCurrent = null;
+
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    for (const [_, interaction] of Object.entries(interactions)) {
+                        if (shouldFireUpdate(interaction, c, p)) {
+                            handleInteraction(signal, interaction, c).then((data) => {
+                                store.setState(data);
+                            });
+                        }
+                    }
+                }, 300);
             }
-        )
+        );
         return () => {
+            if (timeoutId) {
+                clearTimeout(timeoutId);
+            }
             controller?.abort();
             unsubscribe();
         };
-    }, [store, interactions]);
+    }, []);
 
     return <></>;
 }
@@ -784,16 +810,15 @@ function FormRenderer() {
     const fields = useMemo(() => Object.entries(currentStep.fields).map((v) => v[1]), [currentStep]);
     const fieldsLayout = useMemo(() => fields.map((f) => f.layout), [fields]);
     const fieldsValues = useFormContext((s) => s.fieldsValues);
-    const nextStep = useFormContext(s=>s.nextStep)
-    const shouldSubmit = useFormContext(s=>s.submit)
+    const nextStep = useFormContext((s) => s.nextStep);
+    const shouldSubmit = useFormContext((s) => s.submit);
 
     useEffect(() => {
-        if(!shouldSubmit) return;
-
+        if (!shouldSubmit) return;
     }, [shouldSubmit]);
 
-    if(shouldSubmit) {
-        return <p>form submitted</p>
+    if (shouldSubmit) {
+        return <p>form submitted</p>;
     }
 
     return (
@@ -801,10 +826,11 @@ function FormRenderer() {
             {mounted && (
                 <form
                     className="w-full"
-                    onSubmit={e => {
-                    e.preventDefault()
-                    nextStep()
-                }}>
+                    onSubmit={(e) => {
+                        e.preventDefault();
+                        nextStep();
+                    }}
+                >
                     <div className="relative w-full bg-white rounded-2xl border border-gray-200 shadow-sm p-4 md:p-6 overflow-hidden">
                         <ReactGridLayout
                             width={width}
@@ -841,12 +867,10 @@ function FormRenderer() {
                     </div>
                 </form>
             )}
-            <InteractionsHandler/>
+            <InteractionsHandler />
         </div>
     );
 }
-
-
 
 export default function HomePage() {
     return (

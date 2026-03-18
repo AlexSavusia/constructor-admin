@@ -74,12 +74,11 @@ export default function GroupEditor({ rule, path }: GroupEditorProps) {
                             value={rule.type}
                             onChange={(e) => {
                                 const fuck = path.length == 1 ? [] : path.slice(1, path.length);
-                                const old = (findByPath(editingRule.condition, fuck) as AndExpression | OrExpression)
+                                const old = findByPath(editingRule.condition, fuck) as AndExpression | OrExpression;
                                 updateEditingRule(path, {
                                     ...old,
-                                    items: (old && 'items' in old) ? old.items : [],
+                                    items: old && 'items' in old ? old.items : [],
                                     type: e.target.value as 'or' | 'and' | 'noop',
-
                                 });
                             }}
                             className="min-w-[220px] rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
@@ -100,7 +99,8 @@ export default function GroupEditor({ rule, path }: GroupEditorProps) {
                             No conditions yet. Add a condition or nested group.
                         </div>
                     )}
-                    {rule.type != 'noop' && rule?.items?.length != 0 &&
+                    {rule.type != 'noop' &&
+                        rule?.items?.length != 0 &&
                         rule?.items?.map((child, index) =>
                             child.type !== 'and' && child.type !== 'or' ? (
                                 <div key={child.id} className="rounded-xl border border-slate-200 bg-slate-50 p-3">

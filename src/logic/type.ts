@@ -1,6 +1,7 @@
 import type { StepDefinition } from './step.ts';
 import type { LookupDefinition } from './lookup.ts';
-import type {ObjPath} from "../pages/Programs/editor/EditorContext.tsx";
+import type { ObjPath } from '../pages/Programs/editor/EditorContext.tsx';
+import type { FormContextValue } from '../pages/HomePage.tsx';
 
 export type Key = string;
 
@@ -34,42 +35,48 @@ export type RuntimeVariableDefinition = {
 export type ExpressionScope =
     | 'FIELD_SCOPE_DECISION' // простые булевые операции
     | 'FIELD_SCOPE_PROPERTY' // изменение свойств поля
-    | 'FIELD_ON_UPDATE_SCOPE' //
+    // | 'FIELD_ON_UPDATE_SCOPE' //
     | 'LOOKUP_ROW_SCOPE' // условие доступности строки справочника для выбора
     | 'STEP_TRANSITION_SCOPE'; // переход на следующий шаг
 
-
 export type InteractionDefinition<T = unknown> = {
-    key: Key
-    title: string
-    dependentFields: ObjPath[]
-    execute: (abort: AbortSignal, contextVariables: Record<string, unknown>) => Promise<T>
-}
+    key: Key;
+    title: string;
+    dependentFields: ObjPath[];
+    execute: (
+        abort: AbortSignal,
+        contextVariables: Record<string, unknown>
+    ) => Promise<(state: FormContextValue) => Partial<FormContextValue>>;
+};
 
-type CalculateRs = {
-
-}
+type CalculateRs = {};
 
 const CalculateInteraction: InteractionDefinition<CalculateRs> = {
-    key: "calculate",
-    title: "Рассчет",
+    key: 'calculate',
+    title: 'Рассчет',
     execute: async (as, contextVariables) => {
-        debugger
-        return {};
-    }
-}
+        return (state) => ({
+            fieldsValues: {
+                ...state.fieldsValues,
+                foo: 'bar',
+            },
+        });
+    },
+};
 
 type ContractRs = {
-    "contract": string
-}
+    contract: string;
+};
 
 const ContractNumberInteraction: InteractionDefinition<ContractRs> = {
-    key: "contractNumber",
-    title: "Номер договора",
+    key: 'contractNumber',
+    title: 'Номер договора',
     execute: async (as, contextVariables) => {
-        debugger
-        return {
-            contract: "q"
-        };
-    }
-}
+        return (state) => ({
+            fieldsValues: {
+                ...state.fieldsValues,
+                foo: 'bar',
+            },
+        });
+    },
+};
