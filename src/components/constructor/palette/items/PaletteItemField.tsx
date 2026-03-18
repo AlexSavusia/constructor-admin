@@ -16,6 +16,7 @@ import SwitchUI from '../../../ui/fieldsUI/Switch/Switch.tsx';
 import InputDateUI from '../../../ui/fieldsUI/InputDate/InputDate.tsx';
 import SelectUI from '../../../ui/fieldsUI/Select/Select.tsx';
 import FileUploadUI from '../../../ui/fieldsUI/FileUpload/FileUpload.tsx';
+import SliderUI from '../../../ui/fieldsUI/Slider/SliderField.tsx';
 
 import InputPreview from '../../../ui/fieldsUIAdmin/Input/Input.tsx';
 import { useMemo, useState } from 'react';
@@ -55,6 +56,7 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
                 .filter(Boolean),
         [acceptRaw]
     );
+
     const [files, setFiles] = useState<File[]>([]);
 
     const label = String(settingsValues?.label ?? 'Название поля');
@@ -67,6 +69,12 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
     const checked = Boolean(settingsValues?.checked ?? false);
     const disabled = Boolean(settingsValues?.disabled ?? false);
 
+    const min = Number(settingsValues?.min ?? 0);
+    const max = Number(settingsValues?.max ?? 100);
+    const step = Number(settingsValues?.step ?? 1);
+    const showValue = Boolean(settingsValues?.showValue ?? true);
+    const inputBox = Boolean(settingsValues?.inputBox ?? false);
+
     const optionsData = useMemo<RadioItem[]>(() => {
         if (isRadioItemArray(settingsValues?.options)) {
             return settingsValues.options;
@@ -77,6 +85,7 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
 
     const [radioValue, setRadioValue] = useState<string>(String(optionsData[0]?.value ?? ''));
     const [switchEnabled, setSwitchEnabled] = useState(false);
+    const [sliderValue, setSliderValue] = useState<number>(Number(settingsValues?.defaultValue ?? min));
 
     if (fieldType === 'textarea') {
         return (
@@ -119,7 +128,13 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
     if (fieldType === 'switch') {
         return (
             <div className={classNames(className)}>
-                <SwitchUI name={name} label={label} required={required} checked={switchEnabled} onChange={setSwitchEnabled} />
+                <SwitchUI
+                    name={name}
+                    label={label}
+                    required={required}
+                    checked={switchEnabled}
+                    onChange={setSwitchEnabled}
+                />
             </div>
         );
     }
@@ -135,10 +150,17 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
     if (fieldType === 'select') {
         return (
             <div className={classNames(className)}>
-                <SelectUI name={name} label={label} required={required} disabled={disabled} options={optionsData} />
+                <SelectUI
+                    name={name}
+                    label={label}
+                    required={required}
+                    disabled={disabled}
+                    options={optionsData}
+                />
             </div>
         );
     }
+
     if (fieldType === 'file') {
         return (
             <div className={classNames(className)}>
@@ -156,9 +178,33 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
         );
     }
 
+    if (fieldType === 'slider') {
+        return (
+            <div className={classNames(className)}>
+                <SliderUI
+                    label={label}
+                    required={required}
+                    value={sliderValue}
+                    min={min}
+                    max={max}
+                    step={step}
+                    showValue={showValue}
+                    inputBox={inputBox}
+                    onChange={setSliderValue}
+                />
+            </div>
+        );
+    }
+
     return (
         <div className={classNames(className)}>
-            <InputUI label={label} required={required} type={inputType} placeholder={placeholder} disabled={disabled} />
+            <InputUI
+                label={label}
+                required={required}
+                type={inputType}
+                placeholder={placeholder}
+                disabled={disabled}
+            />
         </div>
     );
 }
@@ -192,7 +238,7 @@ const FieldDescriptor: PaletteItemDescriptor = {
             title: 'Тип поля',
             valType: 'string',
             defaultValue: 'input',
-            multiValVariants: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'date', 'select', 'file'],
+            multiValVariants: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'date', 'select', 'file', 'slider'],
         },
         {
             key: 'label',
@@ -213,7 +259,7 @@ const FieldDescriptor: PaletteItemDescriptor = {
             defaultValue: false,
             visibleWhen: {
                 key: 'fieldType',
-                equals: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'date', 'select', 'file'],
+                equals: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'date', 'select', 'file', 'slider'],
             },
         },
         {
@@ -223,7 +269,7 @@ const FieldDescriptor: PaletteItemDescriptor = {
             defaultValue: false,
             visibleWhen: {
                 key: 'fieldType',
-                equals: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'date', 'select', 'file'],
+                equals: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'date', 'select', 'file', 'slider'],
             },
         },
         {
@@ -305,6 +351,56 @@ const FieldDescriptor: PaletteItemDescriptor = {
             visibleWhen: {
                 key: 'fieldType',
                 equals: ['file'],
+            },
+        },
+        {
+            key: 'min',
+            title: 'Минимум',
+            valType: 'string',
+            defaultValue: '0',
+            visibleWhen: {
+                key: 'fieldType',
+                equals: ['slider'],
+            },
+        },
+        {
+            key: 'max',
+            title: 'Максимум',
+            valType: 'string',
+            defaultValue: '100',
+            visibleWhen: {
+                key: 'fieldType',
+                equals: ['slider'],
+            },
+        },
+        {
+            key: 'step',
+            title: 'Шаг',
+            valType: 'string',
+            defaultValue: '1',
+            visibleWhen: {
+                key: 'fieldType',
+                equals: ['slider'],
+            },
+        },
+        {
+            key: 'showValue',
+            title: 'Показывать значение',
+            valType: 'boolean',
+            defaultValue: true,
+            visibleWhen: {
+                key: 'fieldType',
+                equals: ['slider'],
+            },
+        },
+        {
+            key: 'inputBox',
+            title: 'Поле ручного ввода',
+            valType: 'boolean',
+            defaultValue: false,
+            visibleWhen: {
+                key: 'fieldType',
+                equals: ['slider'],
             },
         },
     ],

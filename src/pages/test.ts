@@ -1,3 +1,6 @@
+import type {
+    FormDefinition,
+} from '../logic/type.ts';
 export const TEST: FormDefinition = {
     "firstStepKey": "start",
     "steps": {
@@ -54,7 +57,7 @@ export const TEST: FormDefinition = {
                     "key": "15c5848e-3d4f-4c34-be8b-3436578234fc",
                     "descriptorKey": "radio",
                     "settingsValues": {
-                        "label": "Тип рассчеиа",
+                        "label": "Тип рассчета",
                         "fieldType": "radio",
                         "name": "calcType",
                         "required": false,
@@ -75,13 +78,18 @@ export const TEST: FormDefinition = {
                     "layout": {
                         "i": "15c5848e-3d4f-4c34-be8b-3436578234fc",
                         "x": 0,
-                        "y": 0,
+                        "y": 6,
                         "w": 2,
                         "h": 3,
                         "minW": 1,
                         "moved": false,
                         "static": false,
-                        "resizeHandles": ['n', 's', 'w', 'e']
+                        "resizeHandles": [
+                            "n",
+                            "s",
+                            "w",
+                            "e"
+                        ]
                     }
                 },
                 "a671a831-1094-483c-b20f-8d7fbf86d80b": {
@@ -154,13 +162,18 @@ export const TEST: FormDefinition = {
                     "layout": {
                         "i": "a671a831-1094-483c-b20f-8d7fbf86d80b",
                         "x": 0,
-                        "y": 3,
+                        "y": 9,
                         "w": 2,
                         "h": 3,
                         "minW": 1,
                         "moved": false,
                         "static": false,
-                        "resizeHandles": ['n', 's', 'w', 'e']
+                        "resizeHandles": [
+                            "n",
+                            "s",
+                            "w",
+                            "e"
+                        ]
                     }
                 },
                 "f1cf2101-9ef1-4dff-bfe8-8687884755e5": {
@@ -335,13 +348,18 @@ export const TEST: FormDefinition = {
                     "layout": {
                         "i": "f1cf2101-9ef1-4dff-bfe8-8687884755e5",
                         "x": 0,
-                        "y": 6,
+                        "y": 12,
                         "w": 1,
                         "h": 3,
                         "minW": 1,
                         "moved": false,
                         "static": false,
-                        "resizeHandles": ['n', 's', 'w', 'e']
+                        "resizeHandles": [
+                            "n",
+                            "s",
+                            "w",
+                            "e"
+                        ]
                     }
                 },
                 "dddcaaaa-2c84-4812-a5ce-233b0f05f1ce": {
@@ -420,13 +438,18 @@ export const TEST: FormDefinition = {
                     "layout": {
                         "i": "dddcaaaa-2c84-4812-a5ce-233b0f05f1ce",
                         "x": 1,
-                        "y": 6,
+                        "y": 12,
                         "w": 1,
                         "h": 3,
                         "minW": 1,
                         "moved": false,
                         "static": false,
-                        "resizeHandles": ['n', 's', 'w', 'e']
+                        "resizeHandles": [
+                            "n",
+                            "s",
+                            "w",
+                            "e"
+                        ]
                     }
                 },
                 "7abf3482-cb8e-4542-909a-00c0b5597b8e": {
@@ -537,13 +560,18 @@ export const TEST: FormDefinition = {
                     "layout": {
                         "i": "7abf3482-cb8e-4542-909a-00c0b5597b8e",
                         "x": 0,
-                        "y": 9,
+                        "y": 15,
                         "w": 2,
                         "h": 3,
                         "minW": 1,
                         "moved": false,
                         "static": false,
-                        "resizeHandles": ['n', 's', 'w', 'e']
+                        "resizeHandles": [
+                            "n",
+                            "s",
+                            "w",
+                            "e"
+                        ]
                     }
                 },
                 "e295cf27-925a-47ef-821d-e1afd21207b9": {
@@ -618,13 +646,18 @@ export const TEST: FormDefinition = {
                     "layout": {
                         "i": "e295cf27-925a-47ef-821d-e1afd21207b9",
                         "x": 0,
-                        "y": 12,
+                        "y": 18,
                         "w": 2,
                         "h": 3,
                         "minW": 1,
                         "moved": false,
                         "static": false,
-                        "resizeHandles": ['n', 's', 'w', 'e']
+                        "resizeHandles": [
+                            "n",
+                            "s",
+                            "w",
+                            "e"
+                        ]
                     }
                 },
                 "a5d9549b-489c-4e09-9cf8-e560283a98af": {
@@ -682,13 +715,18 @@ export const TEST: FormDefinition = {
                     "layout": {
                         "i": "a5d9549b-489c-4e09-9cf8-e560283a98af",
                         "x": 0,
-                        "y": 15,
+                        "y": 21,
                         "w": 2,
                         "h": 2,
                         "minW": 1,
                         "moved": false,
                         "static": false,
-                        "resizeHandles": ['n', 's', 'w', 'e']
+                        "resizeHandles": [
+                            "n",
+                            "s",
+                            "w",
+                            "e"
+                        ]
                     }
                 },
                 "139d147d-19d9-4e39-af43-4e150469d388": {
@@ -767,13 +805,18 @@ export const TEST: FormDefinition = {
                     "layout": {
                         "i": "139d147d-19d9-4e39-af43-4e150469d388",
                         "x": 0,
-                        "y": 18,
+                        "y": 23,
                         "w": 1,
                         "h": 3,
                         "minW": 1,
                         "moved": false,
                         "static": false,
-                        "resizeHandles": ['n', 's', 'w', 'e']
+                        "resizeHandles": [
+                            "n",
+                            "s",
+                            "w",
+                            "e"
+                        ]
                     }
                 },
                 "6a224b46-b6bd-431d-8b2e-ddb533c1e7f9": {
@@ -846,13 +889,104 @@ export const TEST: FormDefinition = {
                     "layout": {
                         "i": "6a224b46-b6bd-431d-8b2e-ddb533c1e7f9",
                         "x": 1,
-                        "y": 18,
+                        "y": 23,
                         "w": 1,
                         "h": 3,
                         "minW": 1,
                         "moved": false,
                         "static": false,
-                        "resizeHandles": ['n', 's', 'w', 'e']
+                        "resizeHandles": [
+                            "n",
+                            "s",
+                            "w",
+                            "e"
+                        ]
+                    }
+                },
+                "326424bf-d84b-4d94-8b2d-83ff50f68a0d": {
+                    "capabilities": {
+                        "canBeVisible": false,
+                        "canBeEnabled": false,
+                        "canBeRequired": false,
+                        "canBeSetValue": false
+                    },
+                    "control": "input",
+                    "fieldType": "input",
+                    "valueType": "unknown",
+                    "logic": {
+                        "visibility": {
+                            "defaultValue": true,
+                            "rule": {
+                                "condition": {
+                                    "id": "efaef6bf-c383-47a9-b484-fc391d6a7982",
+                                    "type": "noop",
+                                    "items": []
+                                },
+                                "actions": []
+                            }
+                        },
+                        "enabled": {
+                            "defaultValue": true,
+                            "rule": {
+                                "condition": {
+                                    "id": "723e6c1c-f17d-42df-ac11-de151684c88e",
+                                    "type": "noop",
+                                    "items": []
+                                },
+                                "actions": []
+                            }
+                        },
+                        "required": {
+                            "defaultValue": true,
+                            "rule": {
+                                "condition": {
+                                    "id": "98af8686-4d31-4ace-b7fb-8aac77a40ed4",
+                                    "type": "noop",
+                                    "items": []
+                                },
+                                "actions": []
+                            }
+                        }
+                    },
+                    "__typ": "field",
+                    "key": "326424bf-d84b-4d94-8b2d-83ff50f68a0d",
+                    "descriptorKey": "field",
+                    "settingsValues": {
+                        "mask": "",
+                        "fieldType": "slider",
+                        "label": "Срок действия полиса, лет",
+                        "name": "field",
+                        "required": false,
+                        "visible": false,
+                        "disabled": false,
+                        "placeholder": "",
+                        "inputType": "text",
+                        "checked": false,
+
+                        "multiple": true,
+                        "accept": "jpg,jpeg,heic,png,pdf",
+                        "maxFileSizeMb": "20",
+                        "min": "0",
+                        "max": "100",
+                        "step": "1",
+                        "showValue": true,
+                        "inputBox": false
+                    },
+                    "layout": {
+                        "i": "326424bf-d84b-4d94-8b2d-83ff50f68a0d",
+                        "x": 0,
+                        "y": 3,
+                        "w": 2,
+                        "h": 3,
+                        "minW": 1,
+                        "moved": false,
+                        "static": false,
+                        "resizeHandles": [
+                            "n",
+                            "s",
+                            "w",
+                            "e"
+                        ]
                     }
                 }
             },
@@ -950,7 +1084,12 @@ export const TEST: FormDefinition = {
                         "minW": 1,
                         "moved": false,
                         "static": false,
-                        "resizeHandles": ['n', 's', 'w', 'e']
+                        "resizeHandles": [
+                            "n",
+                            "s",
+                            "w",
+                            "e"
+                        ]
                     }
                 }
             },

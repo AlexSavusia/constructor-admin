@@ -13,6 +13,7 @@ import SelectUI, { type Option } from '../components/ui/fieldsUI/Select/Select.t
 import InputDate from '../components/ui/fieldsUI/InputDate/InputDate.tsx';
 import type {StepTransitionRule} from "../logic/logic.ts";
 import {TEST} from "./test.ts";
+import SliderUI from "../components/ui/fieldsUI/Slider/SliderField.tsx";
 
 const getValueExpressionDependentPaths = (valExpr: ValueExpression): ObjPath => {
     switch (valExpr.__typ) {
@@ -551,6 +552,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                     | 'select'
                     | 'file'
                     | 'agree'
+                    | 'slider'
             ) {
                 case 'input': {
                     return (
@@ -564,6 +566,35 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                             {selfError && !!selfValue &&<p className="mt-1 text-sm leading-4 text-red-500 break-words">
                                 {selfError}
                             </p>}
+                        </div>
+                    );
+                }
+                case 'slider': {
+                    const min = Number(field.settingsValues['min'] ?? 0);
+                    const max = Number(field.settingsValues['max'] ?? 100);
+                    const step = Number(field.settingsValues['step'] ?? 1);
+                    const showValue = Boolean(field.settingsValues['showValue'] ?? true);
+                    const inputBox = Boolean(field.settingsValues['inputBox'] ?? false);
+
+                    return (
+                        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+                            <SliderUI
+                                label={field.settingsValues['label'] as string}
+                                required={selfRequired}
+                                value={Number(selfValue ?? min)}
+                                min={min}
+                                max={max}
+                                step={step}
+                                showValue={showValue}
+                                inputBox={inputBox}
+                                onChange={(value) => handleFieldUpdate(value)}
+                                disabled={!selfEnabled}
+                            />
+                            {selfError && selfValue !== undefined && (
+                                <p className="mt-1 text-sm leading-4 text-red-500 break-words">
+                                    {selfError}
+                                </p>
+                            )}
                         </div>
                     );
                 }

@@ -1,0 +1,49 @@
+.field {
+    width: 100%;
+}
+
+.textWrapper {
+    position: relative;
+    padding: 18px 19px 10px;
+}
+
+.text {
+    width: 100%;
+    border: none;
+    outline: none;
+    font-size: 16px;
+    background: transparent;
+    color: #2e3038;
+}
+
+.textLabel {
+    font-size: 16px;
+    color: #b9bcc6;
+    pointer-events: none;
+
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.required {
+    font-size: 30px;
+    position: relative;
+    line-height: 1;
+    color: #ea4b4b;
+    display: flex;
+    align-items: center;
+    top: 3px;
+}
+
+
+
+.error {
+    border-color: #ea4b4b;
+}
+
+.errorText {
+    margin-top: 6px;
+    font-size: 14px;
+    color: #ea4b4b;
+}

@@ -4,6 +4,7 @@ import RadioDescriptor from './items/PaletteItemRadio.tsx';
 import DescriptionDescriptor from './items/PaletteItemTitle.tsx';
 import AgreeDescriptor from './items/PaletteItemAgree.tsx';
 import SelectDictDescriptor from './items/PaletteItemSelectDict.tsx';
+import InputDescriptor from "./items/PaletteItemInput.tsx";
 
 const PALETTE_ITEMS: PaletteItemDescriptor[] = [
     FieldDescriptor,
@@ -11,6 +12,7 @@ const PALETTE_ITEMS: PaletteItemDescriptor[] = [
     DescriptionDescriptor,
     AgreeDescriptor,
     SelectDictDescriptor,
+    InputDescriptor,
 ];
 
 export default PALETTE_ITEMS;

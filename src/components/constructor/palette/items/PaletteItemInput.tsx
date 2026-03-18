@@ -1,7 +1,6 @@
 import type { PaletteItemPreviewProps, PaletteItemProps, PaletteItemDescriptor } from '../../type.ts';
 import classNames from 'classnames';
-import InputUI from '../../../ui/fieldsUI/Input/Input.tsx';
-import Input from '../../../ui/fieldsUIAdmin/Input/Input.tsx';
+import TextUI from '../../../ui/fieldsUI/Text/Text.tsx';
 
 function PaletteItemInput({ className, settingsValues }: PaletteItemProps) {
     const label = String(settingsValues?.label ?? 'Название поля');
@@ -10,7 +9,7 @@ function PaletteItemInput({ className, settingsValues }: PaletteItemProps) {
 
     return (
         <div className={classNames(className)}>
-            <InputUI label={label} required={required} type={inputType} />
+            <TextUI label={label} required={required} type={inputType} />
         </div>
     );
 }
@@ -18,7 +17,7 @@ function PaletteItemInput({ className, settingsValues }: PaletteItemProps) {
 function PaletteItemInputPreview({ className }: PaletteItemPreviewProps) {
     return (
         <div className={classNames('mb-0', className)}>
-            <Input placeholder="placeholder" />
+            <p>Text</p>
         </div>
     );
 }
@@ -30,20 +29,57 @@ const InputDescriptor: PaletteItemDescriptor = {
     minWidth: 1,
     settings: [
         {
+            key: 'mask',
+            title: 'Маска',
+            valType: 'string',
+            defaultValue: '',
+        },
+        {
+            key: 'fieldType',
+            title: 'Тип поля',
+            valType: 'string',
+            defaultValue: 'input',
+            multiValVariants: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'date', 'select', 'file', 'slider'],
+        },
+        {
             key: 'label',
             title: 'Название',
             valType: 'string',
             defaultValue: 'Название поля',
         },
         {
+            key: 'name',
+            title: 'Name',
+            valType: 'string',
+            defaultValue: 'field',
+        },
+        {
             key: 'required',
-            title: 'Обязательное поле',
+            title: 'Обязательное',
             valType: 'boolean',
             defaultValue: false,
         },
         {
+            key: 'visible',
+            title: 'Видимость',
+            valType: 'boolean',
+            defaultValue: false,
+        },
+        {
+            key: 'disabled',
+            title: 'Включено',
+            valType: 'boolean',
+            defaultValue: false,
+        },
+        {
+            key: 'placeholder',
+            title: 'Placeholder',
+            valType: 'string',
+            defaultValue: '',
+        },
+        {
             key: 'inputType',
-            title: 'Тип ввода',
+            title: 'HTML type input',
             valType: 'string',
             defaultValue: 'text',
             multiValVariants: ['text', 'email', 'number', 'password', 'tel'],
