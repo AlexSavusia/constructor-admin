@@ -39,7 +39,10 @@ const InputDescriptor: PaletteItemDescriptor = {
             title: 'Тип поля',
             valType: 'string',
             defaultValue: 'input',
-            multiValVariants: ['input', 'textarea', 'checkbox', 'radio', 'switch', 'date', 'select', 'file', 'slider'],
+            visibleWhen: {
+                key: 'fieldType',
+                equals: [],
+            },
         },
         {
             key: 'label',
