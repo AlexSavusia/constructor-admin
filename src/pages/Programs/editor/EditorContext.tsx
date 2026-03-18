@@ -60,6 +60,7 @@ export type EditingRuleMeta = {
     dictionaryRowFilter?: {
         dictId: Key;
         rowId: Key;
+        label: string;
     };
 };
 
@@ -231,6 +232,16 @@ export function createContextStore(initialState?: FormDefinition) {
             persistEditingRule: () =>
                 set((state) => {
                     if (!state.editingRule) return {};
+                    if(state.editingRule.scope == "LOOKUP_ROW_SCOPE") {
+                        const updatedState = setByPath(state, [...state.editingRule.path, state.editingRule.meta!.dictionaryRowFilter!.rowId], {
+                            key: state.editingRule.meta?.dictionaryRowFilter?.dictId,
+                            rowId: state.editingRule.meta?.dictionaryRowFilter?.rowId,
+                            label: state.editingRule.meta?.dictionaryRowFilter?.label,
+                            baseFilter: state.editingRule.rule,
+                        });
+                        updatedState.editingRule = undefined;
+                        return updatedState;
+                    }
 
                     const updatedState = setByPath(state, state.editingRule.path, state.editingRule.rule);
                     updatedState.editingRule = undefined;
@@ -268,7 +279,7 @@ export function createContextStore(initialState?: FormDefinition) {
                                 },
                             };
                         }
-
+                        case "LOOKUP_ROW_SCOPE":
                         case 'STEP_TRANSITION_SCOPE': {
                             // debugger
                             const r = setByPath(editingRule.rule as StepTransitionRule, path, expr);
@@ -287,7 +298,9 @@ export function createContextStore(initialState?: FormDefinition) {
 
             setEditingRule: (path: ObjPath, scope: ExpressionScope, meta) =>
                 set((state) => {
-                    let ruleObj = findByPath<Rule>(state, path);
+                    // debugger
+                    let ruleObj = scope == "LOOKUP_ROW_SCOPE" ? findByPath<Rule>(state, [...path, meta!.dictionaryRowFilter!.rowId])
+                        : findByPath<Rule>(state, path)
                     if (ruleObj == null) {
                         ruleObj = {
                             condition: {

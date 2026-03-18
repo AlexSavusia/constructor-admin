@@ -10,7 +10,7 @@ export type ValueType = 'string' | 'number' | 'boolean' | 'array' | 'object' | '
 export type FormDefinition = {
     firstStepKey: Key;
     steps: Record<Key, StepDefinition>;
-    lookups: Record<Key, LookupDefinition>;
+    lookups: Record<string, Record<Key, LookupDefinition>>;
     constants: Record<Key, ConstVariableDefinition>;
     variables: Record<Key, RuntimeVariableDefinition>;
     interactions: Record<Key, InteractionDefinition>;

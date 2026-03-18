@@ -139,6 +139,7 @@ export default function Constructor({ className }: ConstructorProps) {
         setDictionaryModalStep(1);
         setOptionsDraft([]);
         setSelectedRowIds([]);
+
     };
 
     return (
@@ -335,12 +336,13 @@ export default function Constructor({ className }: ConstructorProps) {
                                                                     className="btn btn-outline-secondary btn-sm"
                                                                     onClick={() => {
                                                                         setEditingRule(
-                                                                            ['lookups', selectedDictionary!.id, selectedRow!.id!],
+                                                                            ['form', 'lookups', selectedDictionary!.id],
                                                                             'LOOKUP_ROW_SCOPE',
                                                                             {
                                                                                 dictionaryRowFilter: {
                                                                                     dictId: selectedDictionary!.id,
                                                                                     rowId: selectedRow!.id!,
+                                                                                    label: option.label
                                                                                 },
                                                                             }
                                                                         );

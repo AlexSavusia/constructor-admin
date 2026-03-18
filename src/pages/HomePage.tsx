@@ -1,5 +1,5 @@
 import { type ObjPath, objPathFromString, objPathToString } from './Programs/editor/EditorContext.tsx';
-import { createContext, type ReactNode, useContext, useEffect, useMemo, useRef } from 'react';
+import {createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState} from 'react';
 import { create, createStore, type StateCreator, type StoreApi, useStore } from 'zustand';
 import type { FormDefinition, InteractionDefinition, Key } from '../logic/type.ts';
 import { ReactGridLayout, useContainerWidth } from 'react-grid-layout';
@@ -15,13 +15,16 @@ import InputDate from '../components/ui/fieldsUI/InputDate/InputDate.tsx';
 import type { StepTransitionRule } from '../logic/logic.ts';
 import { TEST } from './test.ts';
 import { subscribeWithSelector } from 'zustand/middleware';
+import type {LookupDefinition} from "../logic/lookup.ts";
+import type {DictionaryRow} from "../api/types.ts";
+import {getDictionaryRows} from "../api";
 
 const getValueExpressionDependentPaths = (valExpr: ValueExpression): ObjPath => {
     switch (valExpr.__typ) {
         case 'ref': {
             switch (valExpr.refType) {
                 case 'const':
-                    return ['constants', ...valExpr.path];
+                    return valExpr.path[0] == 'constants' ? valExpr.path : ['constants', ...valExpr.path];
                 case 'field':
                     return ['steps', ...valExpr.path];
                 case 'variable':
@@ -307,7 +310,7 @@ const createFormContext = (initialState: FormDefinition) => {
 
                 const { visibility, validation, enabled, required /* value */ } = fieldDef.logic!;
 
-                const dependentPaths = [];
+                const dependentPaths: ObjPath[] = [];
 
                 if (visibility) {
                     const r = getRuleDependentPaths(visibility.rule);
@@ -328,6 +331,13 @@ const createFormContext = (initialState: FormDefinition) => {
                     const r = getRuleDependentPaths(required.rule);
                     if (r.length) dependentPaths.push(...r);
                 }
+
+                if('dictId' in fieldDef.settingsValues) {
+                    const lookups = initialState.lookups[fieldDef.settingsValues['dictId'] as string] ?? []
+                    const lks = Object.entries(lookups).filter(lk=>lk[1].baseFilter).map(lk=>getRuleDependentPaths(lk[1]!.baseFilter!))
+                    if(lks.length) dependentPaths.push(...(lks.flat()));
+                }
+
                 // TODO
                 // if(value) {
                 //
@@ -495,11 +505,16 @@ type FieldRendererProps = {
     path: ObjPath;
 };
 
+
+
 function InputFieldRenderer({ field, path }: FieldRendererProps) {
     const pathString = objPathToString(path);
     const updateFieldValue = useFormContext((s) => s.updateFieldValue);
     const depPaths = useFormContext(useShallow((s) => s.fieldsDeps[pathString] ?? []));
-    const deps = useFormContext(useShallow((state) => depPaths.map((depPath) => state.fieldsValues[objPathToString(depPath)])));
+    const deps = useFormContext(useShallow((state) => {
+
+        return depPaths.filter(p=>p[0] != 'constants').map((depPath) => state.fieldsValues[objPathToString(depPath)])
+    }));
     const selfValue = useFormContext((s) => s.fieldsValues[pathString]);
 
     const evalCondition = useFormContext((s) => s.evalCondition);
@@ -510,6 +525,33 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
     const selfEnabled = useFormContext((s) => s.fieldEnabled[objPathToString(path)]);
     const setFieldRequired = useFormContext((s) => s.setFieldRequired);
     const setFieldEnabled = useFormContext((s) => s.setFieldEnabled);
+
+    // const lookups = useFormContext(s=>s.form.lookups[field.settingsValues['dictId'] as string])
+    //
+    // const [selectDictOpts, setSelectDictOpts] = useState<DictionaryRow[] | null>(null)
+    //
+    // const fvs = useFormContext(s=>s.fieldsValues)
+    //
+    // useEffect(() => {
+    //     if(lookups && !selectDictOpts) {
+    //         const dictRowKeys = Object.keys(lookups);
+    //         getDictionaryRows({page: 0, size: 1000}, field.settingsValues['dictId'] as string)
+    //             .then(dictRows=>setSelectDictOpts(dictRows.data.filter(x=>dictRowKeys.includes(x.id))))
+    //     }
+    // }, []);
+    // type Opt = DictionaryRow & {label: string}
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
+    // const availableDictSelectOptions = useMemo(() => selectDictOpts?.filter(opt =>
+    //     {
+    //         debugger
+    //         console.log(depPaths, deps, fvs)
+    //         if(lookups[opt.id].baseFilter) {
+    //             const evalRes = evalCondition(lookups[opt.id]!.baseFilter!)
+    //             return evalRes
+    //         }
+    //         return true
+    //     }
+    // ).map(opt=>({...opt, label: lookups[opt.id]!.label}) as Opt), [selectDictOpts, lookups, evalCondition, deps]);
 
     function handleFieldUpdate(value: unknown) {
         updateFieldValue(path, value);
@@ -561,6 +603,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                     | 'file'
                     | 'agree'
                     | 'slider'
+                    | 'dictSelect'
             ) {
                 case 'input': {
                     return (
@@ -657,6 +700,17 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                                 {' '}
                                 {field.settingsValues['description'] as string}
                             </p>
+                        </div>
+                    );
+                case 'dictSelect':
+                    return (
+                        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+                            {/*<SelectUI*/}
+                            {/*    label={field.settingsValues['label'] as string}*/}
+                            {/*    options={!availableDictSelectOptions ? [] : availableDictSelectOptions.map(o=>({value: o.id, label: o.label}))}*/}
+                            {/*    value={selfValue as InputValuePropType}*/}
+                            {/*    onChange={(e) => handleFieldUpdate(e.target.value)}*/}
+                            {/*/>*/}
                         </div>
                     );
                 case 'textarea':
