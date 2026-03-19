@@ -1,5 +1,5 @@
 import {type ObjPath, objPathFromString, objPathToString} from './Programs/editor/EditorContext.tsx';
-import {createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState} from 'react';
+import {createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
 import {create, type StateCreator, useStore} from 'zustand';
 import type {FormDefinition, InteractionDefinition, Key} from '../logic/type.ts';
 import {ReactGridLayout, useContainerWidth} from 'react-grid-layout';
@@ -547,7 +547,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
     //eslint-disable-next-line react-hooks/preserve-manual-memoization
     const availableDictSelectOptions = useCallback(() => selectDictOpts?.filter(opt =>
         {
-
+            debugger
             if(lookups[opt.id].baseFilter) {
                 const evalRes = evalCondition(lookups[opt.id]!.baseFilter!)
                 return evalRes
