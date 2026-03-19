@@ -1,10 +1,11 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import PageHeader from '../../components/ui/PageHeader';
 import TableToolbar from '../../components/ui/TableToolbar';
 import PaginationFooter from '../../components/ui/PaginationFooter';
 import DictionaryRow from '../../components/ui/DictionaryRow';
-import InputAutocomplete from '../../components/ui/fieldsUIAdmin/InputSelect/InputSelect.tsx';
-import { valueExpressionToString } from '../../components/ui/fieldsUIAdmin/InputSelect/parser.ts';
+// import InputAutocomplete from '../../components/ui/fieldsUIAdmin/InputSelect/InputSelect.tsx';
+// import { valueExpressionToString } from '../../components/ui/fieldsUIAdmin/InputSelect/parser.ts';
+import { getDictionaries } from '../../api';
 
 type DictionaryItem = {
     id: string;
@@ -25,120 +26,47 @@ const GROUPS: GroupItem[] = [
     { id: '3', name: 'Финансы' },
 ];
 
-const MOCK_ITEMS: DictionaryItem[] = [
-    {
-        id: '1',
-        name: 'Справочник валют',
-        description: 'Список поддерживаемых валют',
-        groupId: '3',
-    },
-    {
-        id: '2',
-        name: 'Справочник регионов',
-        description: 'Регионы и области',
-        groupId: '1',
-    },
-    {
-        id: '3',
-        name: 'Статусы договоров',
-        description: 'Статусы страховых договоров',
-        groupId: '2',
-    },
-    {
-        id: '4',
-        name: 'Типы клиентов',
-        description: 'Физические и юридические лица',
-        groupId: '1',
-    },
-    {
-        id: '5',
-        name: 'Типы программ',
-        description: 'Категории страховых программ',
-        groupId: '2',
-    },
-    {
-        id: '6',
-        name: 'Банки',
-        description: 'Список банков-партнёров',
-        groupId: '3',
-    },
-    {
-        id: '7',
-        name: 'Справочник стран',
-        description: 'Страны мира',
-        groupId: '1',
-    },
-    {
-        id: '8',
-        name: 'Каналы продаж',
-        description: 'Онлайн, агент, отделение',
-        groupId: '2',
-    },
-    {
-        id: '9',
-        name: 'Платёжные статусы',
-        description: 'Успешно, ошибка, ожидание',
-        groupId: '3',
-    },
-    {
-        id: '10',
-        name: 'Виды документов',
-        description: 'Паспорт, ИНН, договор',
-        groupId: '1',
-    },
-    {
-        id: '11',
-        name: 'Риски',
-        description: 'Страховые риски',
-        groupId: '2',
-    },
-    {
-        id: '12',
-        name: 'Ставки',
-        description: 'Финансовые коэффициенты',
-        groupId: '3',
-    },
-];
 
-const options = [
-    { label: 'birthdate', value: 'birthdate' },
-    { label: 'now()', value: 'now()' },
-    { label: 'firstname', value: 'firstname' },
-    { label: 'lastname', value: 'lastname' },
-    { label: 'age', value: 'age' },
-    { label: 'email', value: 'email' },
-    { label: 'phone', value: 'phone' },
-    { label: 'eq', value: 'eq' },
-    { label: 'gt', value: 'gt' },
-    { label: 'lt', value: 'lt' },
-];
 
 export default function DictionariesPage() {
-    const [text, setText] = useState('[bir');
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(20);
     const [search, setSearch] = useState('');
     const [selectedGroupId, setSelectedGroupId] = useState('');
 
-    const filteredItems = useMemo(() => {
-        const q = search.trim().toLowerCase();
+    const [items, setItems] = useState<DictionaryItem[]>([]);
+    const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-        return MOCK_ITEMS.filter((item) => {
-            const byGroup = !selectedGroupId || item.groupId === selectedGroupId;
-
-            const bySearch = !q || item.name.toLowerCase().includes(q) || item.description?.toLowerCase().includes(q);
-
-            return byGroup && bySearch;
-        });
-    }, [search, selectedGroupId]);
-
-    const total = filteredItems.length;
     const totalPages = Math.max(1, Math.ceil(total / Math.max(1, size)));
 
-    const pageItems = useMemo(() => {
-        const start = (page - 1) * size;
-        return filteredItems.slice(start, start + size);
-    }, [filteredItems, page, size]);
+    const loadDictionaries = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const res = await getDictionaries({
+                page,
+                size,
+                search: search.trim() || undefined,
+            });
+
+            setItems(res.data ?? []);
+            setTotal(res.total ?? 0);
+        } catch (err) {
+            console.error('Failed to load dictionaries', err);
+            setItems([]);
+            setTotal(0);
+            setError('Не удалось загрузить справочники');
+        } finally {
+            setLoading(false);
+        }
+    }, [page, size, search, selectedGroupId]);
+
+    useEffect(() => {
+        void loadDictionaries();
+    }, [loadDictionaries]);
 
     const onClearSearch = () => {
         setSearch('');
@@ -146,7 +74,7 @@ export default function DictionariesPage() {
     };
 
     const onRefresh = () => {
-        refetch()
+        // refetch()
         console.log('refresh');
     };
 
@@ -168,6 +96,8 @@ export default function DictionariesPage() {
             console.log('copy failed');
         }
     };
+
+    const pageItems = useMemo(() => items, [items]);
 
     return (
         <div className="d-flex flex-column w-100">
@@ -225,37 +155,41 @@ export default function DictionariesPage() {
                         />
 
                         <div className="card-body table-responsive p-0">
-                            {pageItems.length === 0 ? (
+                            {loading ? (
+                                <div className="p-3 text-muted">Загрузка...</div>
+                            ) : error ? (
+                                <div className="p-3 text-danger">{error}</div>
+                            ) : pageItems.length === 0 ? (
                                 <div className="p-3 text-muted">Справочников нет.</div>
                             ) : (
                                 <table className="table table-hover text-nowrap mb-0">
                                     <thead>
-                                        <tr>
-                                            <th style={{ width: 70 }}>#</th>
-                                            <th style={{ minWidth: 240 }}>Название</th>
-                                            <th>Описание</th>
-                                            <th style={{ width: 220 }}>Группа</th>
-                                            <th style={{ width: 180 }} className="text-right">
-                                                Действия
-                                            </th>
-                                        </tr>
+                                    <tr>
+                                        <th style={{ width: 70 }}>#</th>
+                                        <th style={{ minWidth: 240 }}>Название</th>
+                                        <th>Описание</th>
+                                        <th style={{ width: 220 }}>Группа</th>
+                                        <th style={{ width: 180 }} className="text-right">
+                                            Действия
+                                        </th>
+                                    </tr>
                                     </thead>
 
                                     <tbody>
-                                        {pageItems.map((it, i) => {
-                                            const rowNumber = (page - 1) * size + i + 1;
+                                    {pageItems.map((it, i) => {
+                                        const rowNumber = (page - 1) * size + i + 1;
 
-                                            return (
-                                                <DictionaryRow
-                                                    key={it.id}
-                                                    item={it}
-                                                    rowNumber={rowNumber}
-                                                    groups={GROUPS}
-                                                    onCopy={onCopy}
-                                                    onDelete={onDelete}
-                                                />
-                                            );
-                                        })}
+                                        return (
+                                            <DictionaryRow
+                                                key={it.id}
+                                                item={it}
+                                                rowNumber={rowNumber}
+                                                groups={GROUPS}
+                                                onCopy={onCopy}
+                                                onDelete={onDelete}
+                                            />
+                                        );
+                                    })}
                                     </tbody>
                                 </table>
                             )}

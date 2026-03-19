@@ -46,13 +46,26 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
         const loadDictionaries = async () => {
             try {
                 setDictionariesLoading(true);
+
                 const res = await getDictionaries({ page: 1, size: 1000 }, controller.signal);
+
                 setDictionaries(Array.isArray(res?.data) ? res.data : []);
             } catch (error) {
+                if (error instanceof Error && error.name === 'CanceledError') {
+                    return;
+                }
+
+                const maybeApiError = error as { title?: string; type?: string };
+                if (maybeApiError?.type === 'network error' && maybeApiError?.title?.includes('canceled')) {
+                    return;
+                }
+
                 console.error('Failed to load dictionaries', error);
                 setDictionaries([]);
             } finally {
-                setDictionariesLoading(false);
+                if (!controller.signal.aborted) {
+                    setDictionariesLoading(false);
+                }
             }
         };
 
@@ -286,7 +299,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
                                                     {selectedOptions.map((option, index) => (
                                                         <span
                                                             key={`${option.value}-${index}`}
-                                                            className="badge text-bg-light border"
+                                                            className="badge text-bg-light border text-wrap"
                                                         >
                                                             {option.label}
                                                         </span>
