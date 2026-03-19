@@ -1,21 +1,20 @@
-import { type ObjPath, objPathFromString, objPathToString } from './Programs/editor/EditorContext.tsx';
-import {createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState} from 'react';
-import { create, createStore, type StateCreator, type StoreApi, useStore } from 'zustand';
-import type { FormDefinition, InteractionDefinition, Key } from '../logic/type.ts';
-import { ReactGridLayout, useContainerWidth } from 'react-grid-layout';
-import type { FieldDefinition } from '../logic/field.ts';
+import {type ObjPath, objPathFromString, objPathToString} from './Programs/editor/EditorContext.tsx';
+import {createContext, type ReactNode, useContext, useEffect, useMemo, useRef, useState} from 'react';
+import {create, type StateCreator, useStore} from 'zustand';
+import type {FormDefinition, InteractionDefinition, Key} from '../logic/type.ts';
+import {ReactGridLayout, useContainerWidth} from 'react-grid-layout';
+import type {FieldDefinition} from '../logic/field.ts';
 import InputUI from '../components/ui/fieldsUI/Input/Input.tsx';
-import type { ActionExpression, Rule } from '../components/logic/types.ts';
-import type { BooleanExpression, ValueExpression } from '../logic/expression.ts';
-import { useShallow } from 'zustand/react/shallow';
-import RadioButtons, { type RadioItem } from '../components/ui/fieldsUI/RadioButtons/RadioButtons.tsx';
-import SelectUI, { type Option } from '../components/ui/fieldsUI/Select/Select.tsx';
+import type {ActionExpression, Rule} from '../components/logic/types.ts';
+import type {BooleanExpression, ValueExpression} from '../logic/expression.ts';
+import {useShallow} from 'zustand/react/shallow';
+import RadioButtons, {type RadioItem} from '../components/ui/fieldsUI/RadioButtons/RadioButtons.tsx';
+import SelectUI, {type Option} from '../components/ui/fieldsUI/Select/Select.tsx';
 import SliderUI from '../components/ui/fieldsUI/Slider/SliderField.tsx';
 import InputDate from '../components/ui/fieldsUI/InputDate/InputDate.tsx';
-import type { StepTransitionRule } from '../logic/logic.ts';
-import { TEST } from './test.ts';
-import { subscribeWithSelector } from 'zustand/middleware';
-import type {LookupDefinition} from "../logic/lookup.ts";
+import type {StepTransitionRule} from '../logic/logic.ts';
+import {TEST} from './test.ts';
+import {subscribeWithSelector} from 'zustand/middleware';
 import type {DictionaryRow} from "../api/types.ts";
 import {getDictionaryRows} from "../api";
 
@@ -91,7 +90,7 @@ const getRuleDependentPaths = (rule: Rule): ObjPath[] => {
     return boolRes;
 };
 
-type InputValuePropType = string | number | readonly string[] | undefined;
+type InputValuePropType = string | number | readonly string[] | undefined | null;
 
 export type FormContextValue = {
     currentStep: Key;
@@ -508,6 +507,8 @@ type FieldRendererProps = {
 
 
 function InputFieldRenderer({ field, path }: FieldRendererProps) {
+    const isSelectMulti = Boolean(field.settingsValues['multiselect'] ?? false);
+    const isDictSelectMulti = Boolean(field.settingsValues['multiselect'] ?? false);
     const pathString = objPathToString(path);
     const updateFieldValue = useFormContext((s) => s.updateFieldValue);
     const depPaths = useFormContext(useShallow((s) => s.fieldsDeps[pathString] ?? []));
@@ -544,16 +545,18 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
     }, []);
     type Opt = DictionaryRow & {label: string}
     //eslint-disable-next-line react-hooks/preserve-manual-memoization
-    const availableDictSelectOptions = useCallback(() => selectDictOpts?.filter(opt =>
-        {
-            debugger
-            if(lookups[opt.id].baseFilter) {
-                const evalRes = evalCondition(lookups[opt.id]!.baseFilter!)
-                return evalRes
-            }
-            return true
-        }
-    ).map(opt=>({...opt, label: lookups[opt.id]!.label}) as Opt), [selectDictOpts, lookups, evalCondition, deps]);
+    const availableDictSelectOptions = useMemo(() => {
+        if (!selectDictOpts || !lookups) return [];
+
+        return selectDictOpts
+            .filter((opt) => {
+                return lookups[opt.id];
+            })
+            .map((opt) => ({
+                value: opt.id,
+                label: lookups[opt.id]?.label ?? opt.id,
+            }));
+    }, [selectDictOpts, lookups, evalCondition]);
 
     function handleFieldUpdate(value: unknown) {
         updateFieldValue(path, value);
@@ -576,11 +579,11 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
             }
             if (logic.required && logic.required.rule.condition.type != 'noop') {
                 const evalRes = evalCondition(logic.required.rule);
-                setFieldRequired(field.key, evalRes);
+                setFieldRequired(pathString, evalRes);
             }
             if (logic.enabled && logic.enabled.rule.condition.type != 'noop') {
                 const evalRes = evalCondition(logic.enabled.rule);
-                setFieldEnabled(field.key, evalRes);
+                setFieldEnabled(pathString, evalRes);
             }
         }
     }, [deps, selfValue, pathString, field]);
@@ -609,7 +612,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
             ) {
                 case 'input': {
                     return (
-                        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+                        <div className="cell h-full min-w-0 px-4 py-3 ">
                             <InputUI
                                 required={selfRequired}
                                 value={selfValue as InputValuePropType}
@@ -630,7 +633,7 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                     const inputBox = Boolean(field.settingsValues['inputBox'] ?? false);
 
                     return (
-                        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
+                        <div className="cell h-full min-w-0 px-4 py-3 ">
                             <SliderUI
                                 label={field.settingsValues['label'] as string}
                                 required={selfRequired}
@@ -672,13 +675,23 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                     );
                 case 'select':
                     return (
-                        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
-                            <SelectUI
-                                label={field.settingsValues['label'] as string}
-                                options={field.settingsValues['options'] as Option[]}
-                                value={selfValue as InputValuePropType}
-                                onChange={(e) => handleFieldUpdate(e.target.value)}
-                            />
+                        <div className="cell h-full min-w-0 px-4 py-3">
+                            {isSelectMulti ? (
+                                <SelectUI
+                                    label={field.settingsValues['label'] as string}
+                                    options={field.settingsValues['options'] as Option[]}
+                                    value={Array.isArray(selfValue) ? selfValue : []}
+                                    onChange={(value) => handleFieldUpdate(value)}
+                                    multiple={true}
+                                />
+                            ) : (
+                                <SelectUI
+                                    label={field.settingsValues['label'] as string}
+                                    options={field.settingsValues['options'] as Option[]}
+                                    value={(selfValue as string | number | null) ?? null}
+                                    onChange={(value) => handleFieldUpdate(value)}
+                                />
+                            )}
                         </div>
                     );
                 case 'date':
@@ -706,13 +719,23 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
                     );
                 case 'dictSelect':
                     return (
-                        <div className="cell h-full min-w-0 px-4 py-3 overflow-hidden">
-                            <SelectUI
-                                label={field.settingsValues['label'] as string}
-                                options={availableDictSelectOptions()?.map(o=>({value: o.id, label: o.label})) ?? []}
-                                value={selfValue as InputValuePropType}
-                                onChange={(e) => handleFieldUpdate(e.target.value)}
-                            />
+                        <div className="cell h-full min-w-0 px-4 py-3">
+                            {isDictSelectMulti ? (
+                                <SelectUI
+                                    label={field.settingsValues['label'] as string}
+                                    options={availableDictSelectOptions}
+                                    value={Array.isArray(selfValue) ? selfValue : []}
+                                    onChange={(value) => handleFieldUpdate(value)}
+                                    multiple={true}
+                                />
+                            ) : (
+                                <SelectUI
+                                    label={field.settingsValues['label'] as string}
+                                    options={availableDictSelectOptions}
+                                    value={(selfValue as string | number | null) ?? null}
+                                    onChange={(value) => handleFieldUpdate(value)}
+                                />
+                            )}
                         </div>
                     );
                 case 'textarea':
@@ -887,7 +910,7 @@ function FormRenderer() {
                         nextStep();
                     }}
                 >
-                    <div className="relative w-full bg-white rounded-2xl border border-gray-200 shadow-sm p-4 md:p-6 overflow-hidden">
+                    <div className="relative w-full bg-white rounded-2xl border border-gray-200 shadow-sm p-4 md:p-6 ">
                         <ReactGridLayout
                             width={width}
                             gridConfig={{ cols, rowHeight }}

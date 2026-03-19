@@ -88,10 +88,17 @@ export default function ConditionRow({ rule, path }: ConditionRowProps) {
                 onChange={(ast, raw) => {
                     setRawFirstArg(raw);
                     if (ast) {
-                        updateEditingRule(path, {
-                            ...(rule as Boolean2OperandExpression),
-                            left: ast,
-                        });
+                        if(twoOperand) {
+                            updateEditingRule(path, {
+                                ...(rule as Boolean2OperandExpression),
+                                left: ast,
+                            });
+                        } else {
+                            updateEditingRule(path, {
+                                ...(rule as StupidFuck),
+                                item: ast,
+                            });
+                        }
                     }
                     console.log('onChange:', ast, raw);
                 }}
@@ -157,10 +164,15 @@ export default function ConditionRow({ rule, path }: ConditionRowProps) {
                     options={allFields}
                     onChange={(ast, raw) => {
                         setRawSecondArg(raw);
-                        if (ast) {
+                        if(twoOperand) {
                             updateEditingRule(path, {
                                 ...(rule as Boolean2OperandExpression),
-                                right: ast,
+                                right: ast!,
+                            });
+                        } else {
+                            updateEditingRule(path, {
+                                ...(rule as StupidFuck),
+                                item: ast!,
                             });
                         }
                         console.log('onChange:', ast, raw);
