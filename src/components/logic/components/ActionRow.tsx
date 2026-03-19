@@ -1,127 +1,100 @@
-import type {ActionNode} from "../type.ts";
-import type {ChangeEvent} from "react";
+import { type ObjPath, useEditorContext } from '../../../pages/Programs/editor/EditorContext.tsx';
+import type { ActionExpression, SetFieldErrorActionExpression, SetFieldPropertyActionExpression } from '../types.ts';
+import Input from '../../ui/fieldsUIAdmin/Input/Input.tsx';
 
 export type ActionRowProps = {
-    node: ActionNode;
-    onChange: (next: ActionNode) => void;
-    onDelete: () => void;
-}
+    action: ActionExpression;
+    path: ObjPath;
+};
 
-const onChangeHandler = (e: ChangeEvent<HTMLSelectElement, HTMLSelectElement>, node: ActionNode, onChange: ActionRowProps['onChange']) => {
-    const type = e.target.value;
+type ActionType = ActionExpression['type'];
 
-    if (type === "showField") {
-        onChange({
-            id: node.id,
-            enabled: node.enabled,
-            type: "showField",
-            fieldId: "",
-        });
-        return;
+export default function ActionRow({ action, path }: ActionRowProps) {
+    const editingRule = useEditorContext((s) => s.editingRule)!;
+    const updateEditingRule = useEditorContext((s) => s.updateEditingRule);
+    //const selfValue = useEditorContext(s=>s.form.steps[s.stepKey].transition)
+    let actionTypes: Partial<Record<ActionType, string>> = {
+        noop: 'Ничего не делать',
+    };
+    switch (editingRule.scope) {
+        case 'FIELD_SCOPE_PROPERTY':
+            actionTypes = {
+                ...actionTypes,
+                setFieldProperty: `Установить значение свойства ${editingRule.meta?.editingFieldProperty ?? ''}`,
+                // "clearValue": `Очистить значение поля ${editingRule.meta?.editingFieldProperty ?? ""}`,
+                // "setValue": `Установить значение поля ${editingRule.meta?.editingFieldProperty ?? ""}`
+            };
+            break;
+        case 'FIELD_SCOPE_DECISION':
+            actionTypes = {
+                ...actionTypes,
+                setFieldError: `Вывести ошибку`,
+            };
+            break;
+        case 'STEP_TRANSITION_SCOPE':
+            actionTypes = {
+                ...actionTypes,
+                setTargetStep: 'Перейти на шаг',
+            };
+            break;
+        default:
+            throw new Error(`Unknown action scope "${editingRule.scope}"`);
     }
-
-    if (type === "hideField") {
-        onChange({
-            id: node.id,
-            enabled: node.enabled,
-            type: "hideField",
-            fieldId: "",
-        });
-        return;
-    }
-
-    if (type === "setRequired") {
-        onChange({
-            id: node.id,
-            enabled: node.enabled,
-            type: "setRequired",
-            fieldId: "",
-            value: true,
-        });
-        return;
-    }
-
-    if (type === "setVariable") {
-        onChange({
-            id: node.id,
-            enabled: node.enabled,
-            type: "setVariable",
-            variableId: "",
-            value: { kind: "const", value: "" },
-        });
-    }
-}
-
-export default function ActionRow({node, onChange, onDelete}: ActionRowProps) {
     return (
-        <div style={{ display: "flex", gap: 8, alignItems: "center", margin: "8px 0" }}>
-            <input
-                type="checkbox"
-                checked={node.enabled}
-                onChange={(e) => onChange({ ...node, enabled: e.target.checked } as ActionNode)}
-            />
-
+        <div className="my-2 flex flex-col gap-2 rounded-xl border border-slate-200 bg-white p-3 shadow-sm lg:flex-row lg:items-center">
             <select
-                value={node.type}
-                onChange={(e) => onChangeHandler(e, node, onChange)}
-            >
-                <option value="showField">Show Field</option>
-                <option value="hideField">Hide Field</option>
-                <option value="setRequired">Set Required</option>
-                <option value="setVariable">Set Variable</option>
-            </select>
-
-            {(node.type === "showField" ||
-                node.type === "hideField" ||
-                node.type === "setRequired") && (
-                <select
-                    value={node.fieldId}
-                    onChange={(e) => onChange({ ...node, fieldId: e.target.value } as ActionNode)}
-                >
-                    <option value="">-- select field --</option>
-                    <option value="passportNumber">Passport Number (TODO make context)</option>
-                    <option value="region">Region (TODO make context)</option>
-                </select>
-            )}
-
-            {node.type === "setRequired" && (
-                <select
-                    value={String(node.value)}
-                    onChange={(e) =>
-                        onChange({
-                            ...node,
-                            value: e.target.value === "true",
-                        })
-                    }
-                >
-                    <option value="true">true</option>
-                    <option value="false">false</option>
-                </select>
-            )}
-
-            {node.type === "setVariable" && (
-                <>
-                    <select
-                        value={node.variableId}
-                        onChange={(e) => onChange({ ...node, variableId: e.target.value })}
-                    >
-                        <option value="">-- variable --</option>
-                        <option value="rateMultiplier">rateMultiplier (TODO make context)</option>
-                    </select>
-
-                    <input
-                        value={String(node.value.kind === "const" ? node.value.value : "")}
-                        onChange={(e) =>
-                            onChange({
-                                ...node,
-                                value: { kind: "const", value: Number(e.target.value) },
-                            })
+                className="min-h-[42px] w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 lg:flex-1"
+                value={action.type}
+                onChange={(e) => {
+                    switch (e.target.value as ActionType) {
+                        case 'setFieldProperty': {
+                            updateEditingRule(path, {
+                                ...action,
+                                type: e.target.value as ActionType,
+                                property: editingRule.meta!.editingFieldProperty,
+                            } as SetFieldPropertyActionExpression);
+                            break;
                         }
+                        default: {
+                            updateEditingRule(path, {
+                                ...action,
+                                type: e.target.value as ActionType,
+                            } as ActionExpression);
+                        }
+                    }
+                }}
+            >
+                {Object.entries(actionTypes).map(([key, label]) => (
+                    <option key={key} value={key}>
+                        {label}
+                    </option>
+                ))}
+            </select>
+            {action.type == 'setFieldProperty' && (
+                <div className="mb-3 form-check flex items-center gap-2">
+                    <input
+                        type="checkbox"
+                        className="form-check-input h-4 w-4 cursor-pointer"
+                        checked={(action as SetFieldPropertyActionExpression).value}
+                        onChange={(e) => {
+                            updateEditingRule(path, { ...action, value: e.target.checked } as SetFieldPropertyActionExpression);
+                        }}
                     />
-                </>
+                    <label className="form-check-label text-sm text-slate-700">Enabled</label>
+                </div>
             )}
-
-            <button onClick={onDelete}>delete</button>
+            {action.type == 'setFieldError' && (
+                <div className="mb-3 form-check flex items-center gap-2">
+                    <Input
+                        className="mb-3 w-full rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-100"
+                        placeholder="Name"
+                        value={(action as SetFieldErrorActionExpression).text}
+                        onChange={(e) => {
+                            updateEditingRule(path, { ...action, text: e.target.value } as SetFieldErrorActionExpression);
+                        }}
+                    />
+                </div>
+            )}
         </div>
     );
 }

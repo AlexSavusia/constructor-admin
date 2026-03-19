@@ -1,5 +1,5 @@
-import * as React from "react";
-import classNames from "classnames";
+import * as React from 'react';
+import classNames from 'classnames';
 
 export type ModalProps = {
     title?: string;
@@ -8,60 +8,49 @@ export type ModalProps = {
     children: React.ReactNode;
     className?: string;
     onSave?: () => void;
-}
+};
 
-export default function Modal({title, open, onClose, onSave, className, children}: ModalProps) {
+export default function Modal({ title, open, onClose, onSave, className, children }: ModalProps) {
     return (
         <>
             <div
                 tabIndex={-1}
-                className={classNames("modal fade d-block", {"show": open})}
+                className={classNames('modal fade d-block', { show: open })}
                 onClick={() => onClose()}
                 style={{
-                    visibility: open ? "visible" : "hidden",
-                    position: "absolute",
+                    visibility: open ? 'visible' : 'hidden',
+                    maxHeight: '100vh',
                 }}
             >
                 <div
                     onClick={(e) => e.stopPropagation()}
-                    className={classNames("modal-dialog modal-dialog-centered modal-xl", className)}
+                    className={classNames('modal-dialog modal-dialog-centered modal-xxl', className)}
                 >
                     <div className="modal-content">
                         <div className="modal-header">
                             <h5 className="modal-title">{title}</h5>
-                            <button
-                                type="button"
-                                className="btn-close"
-                                onClick={() => onClose()}
-                            ></button>
+                            <button type="button" className="btn-close" onClick={() => onClose()}></button>
                         </div>
-                        <div className="modal-body">
-                            {children}
-                        </div>
+                        <div className="modal-body">{children}</div>
                         <div className="modal-footer">
-                            <button
-                                type="button"
-                                className="btn btn-secondary"
-                                onClick={() => onClose()}
-                            >
+                            <button type="button" className="btn btn-secondary" onClick={() => onClose()}>
                                 Закрыть
                             </button>
-                            {onSave &&
+                            {onSave && (
                                 <button type="button" className="btn btn-primary" onClick={onSave}>
                                     Сохранить
                                 </button>
-                            }
+                            )}
                         </div>
                     </div>
                 </div>
             </div>
             <div
-                className={classNames("modal-backdrop fade", {"show": open})}
+                className={classNames('modal-backdrop fade', { show: open })}
                 style={{
-                    visibility: open ? "visible" : "hidden",
+                    visibility: open ? 'visible' : 'hidden',
                 }}
             ></div>
         </>
     );
-
 }

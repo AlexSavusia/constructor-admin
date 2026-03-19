@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 export default function PageHeader(props: { title: string; right?: ReactNode }) {
     return (
@@ -10,10 +10,7 @@ export default function PageHeader(props: { title: string; right?: ReactNode }) 
                     </div>
 
                     <div className="col-sm-6">
-                        <div
-                            className="d-flex justify-content-sm-end flex-wrap"
-                            style={{ gap: 8 }}
-                        >
+                        <div className="d-flex justify-content-sm-end flex-wrap" style={{ gap: 8 }}>
                             {props.right}
                         </div>
                     </div>

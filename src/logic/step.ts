@@ -1,6 +1,6 @@
-import type {FieldDefinition} from "./field.ts";
-import type {Key} from "./type.ts";
-import type {StepTransitionRule} from "./logic.ts";
+import type { FieldDefinition } from './field.ts';
+import type { Key } from './type.ts';
+import type { StepTransitionRule } from './logic.ts';
 
 export type StepDefinition = {
     key: Key;
@@ -8,9 +8,9 @@ export type StepDefinition = {
 
     fields: Record<Key, FieldDefinition>;
     transition: StepTransitionLogicDefinition;
-}
+};
 
 export type StepTransitionLogicDefinition = {
     rules: StepTransitionRule[];
     defaultStep?: Key;
-}
+};

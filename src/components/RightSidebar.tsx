@@ -1,5 +1,5 @@
-import {useEffect} from "react";
-import classNames from "classnames";
+import { useEffect } from 'react';
+import classNames from 'classnames';
 
 type RightSidebarProps = {
     open: boolean;
@@ -12,21 +12,18 @@ export default function RightSidebar({ open, onClose, children, title }: RightSi
     useEffect(() => {
         if (!open) return;
         const onKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape") onClose();
+            if (e.key === 'Escape') onClose();
         };
-        window.addEventListener("keydown", onKeyDown);
-        return () => window.removeEventListener("keydown", onKeyDown);
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
     }, [open, onClose]);
 
     return (
         <>
-            <div
-                className={classNames("right-sidebar-overlay", {"is-open": open})}
-                onClick={onClose}
-            />
+            <div className={classNames('right-sidebar-overlay', { 'is-open': open })} onClick={onClose} />
             <aside
                 data-bs-theme="dark"
-                className={classNames("bg-body-secondary right-sidebar", {"is-open": open})}
+                className={classNames('bg-body-secondary right-sidebar', { 'is-open': open })}
                 onClick={(e) => e.stopPropagation()}
             >
                 <div className="right-sidebar-header">

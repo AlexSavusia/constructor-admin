@@ -1,4 +1,4 @@
-import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from "react";
+import type { AnchorHTMLAttributes, ButtonHTMLAttributes, ReactNode } from 'react';
 
 type BaseProps = {
     title?: string;
@@ -8,25 +8,25 @@ type BaseProps = {
 
 type ButtonProps = BaseProps &
     ButtonHTMLAttributes<HTMLButtonElement> & {
-    as?: "button";
-};
+        as?: 'button';
+    };
 
 type AnchorProps = BaseProps &
     AnchorHTMLAttributes<HTMLAnchorElement> & {
-    as: "a";
-};
+        as: 'a';
+    };
 
 type Props = ButtonProps | AnchorProps;
 
 export function IconBtn(props: Props) {
-    if (props.as === "a") {
+    if (props.as === 'a') {
         const { children, className, title, ...rest } = props;
         return (
             <a
                 {...rest}
                 className={className}
                 title={title}
-                style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+                style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
             >
                 {children}
             </a>
@@ -37,10 +37,10 @@ export function IconBtn(props: Props) {
     return (
         <button
             {...rest}
-            type={rest.type ?? "button"}
+            type={rest.type ?? 'button'}
             className={className}
             title={title}
-            style={{ display: "inline-flex", alignItems: "center", justifyContent: "center" }}
+            style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
         >
             {children}
         </button>

@@ -1,3 +1,3 @@
-export default function CalculationsPage(){
-    return <p>calc</p>
+export default function CalculationsPage() {
+    return <p>calc</p>;
 }

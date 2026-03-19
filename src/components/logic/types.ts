@@ -1,31 +1,43 @@
-import type {
-    Key,
-} from "../../logic/type.ts";
-import type {BooleanExpression} from "../../logic/expression.ts";
+import type { BooleanExpression, ValueExpression } from '../../logic/expression.ts';
 
 export type Rule = {
     condition: BooleanExpression;
     actions: ActionExpression[];
-}
+};
 
 export type ActionExpression =
-    | NoOpActionExpression;
+    | NoOpActionExpression
+    | SetValueActionExpression
+    | ClearValueActionExpression
+    | SetFieldPropertyActionExpression
+    | SetFieldErrorActionExpression
+    | SetTargetStep;
 
 export type NoOpActionExpression = {
-    type: "noop"
-}
+    type: 'noop';
+};
 
+export type SetValueActionExpression = {
+    type: 'setValue';
+    value: ValueExpression;
+};
 
+export type ClearValueActionExpression = {
+    type: 'clearValue';
+};
 
+export type SetFieldPropertyActionExpression = {
+    type: 'setFieldProperty';
+    property: string;
+    value: boolean;
+};
 
+export type SetFieldErrorActionExpression = {
+    type: 'setFieldError';
+    text: string;
+};
 
-export type EditorPath =
-    | { type: "fieldLogicVisibility"; fieldKey: Key }
-    | { type: "fieldLogicEnabled"; fieldKey: Key }
-    | { type: "fieldLogicRequired"; fieldKey: Key }
-    | { type: "fieldLogicValue"; fieldKey: Key }
-    | { type: "fieldOnUpdateRule"; fieldKey: Key; ruleIndex: number }
-    | { type: "fieldOnUpdateAction"; fieldKey: Key; ruleIndex: number; actionIndex: number }
-    | { type: "stepTransitionRule"; stepKey: Key; ruleIndex: number }
-    | { type: "lookupBaseFilter"; lookupKey: Key }
-    | { type: "lookupRowAvailability"; fieldKey: Key; rowId: string; prop: "enabled" | "selectable" };
+export type SetTargetStep = {
+    type: 'setTargetStep';
+    targetStep: string;
+};

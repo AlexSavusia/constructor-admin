@@ -1,8 +1,11 @@
-import { useMemo, useState } from "react";
-import PageHeader from "../../components/ui/PageHeader";
-import TableToolbar from "../../components/ui/TableToolbar";
-import PaginationFooter from "../../components/ui/PaginationFooter";
-import DictionaryRow from "../../components/ui/DictionaryRow";
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import PageHeader from '../../components/ui/PageHeader';
+import TableToolbar from '../../components/ui/TableToolbar';
+import PaginationFooter from '../../components/ui/PaginationFooter';
+import DictionaryRow from '../../components/ui/DictionaryRow';
+// import InputAutocomplete from '../../components/ui/fieldsUIAdmin/InputSelect/InputSelect.tsx';
+// import { valueExpressionToString } from '../../components/ui/fieldsUIAdmin/InputSelect/parser.ts';
+import { getDictionaries } from '../../api';
 
 type DictionaryItem = {
     id: string;
@@ -17,123 +20,62 @@ type GroupItem = {
 };
 
 const GROUPS: GroupItem[] = [
-    { id: "", name: "Все" },
-    { id: "1", name: "Общие" },
-    { id: "2", name: "Страхование" },
-    { id: "3", name: "Финансы" },
+    { id: '', name: 'Все' },
+    { id: '1', name: 'Общие' },
+    { id: '2', name: 'Страхование' },
+    { id: '3', name: 'Финансы' },
 ];
 
-const MOCK_ITEMS: DictionaryItem[] = [
-    {
-        id: "1",
-        name: "Справочник валют",
-        description: "Список поддерживаемых валют",
-        groupId: "3",
-    },
-    {
-        id: "2",
-        name: "Справочник регионов",
-        description: "Регионы и области",
-        groupId: "1",
-    },
-    {
-        id: "3",
-        name: "Статусы договоров",
-        description: "Статусы страховых договоров",
-        groupId: "2",
-    },
-    {
-        id: "4",
-        name: "Типы клиентов",
-        description: "Физические и юридические лица",
-        groupId: "1",
-    },
-    {
-        id: "5",
-        name: "Типы программ",
-        description: "Категории страховых программ",
-        groupId: "2",
-    },
-    {
-        id: "6",
-        name: "Банки",
-        description: "Список банков-партнёров",
-        groupId: "3",
-    },
-    {
-        id: "7",
-        name: "Справочник стран",
-        description: "Страны мира",
-        groupId: "1",
-    },
-    {
-        id: "8",
-        name: "Каналы продаж",
-        description: "Онлайн, агент, отделение",
-        groupId: "2",
-    },
-    {
-        id: "9",
-        name: "Платёжные статусы",
-        description: "Успешно, ошибка, ожидание",
-        groupId: "3",
-    },
-    {
-        id: "10",
-        name: "Виды документов",
-        description: "Паспорт, ИНН, договор",
-        groupId: "1",
-    },
-    {
-        id: "11",
-        name: "Риски",
-        description: "Страховые риски",
-        groupId: "2",
-    },
-    {
-        id: "12",
-        name: "Ставки",
-        description: "Финансовые коэффициенты",
-        groupId: "3",
-    },
-];
+
+
 export default function DictionariesPage() {
     const [page, setPage] = useState(1);
     const [size, setSize] = useState(20);
-    const [search, setSearch] = useState("");
-    const [selectedGroupId, setSelectedGroupId] = useState("");
+    const [search, setSearch] = useState('');
+    const [selectedGroupId, setSelectedGroupId] = useState('');
 
-    const filteredItems = useMemo(() => {
-        const q = search.trim().toLowerCase();
+    const [items, setItems] = useState<DictionaryItem[]>([]);
+    const [total, setTotal] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
-        return MOCK_ITEMS.filter((item) => {
-            const byGroup = !selectedGroupId || item.groupId === selectedGroupId;
-
-            const bySearch =
-                !q ||
-                item.name.toLowerCase().includes(q) ||
-                item.description?.toLowerCase().includes(q);
-
-            return byGroup && bySearch;
-        });
-    }, [search, selectedGroupId]);
-
-    const total = filteredItems.length;
     const totalPages = Math.max(1, Math.ceil(total / Math.max(1, size)));
 
-    const pageItems = useMemo(() => {
-        const start = (page - 1) * size;
-        return filteredItems.slice(start, start + size);
-    }, [filteredItems, page, size]);
+    const loadDictionaries = useCallback(async () => {
+        try {
+            setLoading(true);
+            setError(null);
+
+            const res = await getDictionaries({
+                page,
+                size,
+                search: search.trim() || undefined,
+            });
+
+            setItems(res.data ?? []);
+            setTotal(res.total ?? 0);
+        } catch (err) {
+            console.error('Failed to load dictionaries', err);
+            setItems([]);
+            setTotal(0);
+            setError('Не удалось загрузить справочники');
+        } finally {
+            setLoading(false);
+        }
+    }, [page, size, search, selectedGroupId]);
+
+    useEffect(() => {
+        void loadDictionaries();
+    }, [loadDictionaries]);
 
     const onClearSearch = () => {
-        setSearch("");
+        setSearch('');
         setPage(1);
     };
 
     const onRefresh = () => {
-        //refetch()
-        console.log("refresh");
+        // refetch()
+        console.log('refresh');
     };
 
     const onChangeSize = (n: number) => {
@@ -142,18 +84,20 @@ export default function DictionariesPage() {
     };
 
     const onDelete = (id: string) => {
-        console.log("delete", id);
+        console.log('delete', id);
     };
 
     const onCopy = async (id: string) => {
         const url = `${window.location.origin}/api/dictionary-schema/${id}`;
         try {
             await navigator.clipboard.writeText(url);
-            console.log("copied", url);
+            console.log('copied', url);
         } catch {
-            console.log("copy failed");
+            console.log('copy failed');
         }
     };
+
+    const pageItems = useMemo(() => items, [items]);
 
     return (
         <div className="d-flex flex-column w-100">
@@ -211,7 +155,11 @@ export default function DictionariesPage() {
                         />
 
                         <div className="card-body table-responsive p-0">
-                            {pageItems.length === 0 ? (
+                            {loading ? (
+                                <div className="p-3 text-muted">Загрузка...</div>
+                            ) : error ? (
+                                <div className="p-3 text-danger">{error}</div>
+                            ) : pageItems.length === 0 ? (
                                 <div className="p-3 text-muted">Справочников нет.</div>
                             ) : (
                                 <table className="table table-hover text-nowrap mb-0">
@@ -254,6 +202,23 @@ export default function DictionariesPage() {
                             countOnPage={pageItems.length}
                             onPageChange={(p) => setPage(Math.max(1, Math.min(totalPages, p)))}
                         />
+
+                        {/*<div style={{ maxWidth: 400 }}>*/}
+                        {/*    <InputAutocomplete*/}
+                        {/*        referenceTypeMap={{}}*/}
+                        {/*        placeholder="Пиши текст..."*/}
+                        {/*        value={text}*/}
+                        {/*        options={options}*/}
+                        {/*        onChange={(ast, raw) => {*/}
+                        {/*            console.log('onChange:', ast, raw, ast ? valueExpressionToString(ast) : '');*/}
+                        {/*            setText(raw);*/}
+                        {/*        }}*/}
+                        {/*    />*/}
+                        {/*    <div className="mt-3">*/}
+                        {/*        <strong>Текущее значение:</strong>*/}
+                        {/*        <pre className="mt-2 p-2 border rounded bg-light">{text}</pre>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
                     </div>
                 </div>
             </section>

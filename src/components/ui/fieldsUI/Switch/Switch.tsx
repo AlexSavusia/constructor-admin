@@ -1,4 +1,4 @@
-import "./Switch.css";
+import './Switch.css';
 
 type Props = {
     checked?: boolean;
@@ -9,9 +9,9 @@ type Props = {
     name?: string;
 };
 
-export default function Switch({checked = false, onChange, disabled, label, name, required}: Props) {
+export default function Switch({ checked = false, onChange, disabled, label, name, required }: Props) {
     return (
-        <label className={`switch-label ${disabled ? "switch-label--disabled" : ""}`}>
+        <label className={`switch-label ${disabled ? 'switch-label--disabled' : ''}`}>
             {required && <span className="required">*</span>}
             <input
                 className="switch-input"
@@ -23,8 +23,8 @@ export default function Switch({checked = false, onChange, disabled, label, name
             />
 
             <span className="switch-track">
-        <span className="switch-thumb" />
-      </span>
+                <span className="switch-thumb" />
+            </span>
 
             {label && <span className="switch-text">{label}</span>}
         </label>

@@ -5,15 +5,15 @@
 
 .radio-buttons-title {
     margin: 0 0 8px;
-    font-size: 16px;
+    font-size: 18px;
     color: #2e3038;
 }
 
 .radio-buttons-list {
     display: flex;
+    margin: 0 0 32px;
     width: 100%;
     gap: 24px;
-    justify-content: center;
     flex-wrap: wrap;
 }
 

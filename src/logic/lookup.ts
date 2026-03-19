@@ -1,12 +1,9 @@
-import type {Key} from "./type.ts";
-import type {BooleanExpression} from "./expression.ts";
+import type { Key } from './type.ts';
+import type {Rule} from "../components/logic/types.ts";
 
 export type LookupDefinition = {
-    key: Key
-    dictId: string;
-    baseFilter?: LookupBaseFilterDefinition
-}
-
-export type LookupBaseFilterDefinition = {
-    rules: BooleanExpression
-}
+    key: Key;
+    rowId: Key;
+    label: string;
+    baseFilter?: Rule;
+};

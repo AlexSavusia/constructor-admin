@@ -1,3 +1,3 @@
 export default function InternalErrorPage() {
-    return <p>5xx</p>
+    return <p>5xx</p>;
 }

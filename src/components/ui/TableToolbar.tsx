@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { ReactNode } from 'react';
 
 type Props = {
     title: string;
@@ -20,17 +20,11 @@ export default function TableToolbar(props: Props) {
 
     return (
         <div className="card-header">
-            <div
-                className="d-flex flex-wrap align-items-center justify-content-between"
-                style={{ gap: 12 }}
-            >
+            <div className="d-flex flex-wrap align-items-center justify-content-between" style={{ gap: 12 }}>
                 <h3 className="card-title mb-0">{props.title}</h3>
 
                 <div className="d-flex flex-wrap align-items-center" style={{ gap: 10 }}>
-                    <div
-                        className="input-group input-group-sm"
-                        style={{ width: 320, flexWrap: "nowrap" }}
-                    >
+                    <div className="input-group input-group-sm" style={{ width: 320, flexWrap: 'nowrap' }}>
                         <input
                             type="text"
                             className="form-control"
@@ -71,12 +65,7 @@ export default function TableToolbar(props: Props) {
                         </select>
                     </div>
 
-                    <button
-                        type="button"
-                        className="btn btn-sm btn-outline-secondary"
-                        onClick={props.onRefresh}
-                        title="Обновить"
-                    >
+                    <button type="button" className="btn btn-sm btn-outline-secondary" onClick={props.onRefresh} title="Обновить">
                         <i className="bi bi-arrow-clockwise mr-1" />
                         Обновить
                     </button>

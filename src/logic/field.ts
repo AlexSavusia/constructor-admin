@@ -1,24 +1,13 @@
-import type {Key, ValueType} from "./type.ts";
-import type {
-    BooleanDecisionRule,
-    BooleanPropertyLogicDefinition,
-    FieldOnUpdateRule,
-    ValueLogicDefinition
-} from "./logic.ts";
-import type {PaletteItemSettingsValues} from "../components/constructor/type.ts";
-import type {LayoutItem} from "react-grid-layout";
-import type {BooleanExpression} from "./expression.ts";
+import type { Key, ValueType } from './type.ts';
+import type { BooleanPropertyLogicDefinition, FieldOnUpdateRule, ValueLogicDefinition } from './logic.ts';
+import type { PaletteItemSettingsValues } from '../components/constructor/type.ts';
+import type { LayoutItem } from 'react-grid-layout';
+import type { BooleanExpression } from './expression.ts';
+import type { Rule } from '../components/logic/types.ts';
 
-export type FieldType = "input" | "output"
+export type FieldType = 'input' | 'output';
 
-export type InputFieldControlType =
-    | "input"
-    | "textarea"
-    | "number"
-    | "checkbox"
-    | "select"
-    | "multiselect"
-    | "array";
+export type InputFieldControlType = 'input' | 'textarea' | 'number' | 'checkbox' | 'select' | 'multiselect' | 'array';
 
 export interface FieldCapabilities {
     canBeVisible: boolean;
@@ -28,64 +17,64 @@ export interface FieldCapabilities {
 }
 
 export interface BaseFieldDefinition {
-    __typ: "field"
-    key: Key
+    __typ: 'field';
+    key: Key;
 
-    valueType?: ValueType
-    defaultValue?: unknown
+    valueType?: ValueType;
+    defaultValue?: unknown;
 
-    fieldType: FieldType
-    capabilities: FieldCapabilities
+    fieldType: FieldType;
+    capabilities: FieldCapabilities;
 
-    config?: unknown // TODO
+    config?: unknown;
 
-    logic?: FieldLogicDefinition
-    onUpdate?: FieldOnUpdateDefinition
+    logic?: FieldLogicDefinition;
+    onUpdate?: FieldOnUpdateDefinition;
 
-    descriptorKey: string
+    descriptorKey: string;
     settingsValues: PaletteItemSettingsValues;
-    layout: LayoutItem
+    layout: LayoutItem;
 }
 
 export interface InputFieldDefinition extends BaseFieldDefinition {
-    fieldType: "input"
-    control: InputFieldControlType
+    fieldType: 'input';
+    control: InputFieldControlType;
 
-    lookup?: FieldLookupBinding // only used in select/multiselect
+    lookup?: FieldLookupBinding; // only used in select/multiselect
 }
 
 export interface OutputFieldDefinition extends BaseFieldDefinition {
-    fieldType: "output"
-    control: InputFieldControlType
+    fieldType: 'output';
+    control: InputFieldControlType;
 }
 
 export type FieldLookupBinding = {
-    lookupKey: Key
-    valueColumnId: string
-    labelColumnId: string
+    lookupKey: Key;
+    valueColumnId: string;
+    labelColumnId: string;
 
-    rowAvailability: Record<string, LookupRowAvailabilityDefinition> //key - row id in dict
-}
+    rowAvailability: Record<string, LookupRowAvailabilityDefinition>; //key - row id in dict
+};
 
 export type LookupRowAvailabilityDefinition = {
-    enabled?: BooleanPropertyLogicDefinition
-    selectable?: BooleanPropertyLogicDefinition
-}
-
-export type FieldLogicType = keyof FieldLogicDefinition
-
+    enabled?: BooleanPropertyLogicDefinition;
+    selectable?: BooleanPropertyLogicDefinition;
+};
 export type FieldLogicDefinition = {
     visibility?: BooleanPropertyLogicDefinition;
-    validation?: BooleanExpression;
+    validation?: Rule;
     enabled?: BooleanPropertyLogicDefinition;
     required?: BooleanPropertyLogicDefinition;
     value?: ValueLogicDefinition; //this will have higher priority then onUpdate if both are set (or just do not allow setting both?)
-}
+};
 
-export type FieldDefinition =
-    | InputFieldDefinition
-    | OutputFieldDefinition;
+export type FieldValidationDefinition = {
+    condition: BooleanExpression;
+    text: string;
+};
+
+export type FieldDefinition = InputFieldDefinition | OutputFieldDefinition;
 
 export type FieldOnUpdateDefinition = {
-    rules: FieldOnUpdateRule[]
-}
+    rules: FieldOnUpdateRule[];
+};
