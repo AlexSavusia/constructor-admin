@@ -1,23 +1,60 @@
 .field {
     width: 100%;
+    position: relative;
 }
 
-.inputWrapper {
+.selectWrapper {
     position: relative;
     border: 1px solid #dddfe3;
     border-radius: 8px;
-    padding: 18px 19px 10px;
     background: #fff;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
-.input {
+.selectWrapper:hover {
+    border-color: #bfc3cc;
+}
+
+.selectWrapper.open {
+    border-color: #5b8cff;
+    box-shadow: 0 0 0 2px rgba(91, 140, 255, 0.15);
+}
+
+.selectWrapper.error {
+    border-color: #ea4b4b;
+}
+
+.selectWrapper.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+    background: #f8f9fb;
+}
+
+.selectTrigger {
     width: 100%;
+    min-height: 58px;
     border: none;
-    outline: none;
-    font-size: 16px;
     background: transparent;
+    text-align: left;
+    padding: 24px 44px 10px 19px;
+    font-size: 16px;
     color: #2e3038;
-    appearance: none;
+    cursor: pointer;
+}
+
+.selectValue {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.placeholder {
+   cursor: pointer!important;
+}
+
+.selectValue.placeholder {
+    color: transparent;
 }
 
 .label {
@@ -29,10 +66,18 @@
     color: #b9bcc6;
     pointer-events: none;
     transition: all 0.2s ease;
-
     display: flex;
     align-items: center;
     gap: 4px;
+    background: #fff;
+}
+
+.selectWrapper.open .label,
+.selectWrapper.filled .label {
+    top: 2px;
+    transform: none;
+    font-size: 12px;
+    padding: 0 4px;
 }
 
 .required {
@@ -45,16 +90,97 @@
     top: 3px;
 }
 
-select:focus + .label,
-select:valid + .label {
-    top: 2px;
-    font-size: 12px;
-    padding: 4px;
+.selectArrow {
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    width: 10px;
+    height: 10px;
+    border-right: 2px solid #7d8190;
+    border-bottom: 2px solid #7d8190;
+    transform: translateY(-60%) rotate(45deg);
+    transition: transform 0.2s ease;
+    pointer-events: none;
+}
+
+.selectWrapper.open .selectArrow {
+    transform: translateY(-20%) rotate(-135deg);
+}
+
+.dropdown {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    width: 100%;
+    max-height: 260px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #dddfe3;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(17, 24, 39, 0.08);
+    z-index: 20;
+    padding: 6px;
+}
+
+.option {
+    width: 100%;
+    border: none;
+    background: transparent;
+    text-align: left;
+    min-height: 42px;
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 15px;
+    color: #2e3038;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.option:hover {
+    background: #f5f7fb;
+}
+
+.option.selected {
+    background: rgba(91, 140, 255, 0.1);
+    color: #2f5fe3;
+}
+
+.option.empty {
+    color: #9aa1af;
+}
+
+.checkBox {
+    width: 18px;
+    height: 18px;
+    border: 1.5px solid #c7ccd8;
+    border-radius: 5px;
+    flex: 0 0 18px;
+    position: relative;
     background: #fff;
 }
 
-.error {
-    border-color: #ea4b4b;
+.checkBox.checked {
+    border-color: #5b8cff;
+    background: #5b8cff;
+}
+
+.checkMark {
+    position: absolute;
+    left: 5px;
+    top: 1px;
+    width: 5px;
+    height: 10px;
+    border-right: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    transform: rotate(45deg);
+}
+
+.optionLabel {
+    flex: 1;
+    min-width: 0;
 }
 
 .errorText {

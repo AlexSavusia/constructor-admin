@@ -46,9 +46,13 @@ function PaletteItemInput({ className, settingsValues }: PaletteItemProps) {
     const required = Boolean(settingsValues?.required ?? false);
     const disabled = Boolean(settingsValues?.disabled ?? false);
     const dictId = String(settingsValues?.dictId ?? '');
+    const isMultiSelect = Boolean(settingsValues?.multiselect ?? false);
 
     const [options, setOptions] = useState<SelectOption[]>([]);
     const [loading, setLoading] = useState(false);
+
+    const [selectedValue, setSelectedValue] = useState<string | number | null>(null);
+    const [selectedValues, setSelectedValues] = useState<Array<string | number>>([]);
 
     useEffect(() => {
         if (!dictId) {
@@ -62,7 +66,11 @@ function PaletteItemInput({ className, settingsValues }: PaletteItemProps) {
             try {
                 setLoading(true);
 
-                const res = await getDictionaryRows({ page: 0, size: 1000 }, dictId, controller.signal);
+                const res = await getDictionaryRows(
+                    { page: 0, size: 1000 },
+                    dictId,
+                    controller.signal
+                );
 
                 setOptions(mapDictionaryRowsToOptions(res.data));
             } catch (error) {
@@ -89,13 +97,28 @@ function PaletteItemInput({ className, settingsValues }: PaletteItemProps) {
 
     return (
         <div className={classNames(className)}>
-            <SelectUI
-                name={name}
-                label={loading ? `${label} (загрузка...)` : label}
-                required={required}
-                disabled={disabled || loading}
-                options={selectOptions}
-            />
+            {isMultiSelect ? (
+                <SelectUI
+                    name={name}
+                    label={loading ? `${label} (загрузка...)` : label}
+                    required={required}
+                    disabled={disabled || loading}
+                    options={selectOptions}
+                    multiple={true}
+                    value={selectedValues}
+                    onChange={setSelectedValues}
+                />
+            ) : (
+                <SelectUI
+                    name={name}
+                    label={loading ? `${label} (загрузка...)` : label}
+                    required={required}
+                    disabled={disabled || loading}
+                    options={selectOptions}
+                    value={selectedValue}
+                    onChange={setSelectedValue}
+                />
+            )}
         </div>
     );
 }
@@ -151,6 +174,12 @@ const SelectDictDescriptor: PaletteItemDescriptor = {
         {
             key: 'disabled',
             title: 'Включено',
+            valType: 'boolean',
+            defaultValue: false,
+        },
+        {
+            key: 'multiselect',
+            title: 'выбрать Несколько',
             valType: 'boolean',
             defaultValue: false,
         },

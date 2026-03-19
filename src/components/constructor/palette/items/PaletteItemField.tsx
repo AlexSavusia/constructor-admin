@@ -45,6 +45,8 @@ function isRadioItemArray(
 
 function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
     const multiple = Boolean(settingsValues?.multiple ?? true);
+    const isMultiSelect = Boolean(settingsValues?.multiselect ?? false);
+
     const maxFileSizeMb = Number(settingsValues?.maxFileSizeMb ?? 20);
     const acceptRaw = String(settingsValues?.accept ?? 'jpg,jpeg,heic,png,pdf');
 
@@ -87,6 +89,9 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
     const [switchEnabled, setSwitchEnabled] = useState(false);
     const [sliderValue, setSliderValue] = useState<number>(Number(settingsValues?.defaultValue ?? min));
 
+    const [selectedValue, setSelectedValue] = useState<string | number | null>(null);
+    const [selectedValues, setSelectedValues] = useState<Array<string | number>>([]);
+
     if (fieldType === 'textarea') {
         return (
             <div className={classNames(className)}>
@@ -128,7 +133,13 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
     if (fieldType === 'switch') {
         return (
             <div className={classNames(className)}>
-                <SwitchUI name={name} label={label} required={required} checked={switchEnabled} onChange={setSwitchEnabled} />
+                <SwitchUI
+                    name={name}
+                    label={label}
+                    required={required}
+                    checked={switchEnabled}
+                    onChange={setSwitchEnabled}
+                />
             </div>
         );
     }
@@ -144,7 +155,28 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
     if (fieldType === 'select') {
         return (
             <div className={classNames(className)}>
-                <SelectUI name={name} label={label} required={required} disabled={disabled} options={optionsData} />
+                {isMultiSelect ? (
+                    <SelectUI
+                        name={name}
+                        label={label}
+                        required={required}
+                        disabled={disabled}
+                        options={optionsData}
+                        multiple={true}
+                        value={selectedValues}
+                        onChange={setSelectedValues}
+                    />
+                ) : (
+                    <SelectUI
+                        name={name}
+                        label={label}
+                        required={required}
+                        disabled={disabled}
+                        options={optionsData}
+                        value={selectedValue}
+                        onChange={setSelectedValue}
+                    />
+                )}
             </div>
         );
     }
@@ -186,7 +218,13 @@ function PaletteItemField({ className, settingsValues }: PaletteItemProps) {
 
     return (
         <div className={classNames(className)}>
-            <InputUI label={label} required={required} type={inputType} placeholder={placeholder} disabled={disabled} />
+            <InputUI
+                label={label}
+                required={required}
+                type={inputType}
+                placeholder={placeholder}
+                disabled={disabled}
+            />
         </div>
     );
 }
@@ -383,6 +421,16 @@ const FieldDescriptor: PaletteItemDescriptor = {
             visibleWhen: {
                 key: 'fieldType',
                 equals: ['slider'],
+            },
+        },
+        {
+            key: 'multiselect',
+            title: 'Множественный выбор',
+            valType: 'boolean',
+            defaultValue: false,
+            visibleWhen: {
+                key: 'fieldType',
+                equals: ['select'],
             },
         },
     ],
