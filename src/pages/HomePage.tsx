@@ -545,18 +545,17 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
     }, []);
     type Opt = DictionaryRow & {label: string}
     //eslint-disable-next-line react-hooks/preserve-manual-memoization
-    const availableDictSelectOptions = useMemo(() => {
-        if (!selectDictOpts || !lookups) return [];
+    const availableDictSelectOptions = useCallback(() => selectDictOpts?.filter(opt =>
+        {
 
-        return selectDictOpts
-            .filter((opt) => {
-                return lookups[opt.id];
-            })
-            .map((opt) => ({
-                value: opt.id,
-                label: lookups[opt.id]?.label ?? opt.id,
-            }));
-    }, [selectDictOpts, lookups, evalCondition]);
+            if(lookups[opt.id].baseFilter) {
+                const evalRes = evalCondition(lookups[opt.id]!.baseFilter!)
+                return evalRes
+            }
+            return true
+        }
+    ).map(opt=>({...opt, label: lookups[opt.id]!.label}) as Opt), [selectDictOpts, lookups, evalCondition, deps]);
+
 
     function handleFieldUpdate(value: unknown) {
         updateFieldValue(path, value);
