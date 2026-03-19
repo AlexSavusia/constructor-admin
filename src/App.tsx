@@ -12,6 +12,7 @@ import DictionariesPage from './pages/Dictionaries';
 import ProgramsPage from './pages/Programs';
 import CreateProgramsPage from './pages/Programs/create.tsx';
 import HomePage from './pages/HomePage.tsx';
+import EditProgramPage from "./pages/Programs/edit.tsx";
 
 function PrivateRoute({ children }: { children: JSX.Element }) {
     const { keycloak, initialized } = useKeycloak();
@@ -55,6 +56,7 @@ function App() {
                     <Route path="dictionaries" element={<DictionariesPage />}></Route>
                     <Route path="programs" element={<ProgramsPage />} />
                     <Route path="programs/create" element={<CreateProgramsPage />} />
+                    <Route path="programs/:id" element={<EditProgramPage />} />
                 </Route>
                 <Route path="*" element={<NotFoundErrorPage />} />
             </Routes>

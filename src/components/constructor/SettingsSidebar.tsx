@@ -46,7 +46,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
         const loadDictionaries = async () => {
             try {
                 setDictionariesLoading(true);
-                const res = await getDictionaries({ page: 0, size: 1000 }, controller.signal);
+                const res = await getDictionaries({ page: 1, size: 1000 }, controller.signal);
                 setDictionaries(Array.isArray(res?.data) ? res.data : []);
             } catch (error) {
                 console.error('Failed to load dictionaries', error);
@@ -85,7 +85,7 @@ export default function SettingsSidebar({ items }: SettingsSidebarProps) {
 
     const loadDictionaryRowsAndOpenModal = async (dictionary: DictionarySchema, nextSelectedFieldIds: string[]) => {
         try {
-            const res = await getDictionaryRows({ page: 0, size: 100 }, dictionary.id);
+            const res = await getDictionaryRows({ page: 1, size: 100 }, dictionary.id);
 
             openDictionaryPicker({
                 dictionary,

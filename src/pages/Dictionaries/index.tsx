@@ -146,7 +146,7 @@ export default function DictionariesPage() {
     };
 
     const onRefresh = () => {
-        //refetch()
+        refetch()
         console.log('refresh');
     };
 
@@ -269,22 +269,22 @@ export default function DictionariesPage() {
                             onPageChange={(p) => setPage(Math.max(1, Math.min(totalPages, p)))}
                         />
 
-                        <div style={{ maxWidth: 400 }}>
-                            <InputAutocomplete
-                                referenceTypeMap={{}}
-                                placeholder="Пиши текст..."
-                                value={text}
-                                options={options}
-                                onChange={(ast, raw) => {
-                                    console.log('onChange:', ast, raw, ast ? valueExpressionToString(ast) : '');
-                                    setText(raw);
-                                }}
-                            />
-                            <div className="mt-3">
-                                <strong>Текущее значение:</strong>
-                                <pre className="mt-2 p-2 border rounded bg-light">{text}</pre>
-                            </div>
-                        </div>
+                        {/*<div style={{ maxWidth: 400 }}>*/}
+                        {/*    <InputAutocomplete*/}
+                        {/*        referenceTypeMap={{}}*/}
+                        {/*        placeholder="Пиши текст..."*/}
+                        {/*        value={text}*/}
+                        {/*        options={options}*/}
+                        {/*        onChange={(ast, raw) => {*/}
+                        {/*            console.log('onChange:', ast, raw, ast ? valueExpressionToString(ast) : '');*/}
+                        {/*            setText(raw);*/}
+                        {/*        }}*/}
+                        {/*    />*/}
+                        {/*    <div className="mt-3">*/}
+                        {/*        <strong>Текущее значение:</strong>*/}
+                        {/*        <pre className="mt-2 p-2 border rounded bg-light">{text}</pre>*/}
+                        {/*    </div>*/}
+                        {/*</div>*/}
                     </div>
                 </div>
             </section>

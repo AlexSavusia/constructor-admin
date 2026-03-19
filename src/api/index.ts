@@ -288,29 +288,11 @@ export const deleteFormulaGroup = async (id: string, signal?: AbortSignal): Prom
 export const getFormulaGroupTree = async (signal?: AbortSignal): Promise<GroupNode[]> =>
     (await api.get('/formula/group', { signal })).data;
 
-export const getProgramTemplates = async (rq: PageableRq, signal?: AbortSignal): Promise<PageableRs<ProgramTemplate>> =>
-    (
-        await api.get<PageableRs<ProgramTemplate>>(`/program-template${toQueryString(rq)}`, {
-            signal,
-        })
-    ).data;
-
-export const updateProgramTemplate = async (
-    id: string,
-    rq: UpdateProgramTemplate,
-    signal?: AbortSignal
-): Promise<ProgramTemplate> => (await api.patch<ProgramTemplate>(`/program-template/${id}`, rq, { signal })).data;
-
-export const deleteProgramTemplate = async (id: string, signal?: AbortSignal): Promise<void> =>
-    await api.delete(`/program-template/${id}`, { signal });
-
-export const getProgramTemplate = async (id: string, signal?: AbortSignal): Promise<ProgramTemplate> =>
-    (await api.get<ProgramTemplate>(`/program-template/${id}`, { signal })).data;
 
 export const createProgram = async (rq: CreateProgram, signal?: AbortSignal): Promise<Program> =>
     (await api.put<Program>('/program', rq, { signal })).data;
 
-export const updateProgram = async (id: string, rq: UpdateProgram, signal?: AbortSignal): Promise<ProgramTemplate> =>
+export const updateProgram = async (id: string, rq: UpdateProgram, signal?: AbortSignal): Promise<Program> =>
     (await api.patch<Program>(`/program/${id}`, rq, { signal })).data;
 
 export const deleteProgram = async (id: string, signal?: AbortSignal): Promise<void> =>

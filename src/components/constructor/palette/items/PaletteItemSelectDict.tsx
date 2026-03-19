@@ -62,7 +62,7 @@ function PaletteItemInput({ className, settingsValues }: PaletteItemProps) {
             try {
                 setLoading(true);
 
-                const res = await getDictionaryRows({ page: 0, size: 1000 }, dictId, controller.signal);
+                const res = await getDictionaryRows({ page: 1, size: 1000 }, dictId, controller.signal);
 
                 setOptions(mapDictionaryRowsToOptions(res.data));
             } catch (error) {

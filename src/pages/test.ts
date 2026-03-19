@@ -1874,80 +1874,6 @@ export const TEST: FormDefinition = {
                             "e"
                         ]
                     }
-                },
-                "e56879ed-52af-437d-9b32-674acf83a9fc": {
-                    "capabilities": {
-                        "canBeVisible": false,
-                        "canBeEnabled": false,
-                        "canBeRequired": false,
-                        "canBeSetValue": false
-                    },
-                    "control": "input",
-                    "fieldType": "input",
-                    "valueType": "unknown",
-                    "logic": {
-                        "visibility": {
-                            "defaultValue": true,
-                            "rule": {
-                                "condition": {
-                                    "id": "573eb5ad-7611-411a-a460-37bbb5031728",
-                                    "type": "noop",
-                                    "items": []
-                                },
-                                "actions": []
-                            }
-                        },
-                        "enabled": {
-                            "defaultValue": true,
-                            "rule": {
-                                "condition": {
-                                    "id": "49c54347-e991-4f07-8d69-8873f0e01e8c",
-                                    "type": "noop",
-                                    "items": []
-                                },
-                                "actions": []
-                            }
-                        },
-                        "required": {
-                            "defaultValue": true,
-                            "rule": {
-                                "condition": {
-                                    "id": "385e5169-da84-456c-828b-6d5efabb8fb8",
-                                    "type": "noop",
-                                    "items": []
-                                },
-                                "actions": []
-                            }
-                        }
-                    },
-                    "__typ": "field",
-                    "key": "e56879ed-52af-437d-9b32-674acf83a9fc",
-                    "descriptorKey": "selectDict",
-                    "settingsValues": {
-                        "label": "Название поля",
-                        "required": false,
-                        "visible": false,
-                        "disabled": false,
-                        "dictId": "countries",
-                        "fieldType": "dictSelect",
-                        "dictFieldIds": []
-                    },
-                    "layout": {
-                        "i": "e56879ed-52af-437d-9b32-674acf83a9fc",
-                        "x": 2,
-                        "y": 0,
-                        "w": 1,
-                        "h": 3,
-                        "minW": 1,
-                        "moved": false,
-                        "static": false,
-                        "resizeHandles": [
-                            "n",
-                            "s",
-                            "w",
-                            "e"
-                        ]
-                    }
                 }
             },
             "transition": {
@@ -2058,63 +1984,6 @@ export const TEST: FormDefinition = {
             }
         }
     },
-    "lookups": {
-        "countries": {
-            "country-1": {
-                "key": "countries",
-                "rowId": "country-1",
-                "label": "Москва",
-                "baseFilter": {
-                    "condition": {
-                        "id": "dad14f34-3cc2-4676-8d20-e46fb5dc0a93",
-                        "type": "or",
-                        "items": [
-                            {
-                                "id": "6ca85876-9091-4795-9354-4910316bfa01",
-                                "type": "notEmpty",
-                                "item": {
-                                    "__typ": "ref",
-                                    "path": [
-                                        "constants",
-                                        "name"
-                                    ],
-                                    "refType": "const"
-                                }
-                            }
-                        ]
-                    },
-                    "actions": []
-                }
-            },
-            "country-2": {
-                "key": "countries",
-                "rowId": "country-2",
-                "label": "Казахстан",
-                "baseFilter": {
-                    "condition": {
-                        "id": "50080906-07b2-4e2d-b9cb-52142e39422d",
-                        "type": "or",
-                        "items": [
-                            {
-                                "id": "d6e9cbd0-133b-4d52-8a12-d2ec3973d7e5",
-                                "type": "notEmpty",
-                                "item": {
-                                    "__typ": "ref",
-                                    "path": [
-                                        "start",
-                                        "fields",
-                                        "15c5848e-3d4f-4c34-be8b-3436578234fc"
-                                    ],
-                                    "refType": "field"
-                                }
-                            }
-                        ]
-                    },
-                    "actions": []
-                }
-            }
-        }
-    },
     "constants": {
         "name": {
             "__typ": "constant",
@@ -2157,5 +2026,6 @@ export const TEST: FormDefinition = {
                 });
             },
         }
-    }
+    },
+    lookups: {},
 }

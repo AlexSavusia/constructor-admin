@@ -175,9 +175,7 @@ export type ProgramField = ProgramInputField | ProgramDictionaryField | ProgramF
 export type Program = {
     id: string;
     name: string;
-    description: Nullable<string>;
-    programTemplateId: string;
-    fields: ProgramField[];
+    descriptor: string
 };
 
 export type CreateProgram = Omit<Program, 'id'>;

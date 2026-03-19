@@ -526,14 +526,19 @@ function InputFieldRenderer({ field, path }: FieldRendererProps) {
     const setFieldRequired = useFormContext((s) => s.setFieldRequired);
     const setFieldEnabled = useFormContext((s) => s.setFieldEnabled);
 
-    const lookups = useFormContext(s=>s.form.lookups[field.settingsValues['dictId'] as string])
+    const lookups = useFormContext(s=> {
+        if('dictId' in field.settingsValues) {
+            return s.form.lookups[field.settingsValues['dictId'] as string]
+        }
+        return null;
+    })
 
     const [selectDictOpts, setSelectDictOpts] = useState<DictionaryRow[] | null>(null)
 
     useEffect(() => {
         if(lookups && !selectDictOpts) {
             const dictRowKeys = Object.keys(lookups);
-            getDictionaryRows({page: 0, size: 1000}, field.settingsValues['dictId'] as string)
+            getDictionaryRows({page: 1, size: 1000}, field.settingsValues['dictId'] as string)
                 .then(dictRows=>setSelectDictOpts(dictRows.data.filter(x=>dictRowKeys.includes(x.id))))
         }
     }, []);

@@ -20,7 +20,7 @@ export default function WhenEditor() {
             actions: [],
         };
     } else if(editingRule.scope === 'LOOKUP_ROW_SCOPE') {
-        rule = (editingRule.rule as unknown as LookupDefinition).baseFilter!
+        rule = editingRule.rule as Rule;
     } else {
         throw new Error(`Invalid scope "${editingRule.scope}"`);
     }

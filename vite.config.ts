@@ -7,7 +7,7 @@ export default defineConfig({
     server: {
         proxy: {
             '/api': {
-                target: 'http://localhost:5036',
+                target: 'https://constructor.dev.dg-prod.su',
                 changeOrigin: true,
                 secure: false,
             },
